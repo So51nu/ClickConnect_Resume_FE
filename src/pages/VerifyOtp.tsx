@@ -1,3 +1,4 @@
+// src/pages/VerifyOtp.tsx
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { verifyOTP } from "../api/authApi";
@@ -6,6 +7,7 @@ export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
   const { state }: any = useLocation();
 
@@ -16,60 +18,58 @@ export default function VerifyOtp() {
         <div style={card}>
           <h2 style={title}>Session Expired</h2>
           <p style={subtitle}>Please go back and request a new OTP.</p>
-          <button style={btn} onClick={() => navigate("/login")}>Go to Login</button>
+          <button style={btn} onClick={() => navigate("/login")}>
+            Go to Login
+          </button>
         </div>
       </div>
     );
   }
 
   const handleVerify = async () => {
-  if (otp.length !== 6) {
-    setError("OTP must be 6 digits")
-    return
-  }
+    if (otp.length !== 6) {
+      setError("OTP must be 6 digits");
+      return;
+    }
 
-  setLoading(true)
-  setError("")
+    setLoading(true);
+    setError("");
 
-  const payload: any = {
-    phone: state.phone,
-    otp: otp,
-  }
+    const payload: any = {
+      phone: state.phone,
+      otp: otp,
+    };
 
-  if (state.mode === "register") {
-    payload.name = state.name
-    payload.email = state.email
-    payload.pincode = state.pincode
-  }
+    if (state.mode === "register") {
+      payload.name = state.name;
+      payload.email = state.email;
+      payload.pincode = state.pincode;
+    }
 
-  try {
-    const data = await verifyOTP(payload)
+    try {
+      const data = await verifyOTP(payload);
 
-    // ✅ IMPORTANT: STORE EXACT KEYS
-    localStorage.setItem("access_token", data.access)
-    localStorage.setItem("refresh_token", data.refresh)
-    localStorage.setItem("user", JSON.stringify(data.user))
+      // ✅ single standard keys
+      localStorage.setItem("access", data.access);
+      localStorage.setItem("refresh", data.refresh);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    // ✅ FORCE REDIRECT (NO CONDITION)
-    navigate("/dashboard", { replace: true })
-  } catch (err: any) {
-    console.error(err)
-    setError(err?.response?.data?.message || "Invalid OTP")
-  } finally {
-    setLoading(false)
-  }
-}
+      // cleanup old keys (optional)
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.response?.data?.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const keyframeStyles = `
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
   `;
 
   return (
@@ -95,11 +95,7 @@ export default function VerifyOtp() {
 
         {error && <p style={errorStyle}>{error}</p>}
 
-        <button
-          style={{ ...btn, opacity: loading ? 0.8 : 1 }}
-          onClick={handleVerify}
-          disabled={loading}
-        >
+        <button style={{ ...btn, opacity: loading ? 0.8 : 1 }} onClick={handleVerify} disabled={loading}>
           {loading ? "Verifying..." : "Verify & Continue"}
         </button>
 
@@ -114,8 +110,7 @@ export default function VerifyOtp() {
   );
 }
 
-/* ---------- Theme Styles (Consistent with Register/Login) ---------- */
-
+/* ---------- Styles (same theme) ---------- */
 const pageWrapper = {
   position: "fixed" as const,
   top: 0,
@@ -145,10 +140,7 @@ const card = {
   animation: "fadeInUp 0.6s ease-out forwards",
 };
 
-const headerSection = {
-  marginBottom: "30px",
-};
-
+const headerSection = { marginBottom: "30px" };
 const title = {
   fontSize: "30px",
   fontWeight: "800",
@@ -157,24 +149,13 @@ const title = {
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
 };
-
-const subtitle = {
-  fontSize: "15px",
-  color: "#666",
-  margin: 0,
-};
-
-const formGroup = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "18px",
-  marginBottom: "25px",
-};
+const subtitle = { fontSize: "15px", color: "#666", margin: 0 };
+const formGroup = { display: "flex", flexDirection: "column" as const, gap: "18px", marginBottom: "25px" };
 
 const input = {
   width: "100%",
   padding: "15px",
-  fontSize: "18px", // Slightly larger for OTP
+  fontSize: "18px",
   textAlign: "center" as const,
   letterSpacing: "4px",
   borderRadius: "15px",
@@ -182,7 +163,6 @@ const input = {
   boxSizing: "border-box" as const,
   outline: "none",
   backgroundColor: "#fcfcfc",
-  transition: "all 0.3s ease",
 };
 
 const btn = {
@@ -195,7 +175,6 @@ const btn = {
   cursor: "pointer",
   fontSize: "17px",
   fontWeight: "bold",
-  boxShadow: "0 10px 20px -10px rgba(35, 166, 213, 0.5)",
 };
 
 const errorStyle = {
@@ -207,12 +186,7 @@ const errorStyle = {
   marginBottom: "20px",
 };
 
-const footerText = {
-  marginTop: "25px",
-  fontSize: "15px",
-  color: "#555",
-};
-
+const footerText = { marginTop: "25px", fontSize: "15px", color: "#555" };
 const resendLink = {
   color: "#23a6d5",
   cursor: "pointer",

@@ -1,18 +1,22 @@
-import axios from "axios"
+// src/api/axiosInstance.ts
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api", // 👈 auth hata diya
-})
+  baseURL: "http://127.0.0.1:8000/api",
+});
 
 api.interceptors.request.use((config) => {
   const token =
-    localStorage.getItem("access") ||
-    localStorage.getItem("admin_access")
+    localStorage.getItem("admin_access") ||
+    localStorage.getItem("access") ||          // ✅ user token
+    localStorage.getItem("access_token") ||     // old fallback
+    localStorage.getItem("token");
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
-export default api
+export default api;
