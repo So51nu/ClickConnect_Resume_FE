@@ -2232,8 +2232,9 @@
 
 // src/pages/admin/AdminDashboard.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import axios from "../../api/axiosInstance";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import AdminTemplates from "./AdminTemplates";
 import TemplatesPricing from "./AdminTemplatesPricing";
@@ -2808,6 +2809,7 @@ function Placeholder({ text }: { text: string }) {
    Main Component
    ======================= */
 export default function AdminDashboard() {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<
@@ -3037,7 +3039,7 @@ export default function AdminDashboard() {
 
                 <div style={styles.statCard}>
                   <p style={styles.statLabel}>Monthly Revenue</p>
-                  <h2 style={styles.statValue}>${monthlyRevenue.toFixed(2)}</h2>
+                  <h2 style={styles.statValue}>₹{monthlyRevenue.toFixed(2)}</h2>
                 </div>
 
                 <div style={styles.statCard}>
