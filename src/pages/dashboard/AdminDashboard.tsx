@@ -3161,7 +3161,7 @@ export default function AdminDashboard() {
                 <div style={styles.kpiGrid}>
                   <KpiCard title="Subscriptions" value={`${subTotal}`} sub="All subscriptions" />
                   <KpiCard title="Active" value={`${subActive}`} sub="Active subscriptions" />
-                  <KpiCard title="Revenue" value={`$${monthlyRevenue.toFixed(2)}`} sub="Active sum(amount)" />
+                  <KpiCard title="Revenue" value={`₹${monthlyRevenue.toFixed(2)}`} sub="Active sum(amount)" />
                   <KpiCard title="Churn" value={`${churnRate.toFixed(2)}%`} sub="Cancelled/Total" />
                 </div>
 
