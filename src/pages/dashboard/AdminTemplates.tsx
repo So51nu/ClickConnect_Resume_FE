@@ -1701,7 +1701,7 @@
 // }
 
 // src/pages/dashboard/AdminTemplates.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import ResumePreview from "./ResumePreview";

@@ -1440,6 +1440,232 @@
 //   );
 // }
 
+// // src/pages/dashboard/AdminTemplateBuilder.tsx
+// import React, { useEffect, useState } from "react";
+// import { useNavigate, useParams } from "react-router-dom";
+// import axios from "../../api/axiosInstance";
+// import ResumePreview from "./ResumePreview";
+
+// type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+
+// function authHeaders() {
+//   const token = localStorage.getItem("access") || "";
+//   return token ? { Authorization: `Bearer ${token}` } : {};
+// }
+
+// const SECTION_LABELS: Record<string, string> = {
+//   header: "Header",
+//   summary: "Professional Summary",
+//   experience: "Work Experience",
+//   education: "Education",
+//   skills: "Skills",
+//   projects: "Projects",
+//   certifications: "Certifications",
+//   languages: "Languages",
+// };
+
+// function ensureSchema(template: any) {
+//   const schema = template?.schema || {};
+//   const layout = (schema.layout || template.layout || "Single Column") as Layout;
+//   return {
+//     version: schema.version ?? 1,
+//     layout,
+//     theme: {
+//       primary: schema?.theme?.primary || template.color || "#2563eb",
+//       fontFamily: schema?.theme?.fontFamily || "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+//       headingUppercase: schema?.theme?.headingUppercase ?? true,
+//       titleSize: schema?.theme?.titleSize ?? 12,
+//       bodySize: schema?.theme?.bodySize ?? 10,
+//       lineHeight: schema?.theme?.lineHeight ?? 1.35,
+//     },
+//     order: schema.order || ["header", "summary", "experience", "education", "skills", "projects"],
+//     columns: schema.columns || { left: ["summary", "skills", "education"], right: ["header", "experience", "projects"] },
+//     sections: {
+//       header: { enabled: true },
+//       summary: { enabled: true },
+//       experience: { enabled: true },
+//       education: { enabled: true },
+//       skills: { enabled: true },
+//       projects: { enabled: true },
+//       certifications: { enabled: false },
+//       languages: { enabled: false },
+//       ...(schema.sections || {}),
+//     },
+//   };
+// }
+
+// // ✅ short preview data (no long dummy paragraphs)
+// const BUILDER_PREVIEW_DATA = {
+//   header: { fullName: "Your Name", jobTitle: "Your Role", email: "you@email.com", phone: "+91 90000 00000", location: "City", linkedin: "", website: "" },
+//   summary: "Short summary preview (template builder).",
+//   experience: [{ title: "Job Title", company: "Company", location: "City", from: "2023", to: "Present", bullets: ["Achievement 1", "Achievement 2"] }],
+//   education: [{ school: "College/University", degree: "Degree", from: "2019", to: "2023" }],
+//   skills: { programming: ["JS", "TS"], frameworks: ["React"], tools: ["Git"] },
+//   projects: [{ name: "Project", desc: "Short description." }],
+//   certifications: [],
+//   languages: [],
+// };
+
+// export default function AdminTemplateBuilder() {
+//   const { id } = useParams();
+//   const templateId = Number(id);
+//   const nav = useNavigate();
+
+//   const [tpl, setTpl] = useState<any>(null);
+//   const [schema, setSchema] = useState<any>(null);
+//   const [tab, setTab] = useState<"sections" | "design" | "json">("sections");
+//   const [saving, setSaving] = useState(false);
+//   const [draggingItem, setDraggingItem] = useState<string | null>(null);
+//   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+//   const load = async () => {
+//     const res = await axios.get(`/auth/admin/templates/${templateId}/`, { headers: authHeaders() });
+//     setTpl(res.data);
+//     setSchema(ensureSchema(res.data));
+//   };
+
+//   useEffect(() => {
+//     if (!templateId) return;
+//     load();
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, [templateId]);
+
+//   const save = async () => {
+//     if (!tpl) return;
+//     setSaving(true);
+//     try {
+//       const payload = {
+//         name: tpl.name,
+//         category: tpl.category,
+//         layout: schema.layout,
+//         status: tpl.status,
+//         color: schema?.theme?.primary || tpl.color,
+//         description: tpl.description || "",
+//         schema,
+//       };
+//       const res = await axios.put(`/auth/admin/templates/${tpl.id}/`, payload, { headers: authHeaders() });
+//       setTpl(res.data);
+//       setSchema(ensureSchema(res.data));
+//       alert("Saved ✅");
+//     } finally {
+//       setSaving(false);
+//     }
+//   };
+
+//   const toggleSection = (key: string) => {
+//     setSchema((p: any) => ({
+//       ...p,
+//       sections: { ...p.sections, [key]: { ...(p.sections?.[key] || {}), enabled: !p.sections?.[key]?.enabled } },
+//     }));
+//   };
+
+//   const setLayout = (layout: Layout) => {
+//     setSchema((p: any) => {
+//       const next = { ...p, layout };
+//       if (layout === "Single Column") {
+//         const merged = Array.from(new Set([...(p.order || []), ...(p.columns?.left || []), ...(p.columns?.right || [])]));
+//         next.order = merged.length ? merged : ["header", "summary", "experience", "education", "skills", "projects"];
+//       }
+//       return next;
+//     });
+//   };
+
+//   // Drag and Drop Handlers
+//   const handleDragStart = (e: React.DragEvent, sectionId: string) => {
+//     setDraggingItem(sectionId);
+//     e.dataTransfer.setData("text/plain", sectionId);
+//   };
+
+//   const handleDragOver = (e: React.DragEvent, index: number) => {
+//     e.preventDefault();
+//     setDragOverIndex(index);
+//   };
+
+//   const handleDragLeave = () => {
+//     setDragOverIndex(null);
+//   };
+
+//   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+//     e.preventDefault();
+//     const draggedId = e.dataTransfer.getData("text/plain");
+
+//     if (draggedId && schema.order) {
+//       const currentOrder = [...schema.order];
+//       const draggedIndex = currentOrder.indexOf(draggedId);
+
+//       if (draggedIndex !== -1) {
+//         currentOrder.splice(draggedIndex, 1);
+//         const newIndex = dropIndex > draggedIndex ? dropIndex - 1 : dropIndex;
+//         currentOrder.splice(newIndex, 0, draggedId);
+
+//         setSchema((p: any) => ({ ...p, order: currentOrder }));
+//       }
+//     }
+
+//     setDragOverIndex(null);
+//     setDraggingItem(null);
+//   };
+
+//   const handleDropToRemove = (e: React.DragEvent) => {
+//     e.preventDefault();
+//     const draggedId = e.dataTransfer.getData("text/plain");
+
+//     if (draggedId && schema.order) {
+//       setSchema((p: any) => ({
+//         ...p,
+//         order: p.order.filter((id: string) => id !== draggedId),
+//       }));
+//     }
+
+//     setDragOverIndex(null);
+//     setDraggingItem(null);
+//   };
+
+//   const addToOrder = (sectionId: string) => {
+//     if (!schema.order.includes(sectionId)) {
+//       setSchema((p: any) => ({ ...p, order: [...p.order, sectionId] }));
+//     }
+//   };
+
+//   const removeFromOrder = (sectionId: string) => {
+//     setSchema((p: any) => ({ ...p, order: p.order.filter((id: string) => id !== sectionId) }));
+//   };
+
+//   if (!tpl || !schema) return <div style={{ padding: 20 }}>Loading...</div>;
+
+//   return (
+//     <div style={{ minHeight: "100vh", background: "#f9fafb" }}>
+//       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "white", borderBottom: "1px solid #e5e7eb", padding: "12px 16px", display: "flex", justifyContent: "space-between", gap: 10 }}>
+//         <div>
+//           <div style={{ fontWeight: 900, fontSize: 18 }}>{tpl.name}</div>
+//           <div style={{ fontSize: 12, color: "#6b7280" }}>Canvas Builder • {schema.layout} • Drag & Drop</div>
+//         </div>
+//         <div style={{ display: "flex", gap: 8 }}>
+//           <button onClick={() => nav("/admin/templates")} style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #e5e7eb", background: "white", fontWeight: 800 }}>Back</button>
+//           <button onClick={save} disabled={saving} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+//             {saving ? "Saving..." : "Save"}
+//           </button>
+//         </div>
+//       </div>
+
+//       <div style={{ display: "grid", gridTemplateColumns: "380px 1fr 520px", gap: 16, padding: 16 }}>
+//         {/* Left Panel */}
+//         {/* (UNCHANGED - same as your file) */}
+//         {/* ... your existing left + middle panels remain exactly same ... */}
+
+//         {/* Right Panel - Preview (ONLY FIX: pass data) */}
+//         <div style={{ display: "grid", placeItems: "start center" }}>
+//           <div>
+//             <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 12 }}>Live Preview</div>
+//             <ResumePreview schema={schema} data={BUILDER_PREVIEW_DATA} />
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
 // src/pages/dashboard/AdminTemplateBuilder.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
