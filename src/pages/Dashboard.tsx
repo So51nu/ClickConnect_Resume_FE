@@ -6708,7 +6708,7 @@ const Dashboard = () => {
   const normalizeMediaUrl = (src?: string) => {
     if (!src) return "";
     if (/^https?:\/\//i.test(src)) return src;
-    const base = String((axios as any).defaults?.baseURL || "http://127.0.0.1:8000/api").replace(/\/api\/?$/, "");
+    const base = String((axios as any).defaults?.baseURL || "lightgoldenrodyellow-chinchilla-641242.hostingersite.com/api").replace(/\/api\/?$/, "");
     return `${base}${src.startsWith("/") ? src : `/${src}`}`;
   };
 

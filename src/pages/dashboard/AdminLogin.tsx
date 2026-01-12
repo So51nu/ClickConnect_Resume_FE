@@ -521,6 +521,15 @@ export default function AdminLogin() {
           <button style={ghostBtn} onClick={() => navigate("/login")}>
             USER LOGIN
           </button>
+          <p style={{ marginTop: 12, fontSize: 14, color: "#334155" }}>
+            <span
+              style={{ cursor: "pointer", textDecoration: "underline", fontWeight: 700 }}
+              onClick={() => navigate("/admin/forgot-password")}
+            >
+              Forgot password?
+            </span>
+          </p>
+
         </div>
 
         {/* RIGHT LOGIN FORM */}

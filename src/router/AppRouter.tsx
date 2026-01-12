@@ -597,6 +597,7 @@ import VerifyOtp from "../pages/VerifyOtp";
 
 // Student
 import Dashboard from "../pages/Dashboard";
+import AdminStaffManager from "../pages/dashboard/AdminStaffManager";
 
 // Admin
 import AdminLogin from "../pages/dashboard/AdminLogin";
@@ -608,6 +609,8 @@ import AdminResumeEditor from "../pages/dashboard/AdminResumeEditor";
 import AdminTemplateTestEditor from "../pages/dashboard/AdminTemplateTestEditor";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import AdminForgotPassword from "../pages/dashboard/AdminForgotPassword";
+import AdminResetPassword from "../pages/dashboard/AdminResetPassword";
 // ✅ Auth helpers
 function isUserAuthed() {
   return !!localStorage.getItem("access");
@@ -638,8 +641,18 @@ export default function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
+        <Route path="/admin/reset-password" element={<AdminResetPassword />} />
         {/* Optional legacy route (now disabled screen) */}
         <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route
+          path="/admin/staff"
+          element={
+            <RequireAdmin>
+              <AdminStaffManager />
+            </RequireAdmin>
+          }
+        />
 
         {/* Student */}
         <Route

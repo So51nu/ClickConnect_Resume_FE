@@ -95,3 +95,16 @@ export const resetPassword = async (payload: {
   const res = await api.post("password/reset/", payload);
   return res.data;
 };
+export const adminForgotPassword = async (email: string) => {
+  const res = await api.post("admin/password/forgot/", { email });
+  return res.data;
+};
+
+export const adminResetPassword = async (payload: {
+  uid: string;
+  token: string;
+  password: string;
+}) => {
+  const res = await api.post("admin/password/reset/", payload);
+  return res.data;
+};

@@ -4270,6 +4270,10 @@ export default function AdminDashboard() {
           <div style={navStyle(activeTab === "subscriptions")} onClick={() => goTab("subscriptions")}>
             🧾 Subscriptions
           </div>
+          <button onClick={() => navigate("/admin/staff")}>
+          Manage Admin Staff
+        </button>
+
         </nav>
 
         <div style={styles.sidebarBottom}>
