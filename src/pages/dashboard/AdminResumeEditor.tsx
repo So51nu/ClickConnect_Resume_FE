@@ -1038,7 +1038,7 @@
 //               style={{ padding: 10, borderRadius: 10, border: "1px solid #e5e7eb", minHeight: 100 }}
 //               placeholder="Enter professional summary..."
 //             />
-
+//src/AdminResumeEditor
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "../../api/axiosInstance";
