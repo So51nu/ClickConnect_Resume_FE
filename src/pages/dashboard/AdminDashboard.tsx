@@ -4273,6 +4273,9 @@ export default function AdminDashboard() {
           <button onClick={() => navigate("/admin/staff")}>
           Manage Admin Staff
         </button>
+         <button onClick={() => navigate("/ai-resume")}>
+         AI Resume Generator
+        </button>
 
         </nav>
 

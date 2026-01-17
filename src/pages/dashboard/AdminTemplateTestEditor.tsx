@@ -9,7 +9,7 @@
 // // // // // import { Document, Packer, Paragraph, TextRun } from "docx";
 
 // // // // // function authHeaders() {
-// // // // //   const token = localStorage.getItem("access") || "";
+// // // // //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // // // // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // // // // }
 
@@ -183,7 +183,7 @@
 // // // // import { Document, Packer, Paragraph, TextRun } from "docx";
 
 // // // // function authHeaders() {
-// // // //   const token = localStorage.getItem("access") || "";
+// // // //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // // // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // // // }
 
@@ -436,7 +436,7 @@
 // // // import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 // // // function authHeaders() {
-// // //   const token = localStorage.getItem("access") || "";
+// // //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // // }
 
@@ -566,7 +566,7 @@
 // // import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 // // function authHeaders() {
-// //   const token = localStorage.getItem("access") || "";
+// //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // }
 
@@ -781,7 +781,7 @@
 // import { Document, Packer, Paragraph, TextRun } from "docx";
 
 // function authHeaders() {
-//   const token = localStorage.getItem("access") || "";
+//   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 //   return token ? { Authorization: `Bearer ${token}` } : {};
 // }
 
@@ -1621,7 +1621,7 @@ import { saveAs } from "file-saver";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
 function authHeaders() {
-  const token = localStorage.getItem("access") || "";
+  const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

@@ -611,6 +611,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import AdminForgotPassword from "../pages/dashboard/AdminForgotPassword";
 import AdminResetPassword from "../pages/dashboard/AdminResetPassword";
+import AIResumeGenerator from "../pages/dashboard/AIResumeGenerator";
 // ✅ Auth helpers
 function isUserAuthed() {
   return !!localStorage.getItem("access");
@@ -643,6 +644,8 @@ export default function AppRouter() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
         <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+        <Route path="/ai-resume" element={<AIResumeGenerator />} />
+
         {/* Optional legacy route (now disabled screen) */}
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route

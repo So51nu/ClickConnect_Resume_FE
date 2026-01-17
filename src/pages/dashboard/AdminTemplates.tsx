@@ -852,7 +852,7 @@
 // // };
 
 // // function getAccessToken() {
-// //   return localStorage.getItem("access") || "";
+// //   return localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // // }
 
 // // function authHeaders() {
@@ -1326,7 +1326,7 @@
 // };
 
 // function authHeaders() {
-//   const token = localStorage.getItem("access") || "";
+//   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 //   return token ? { Authorization: `Bearer ${token}` } : {};
 // }
 
@@ -1739,7 +1739,7 @@ type MarketplaceTpl = {
 };
 
 function authHeaders() {
-  const token = localStorage.getItem("access") || "";
+  const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
