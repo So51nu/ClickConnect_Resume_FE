@@ -1046,7 +1046,7 @@
 //   );
 // }
 
-import React, { useEffect, useMemo, useState } from "react";
+import  { useEffect, useMemo, useState } from "react";
 import axios from "../../api/axiosInstance";
 
 function adminHeaders() {
@@ -1070,7 +1070,7 @@ function SvgLineChart({
   height = 160,
   getY,
   color = "#2563eb",
-  title = ""
+  //title = ""
 }: {
   data: any[];
   width?: string | number;
@@ -1489,7 +1489,7 @@ export default function AIUses() {
     let peakHour = "N/A";
     let peakValue = 0;
     if (data.heatmap && data.heatmap.matrix && data.heatmap.hours) {
-      data.heatmap.matrix.forEach((row, dayIndex) => {
+      data.heatmap.matrix.forEach((row) => {
         row.forEach((value, hourIndex) => {
           if (value > peakValue) {
             peakValue = value;
@@ -1571,7 +1571,7 @@ export default function AIUses() {
   const performanceMetrics = useMemo(() => {
     if (!data) return [];
     
-    const { kpis, time_series } = data;
+    const { kpis } = data;
     
     // Calculate actual download rate
     const downloadRate = kpis.ai_resumes > 0 
@@ -2006,7 +2006,7 @@ export default function AIUses() {
           marginBottom: 24,
           width: "100%"
         }}>
-          {dynamicKpis.map((kpi, index) => (
+          {dynamicKpis.map((kpi) => (
             <div 
               key={kpi.label} 
               style={{ 

@@ -939,7 +939,7 @@ export default function AdminResumeEditor() {
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button
+          {/* <button
             onClick={() => nav(endpoints.backRoute())}
             style={{
               padding: "10px 12px",
@@ -950,7 +950,7 @@ export default function AdminResumeEditor() {
             }}
           >
             Back
-          </button>
+          </button> */}
 
           {isLocked ? (
             <button

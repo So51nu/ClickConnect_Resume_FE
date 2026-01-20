@@ -1,6 +1,6 @@
 // src/pages/dashboard/AdminTemplateBuilder.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {useParams } from "react-router-dom";
 import axios from "../../api/axiosInstance";
 import ResumePreview from "./ResumePreview";
 
@@ -142,7 +142,7 @@ const ALL_SECTIONS = [
 export default function AdminTemplateBuilder() {
   const { id } = useParams();
   const templateId = Number(id);
-  const nav = useNavigate();
+  //const nav = useNavigate();
 
   const [tpl, setTpl] = useState<any>(null);
   const [schema, setSchema] = useState<any>(null);
@@ -249,12 +249,12 @@ export default function AdminTemplateBuilder() {
           <div style={{ fontSize: 12, color: "#6b7280" }}>Template Builder • {schema.layout}</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button
+          {/* <button
             onClick={() => nav("/admin/templates")}
             style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #e5e7eb", background: "white", fontWeight: 800 }}
           >
             Back
-          </button>
+          </button> */}
           <button
             onClick={save}
             disabled={saving}

@@ -1,830 +1,2125 @@
-// // // // // // src/App.tsx
-// // // // // import React, { useMemo, useState } from "react";
+// // // // // // // // // src/App.tsx
+// // // // // // // // import React, { useMemo, useState } from "react";
+
+// // // // // // // // type TemplateStatus = "active" | "draft";
+// // // // // // // // type Category = "Modern" | "Classic";
+// // // // // // // // type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+
+// // // // // // // // interface Template {
+// // // // // // // //   id: string;
+// // // // // // // //   name: string;
+// // // // // // // //   category: Category;
+// // // // // // // //   layout: Layout;
+// // // // // // // //   status: TemplateStatus;
+// // // // // // // //   downloads: number;
+// // // // // // // //   rating: number;
+// // // // // // // //   updated: string; // dd/mm/yyyy
+// // // // // // // //   color: string; // HEX or any CSS color
+// // // // // // // // }
+
+// // // // // // // // const dummyTemplates: Template[] = [
+// // // // // // // //   { id: "aurora-01", name: "Aurora modern-01", category: "Modern", layout: "Two Column", status: "draft", downloads: 2462, rating: 3.1, updated: "16/12/2025", color: "#06b6d4" },
+// // // // // // // //   { id: "zenith-02", name: "Zenith modern-02", category: "Modern", layout: "Sidebar Left", status: "active", downloads: 4992, rating: 3.6, updated: "19/12/2025", color: "#22c55e" },
+// // // // // // // //   { id: "prism-03", name: "Prism modern-03", category: "Modern", layout: "Two Column", status: "active", downloads: 2659, rating: 4.6, updated: "30/12/2025", color: "#a855f7" },
+// // // // // // // //   { id: "nexus-04", name: "Nexus modern-04", category: "Modern", layout: "Sidebar Right", status: "active", downloads: 3059, rating: 4.6, updated: "29/12/2025", color: "#f97316" },
+// // // // // // // //   { id: "vertex-05", name: "Vertex modern-05", category: "Modern", layout: "Two Column", status: "active", downloads: 4829, rating: 4.1, updated: "10/12/2025", color: "#14b8a6" },
+// // // // // // // //   { id: "pulse-06", name: "Pulse modern-06", category: "Modern", layout: "Single Column", status: "active", downloads: 844, rating: 4.1, updated: "22/12/2025", color: "#ef4444" },
+// // // // // // // //   { id: "nova-07", name: "Nova modern-07", category: "Modern", layout: "Sidebar Left", status: "active", downloads: 2977, rating: 4.5, updated: "01/01/2026", color: "#a855f7" },
+// // // // // // // //   { id: "flux-08", name: "Flux modern-08", category: "Modern", layout: "Two Column", status: "active", downloads: 2601, rating: 4.2, updated: "27/12/2025", color: "#ec4899" },
+// // // // // // // //   { id: "edge-09", name: "Edge modern-09", category: "Modern", layout: "Sidebar Right", status: "active", downloads: 564, rating: 3.3, updated: "15/12/2025", color: "#22c55e" },
+// // // // // // // //   { id: "spark-10", name: "Spark modern-10", category: "Modern", layout: "Two Column", status: "active", downloads: 2618, rating: 4.6, updated: "18/12/2025", color: "#eab308" },
+// // // // // // // //   { id: "heritage-01", name: "Heritage classic-01", category: "Classic", layout: "Single Column", status: "draft", downloads: 612, rating: 4.5, updated: "26/12/2025", color: "#111827" },
+// // // // // // // //   { id: "legacy-02", name: "Legacy classic-02", category: "Classic", layout: "Single Column", status: "active", downloads: 3544, rating: 3.7, updated: "14/12/2025", color: "#374151" },
+// // // // // // // //   { id: "prestige-03", name: "Prestige classic-03", category: "Classic", layout: "Two Column", status: "active", downloads: 551, rating: 4.8, updated: "22/12/2025", color: "#92400e" },
+// // // // // // // //   { id: "tradition-04", name: "Tradition classic-04", category: "Classic", layout: "Single Column", status: "active", downloads: 2273, rating: 3.4, updated: "08/12/2025", color: "#0b1220" },
+// // // // // // // //   { id: "regal-05", name: "Regal classic-05", category: "Classic", layout: "Sidebar Left", status: "active", downloads: 1168, rating: 3.4, updated: "13/12/2025", color: "#7f1d1d" },
+// // // // // // // // ];
+
+// // // // // // // // function formatNumber(n: number) {
+// // // // // // // //   return n.toLocaleString();
+// // // // // // // // }
+
+// // // // // // // // function todayDDMMYYYY() {
+// // // // // // // //   const d = new Date();
+// // // // // // // //   const dd = String(d.getDate()).padStart(2, "0");
+// // // // // // // //   const mm = String(d.getMonth() + 1).padStart(2, "0");
+// // // // // // // //   const yyyy = d.getFullYear();
+// // // // // // // //   return `${dd}/${mm}/${yyyy}`;
+// // // // // // // // }
+
+// // // // // // // // function safeIdFromName(name: string) {
+// // // // // // // //   return (
+// // // // // // // //     name
+// // // // // // // //       .trim()
+// // // // // // // //       .toLowerCase()
+// // // // // // // //       .replace(/[^a-z0-9]+/g, "-")
+// // // // // // // //       .replace(/^-+|-+$/g, "") +
+// // // // // // // //     "-" +
+// // // // // // // //     Math.random().toString(16).slice(2, 6)
+// // // // // // // //   );
+// // // // // // // // }
+
+// // // // // // // // function statusBadge(status: TemplateStatus) {
+// // // // // // // //   if (status === "active") {
+// // // // // // // //     return { bg: "#dbeafe", fg: "#1e40af", border: "#bfdbfe", text: "Active" };
+// // // // // // // //   }
+// // // // // // // //   return { bg: "#fee2e2", fg: "#991b1b", border: "#fecaca", text: "Draft" };
+// // // // // // // // }
+
+// // // // // // // // const styles = {
+// // // // // // // //   page: {
+// // // // // // // //     fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+// // // // // // // //     backgroundColor: "#f9fafb",
+// // // // // // // //     minHeight: "100vh",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   container: {
+// // // // // // // //     maxWidth: 1440,
+// // // // // // // //     margin: "0 auto",
+// // // // // // // //     padding: 24,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   header: {
+// // // // // // // //     position: "sticky" as const,
+// // // // // // // //     top: 0,
+// // // // // // // //     zIndex: 10,
+// // // // // // // //     backgroundColor: "rgba(255,255,255,0.85)",
+// // // // // // // //     backdropFilter: "blur(8px)",
+// // // // // // // //     borderBottom: "1px solid #e5e7eb",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   headerInner: {
+// // // // // // // //     maxWidth: 1440,
+// // // // // // // //     margin: "0 auto",
+// // // // // // // //     padding: "16px 24px",
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     justifyContent: "space-between",
+// // // // // // // //     gap: 16,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   title: {
+// // // // // // // //     margin: 0,
+// // // // // // // //     fontSize: 22,
+// // // // // // // //     fontWeight: 650,
+// // // // // // // //     color: "#111827",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   subtitle: {
+// // // // // // // //     margin: "4px 0 0",
+// // // // // // // //     fontSize: 13,
+// // // // // // // //     color: "#6b7280",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   addBtn: {
+// // // // // // // //     backgroundColor: "#2563eb",
+// // // // // // // //     color: "white",
+// // // // // // // //     padding: "10px 14px",
+// // // // // // // //     borderRadius: 10,
+// // // // // // // //     border: "1px solid #1d4ed8",
+// // // // // // // //     fontWeight: 650,
+// // // // // // // //     cursor: "pointer",
+// // // // // // // //     boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+// // // // // // // //     display: "inline-flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     gap: 8,
+// // // // // // // //     userSelect: "none",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   addBtnDisabled: {
+// // // // // // // //     opacity: 0.7,
+// // // // // // // //     cursor: "not-allowed",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   statsGrid: {
+// // // // // // // //     display: "grid",
+// // // // // // // //     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+// // // // // // // //     gap: 16,
+// // // // // // // //     marginTop: 18,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   card: {
+// // // // // // // //     backgroundColor: "white",
+// // // // // // // //     borderRadius: 14,
+// // // // // // // //     padding: 18,
+// // // // // // // //     boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+// // // // // // // //     border: "1px solid #f1f5f9",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   statTopRow: {
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "flex-start",
+// // // // // // // //     justifyContent: "space-between",
+// // // // // // // //     gap: 12,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   dot: {
+// // // // // // // //     width: 10,
+// // // // // // // //     height: 10,
+// // // // // // // //     borderRadius: 999,
+// // // // // // // //     marginTop: 3,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   statLabel: {
+// // // // // // // //     margin: 0,
+// // // // // // // //     fontSize: 13,
+// // // // // // // //     color: "#6b7280",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   statValue: {
+// // // // // // // //     margin: "10px 0 0",
+// // // // // // // //     fontSize: 30,
+// // // // // // // //     fontWeight: 750,
+// // // // // // // //     color: "#111827",
+// // // // // // // //     letterSpacing: "-0.02em",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   filtersWrap: {
+// // // // // // // //     marginTop: 16,
+// // // // // // // //     backgroundColor: "white",
+// // // // // // // //     borderRadius: 14,
+// // // // // // // //     padding: 14,
+// // // // // // // //     boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+// // // // // // // //     border: "1px solid #f1f5f9",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   filtersRow: {
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     justifyContent: "space-between",
+// // // // // // // //     gap: 12,
+// // // // // // // //     flexWrap: "wrap",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   foundText: {
+// // // // // // // //     margin: 0,
+// // // // // // // //     fontSize: 13,
+// // // // // // // //     color: "#6b7280",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   controls: {
+// // // // // // // //     display: "flex",
+// // // // // // // //     gap: 10,
+// // // // // // // //     flexWrap: "wrap",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   input: {
+// // // // // // // //     padding: "9px 12px",
+// // // // // // // //     border: "1px solid #d1d5db",
+// // // // // // // //     borderRadius: 10,
+// // // // // // // //     minWidth: 240,
+// // // // // // // //     fontSize: 14,
+// // // // // // // //     outline: "none",
+// // // // // // // //     boxShadow: "inset 0 1px 0 rgba(0,0,0,0.02)",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   select: {
+// // // // // // // //     padding: "9px 12px",
+// // // // // // // //     border: "1px solid #d1d5db",
+// // // // // // // //     borderRadius: 10,
+// // // // // // // //     fontSize: 14,
+// // // // // // // //     outline: "none",
+// // // // // // // //     backgroundColor: "white",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   tableCard: {
+// // // // // // // //     marginTop: 14,
+// // // // // // // //     backgroundColor: "white",
+// // // // // // // //     borderRadius: 14,
+// // // // // // // //     boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+// // // // // // // //     overflow: "hidden",
+// // // // // // // //     border: "1px solid #f1f5f9",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   tableWrap: {
+// // // // // // // //     overflowX: "auto" as const,
+// // // // // // // //   },
+
+// // // // // // // //   table: {
+// // // // // // // //     width: "100%",
+// // // // // // // //     borderCollapse: "collapse" as const,
+// // // // // // // //     minWidth: 950,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   th: {
+// // // // // // // //     backgroundColor: "#f3f4f6",
+// // // // // // // //     textAlign: "left" as const,
+// // // // // // // //     padding: "12px 14px",
+// // // // // // // //     fontSize: 12,
+// // // // // // // //     letterSpacing: "0.04em",
+// // // // // // // //     textTransform: "uppercase" as const,
+// // // // // // // //     color: "#4b5563",
+// // // // // // // //     borderBottom: "1px solid #e5e7eb",
+// // // // // // // //     whiteSpace: "nowrap" as const,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   td: {
+// // // // // // // //     padding: "14px",
+// // // // // // // //     fontSize: 14,
+// // // // // // // //     color: "#374151",
+// // // // // // // //     borderTop: "1px solid #eef2f7",
+// // // // // // // //     verticalAlign: "middle" as const,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   templateCell: {
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     gap: 12,
+// // // // // // // //     minWidth: 260,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   colorBox: {
+// // // // // // // //     width: 40,
+// // // // // // // //     height: 40,
+// // // // // // // //     borderRadius: 10,
+// // // // // // // //     flexShrink: 0,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   name: {
+// // // // // // // //     fontWeight: 650,
+// // // // // // // //     color: "#111827",
+// // // // // // // //     margin: 0,
+// // // // // // // //     lineHeight: 1.2,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   small: {
+// // // // // // // //     margin: "2px 0 0",
+// // // // // // // //     fontSize: 12,
+// // // // // // // //     color: "#6b7280",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   badge: {
+// // // // // // // //     display: "inline-flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     padding: "5px 10px",
+// // // // // // // //     borderRadius: 999,
+// // // // // // // //     fontSize: 12,
+// // // // // // // //     fontWeight: 650,
+// // // // // // // //     border: "1px solid transparent",
+// // // // // // // //     whiteSpace: "nowrap" as const,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   menuBtn: {
+// // // // // // // //     background: "transparent",
+// // // // // // // //     border: "1px solid transparent",
+// // // // // // // //     color: "#6b7280",
+// // // // // // // //     fontSize: 18,
+// // // // // // // //     cursor: "pointer",
+// // // // // // // //     borderRadius: 10,
+// // // // // // // //     padding: "6px 8px",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   footer: {
+// // // // // // // //     borderTop: "1px solid #eef2f7",
+// // // // // // // //     padding: "10px 14px",
+// // // // // // // //     fontSize: 13,
+// // // // // // // //     color: "#6b7280",
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     justifyContent: "space-between",
+// // // // // // // //     gap: 10,
+// // // // // // // //     flexWrap: "wrap" as const,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   // Modal
+// // // // // // // //   overlay: {
+// // // // // // // //     position: "fixed" as const,
+// // // // // // // //     inset: 0,
+// // // // // // // //     backgroundColor: "rgba(17,24,39,0.45)",
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "center",
+// // // // // // // //     justifyContent: "center",
+// // // // // // // //     padding: 16,
+// // // // // // // //     zIndex: 50,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   modal: {
+// // // // // // // //     width: "100%",
+// // // // // // // //     maxWidth: 560,
+// // // // // // // //     backgroundColor: "white",
+// // // // // // // //     borderRadius: 16,
+// // // // // // // //     boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+// // // // // // // //     border: "1px solid rgba(255,255,255,0.6)",
+// // // // // // // //     overflow: "hidden",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   modalHeader: {
+// // // // // // // //     padding: "16px 18px",
+// // // // // // // //     borderBottom: "1px solid #eef2f7",
+// // // // // // // //     display: "flex",
+// // // // // // // //     alignItems: "flex-start",
+// // // // // // // //     justifyContent: "space-between",
+// // // // // // // //     gap: 12,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   modalTitle: {
+// // // // // // // //     margin: 0,
+// // // // // // // //     fontSize: 16,
+// // // // // // // //     fontWeight: 750,
+// // // // // // // //     color: "#111827",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   modalBody: {
+// // // // // // // //     padding: 18,
+// // // // // // // //     display: "grid",
+// // // // // // // //     gridTemplateColumns: "1fr 1fr",
+// // // // // // // //     gap: 12,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   field: {
+// // // // // // // //     display: "flex",
+// // // // // // // //     flexDirection: "column" as const,
+// // // // // // // //     gap: 6,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   label: {
+// // // // // // // //     fontSize: 12,
+// // // // // // // //     fontWeight: 650,
+// // // // // // // //     color: "#374151",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   full: {
+// // // // // // // //     gridColumn: "1 / -1",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   modalFooter: {
+// // // // // // // //     padding: "14px 18px",
+// // // // // // // //     borderTop: "1px solid #eef2f7",
+// // // // // // // //     display: "flex",
+// // // // // // // //     justifyContent: "flex-end",
+// // // // // // // //     gap: 10,
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   btnGhost: {
+// // // // // // // //     padding: "10px 12px",
+// // // // // // // //     borderRadius: 12,
+// // // // // // // //     border: "1px solid #e5e7eb",
+// // // // // // // //     backgroundColor: "white",
+// // // // // // // //     color: "#111827",
+// // // // // // // //     fontWeight: 650,
+// // // // // // // //     cursor: "pointer",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   btnPrimary: {
+// // // // // // // //     padding: "10px 12px",
+// // // // // // // //     borderRadius: 12,
+// // // // // // // //     border: "1px solid #1d4ed8",
+// // // // // // // //     backgroundColor: "#2563eb",
+// // // // // // // //     color: "white",
+// // // // // // // //     fontWeight: 750,
+// // // // // // // //     cursor: "pointer",
+// // // // // // // //   } as React.CSSProperties,
+
+// // // // // // // //   error: {
+// // // // // // // //     gridColumn: "1 / -1",
+// // // // // // // //     backgroundColor: "#fef2f2",
+// // // // // // // //     color: "#991b1b",
+// // // // // // // //     border: "1px solid #fecaca",
+// // // // // // // //     padding: "10px 12px",
+// // // // // // // //     borderRadius: 12,
+// // // // // // // //     fontSize: 13,
+// // // // // // // //   } as React.CSSProperties,
+// // // // // // // // };
+
+// // // // // // // // function StatCard({
+// // // // // // // //   label,
+// // // // // // // //   value,
+// // // // // // // //   dotColor,
+// // // // // // // // }: {
+// // // // // // // //   label: string;
+// // // // // // // //   value: string | number;
+// // // // // // // //   dotColor: string;
+// // // // // // // // }) {
+// // // // // // // //   return (
+// // // // // // // //     <div style={styles.card}>
+// // // // // // // //       <div style={styles.statTopRow}>
+// // // // // // // //         <p style={styles.statLabel}>{label}</p>
+// // // // // // // //         <span style={{ ...styles.dot, backgroundColor: dotColor }} />
+// // // // // // // //       </div>
+// // // // // // // //       <p style={styles.statValue}>{value}</p>
+// // // // // // // //     </div>
+// // // // // // // //   );
+// // // // // // // // }
+
+// // // // // // // // export default function App() {
+// // // // // // // //   const [templates, setTemplates] = useState<Template[]>(dummyTemplates);
+
+// // // // // // // //   // filters
+// // // // // // // //   const [searchTerm, setSearchTerm] = useState("");
+// // // // // // // //   const [categoryFilter, setCategoryFilter] = useState<"All" | Category>("All");
+// // // // // // // //   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Draft">("All");
+
+// // // // // // // //   // Add Template modal
+// // // // // // // //   const [isAddOpen, setIsAddOpen] = useState(false);
+// // // // // // // //   const [form, setForm] = useState({
+// // // // // // // //     name: "",
+// // // // // // // //     category: "Modern" as Category,
+// // // // // // // //     layout: "Two Column" as Layout,
+// // // // // // // //     status: "active" as TemplateStatus,
+// // // // // // // //     color: "#2563eb",
+// // // // // // // //   });
+// // // // // // // //   const [formError, setFormError] = useState<string>("");
+
+// // // // // // // //   const filtered = useMemo(() => {
+// // // // // // // //     const s = searchTerm.trim().toLowerCase();
+// // // // // // // //     return templates.filter((t) => {
+// // // // // // // //       const matchesSearch = s === "" || t.name.toLowerCase().includes(s);
+// // // // // // // //       const matchesCategory = categoryFilter === "All" || t.category === categoryFilter;
+// // // // // // // //       const matchesStatus =
+// // // // // // // //         statusFilter === "All" ||
+// // // // // // // //         (statusFilter === "Active" && t.status === "active") ||
+// // // // // // // //         (statusFilter === "Draft" && t.status === "draft");
+// // // // // // // //       return matchesSearch && matchesCategory && matchesStatus;
+// // // // // // // //     });
+// // // // // // // //   }, [templates, searchTerm, categoryFilter, statusFilter]);
+
+// // // // // // // //   // Stats
+// // // // // // // //   const totalTemplates = templates.length;
+// // // // // // // //   const activeCount = templates.filter((t) => t.status === "active").length;
+// // // // // // // //   const draftCount = templates.filter((t) => t.status === "draft").length;
+// // // // // // // //   const totalDownloads = templates.reduce((sum, t) => sum + t.downloads, 0);
+
+// // // // // // // //   const openAdd = () => {
+// // // // // // // //     setFormError("");
+// // // // // // // //     setForm({
+// // // // // // // //       name: "",
+// // // // // // // //       category: "Modern",
+// // // // // // // //       layout: "Two Column",
+// // // // // // // //       status: "active",
+// // // // // // // //       color: "#2563eb",
+// // // // // // // //     });
+// // // // // // // //     setIsAddOpen(true);
+// // // // // // // //   };
+
+// // // // // // // //   const closeAdd = () => setIsAddOpen(false);
+
+// // // // // // // //   const submitAdd = (e?: React.FormEvent) => {
+// // // // // // // //     e?.preventDefault();
+// // // // // // // //     setFormError("");
+
+// // // // // // // //     const name = form.name.trim();
+// // // // // // // //     if (!name) {
+// // // // // // // //       setFormError("Template name required.");
+// // // // // // // //       return;
+// // // // // // // //     }
+// // // // // // // //     if (name.length < 3) {
+// // // // // // // //       setFormError("Template name minimum 3 characters.");
+// // // // // // // //       return;
+// // // // // // // //     }
+
+// // // // // // // //     // duplicate check
+// // // // // // // //     const exists = templates.some((t) => t.name.toLowerCase() === name.toLowerCase());
+// // // // // // // //     if (exists) {
+// // // // // // // //       setFormError("Same name already exists. Please use different name.");
+// // // // // // // //       return;
+// // // // // // // //     }
+
+// // // // // // // //     const newTemplate: Template = {
+// // // // // // // //       id: safeIdFromName(name),
+// // // // // // // //       name,
+// // // // // // // //       category: form.category,
+// // // // // // // //       layout: form.layout,
+// // // // // // // //       status: form.status,
+// // // // // // // //       downloads: 0,
+// // // // // // // //       rating: 0,
+// // // // // // // //       updated: todayDDMMYYYY(),
+// // // // // // // //       color: form.color || "#2563eb",
+// // // // // // // //     };
+
+// // // // // // // //     setTemplates((prev) => [newTemplate, ...prev]);
+// // // // // // // //     setIsAddOpen(false);
+// // // // // // // //   };
+
+// // // // // // // //   return (
+// // // // // // // //     <div style={styles.page}>
+// // // // // // // //       {/* Header */}
+// // // // // // // //       <header style={styles.header}>
+// // // // // // // //         <div style={styles.headerInner}>
+// // // // // // // //           <div>
+// // // // // // // //             <h1 style={styles.title}>Templates</h1>
+// // // // // // // //             <p style={styles.subtitle}>Admin panel for managing resume templates</p>
+// // // // // // // //           </div>
+
+// // // // // // // //           <button
+// // // // // // // //             type="button"
+// // // // // // // //             style={styles.addBtn}
+// // // // // // // //             onClick={openAdd}
+// // // // // // // //             onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.98)")}
+// // // // // // // //             onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+// // // // // // // //             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+// // // // // // // //           >
+// // // // // // // //             <span style={{ fontSize: 18, lineHeight: 0 }}>+</span>
+// // // // // // // //             Add Template
+// // // // // // // //           </button>
+// // // // // // // //         </div>
+// // // // // // // //       </header>
+
+// // // // // // // //       <div style={styles.container}>
+// // // // // // // //         {/* Stats */}
+// // // // // // // //         <div style={styles.statsGrid}>
+// // // // // // // //           <StatCard label="Total Templates" value={totalTemplates} dotColor="#111827" />
+// // // // // // // //           <StatCard label="Active" value={activeCount} dotColor="#10b981" />
+// // // // // // // //           <StatCard label="Drafts" value={draftCount} dotColor="#f59e0b" />
+// // // // // // // //           <StatCard label="Total Downloads" value={formatNumber(totalDownloads)} dotColor="#2563eb" />
+// // // // // // // //         </div>
+
+// // // // // // // //         {/* Filters */}
+// // // // // // // //         <div style={styles.filtersWrap}>
+// // // // // // // //           <div style={styles.filtersRow}>
+// // // // // // // //             <p style={styles.foundText}>
+// // // // // // // //               <b style={{ color: "#111827" }}>{filtered.length}</b> templates found
+// // // // // // // //             </p>
+
+// // // // // // // //             <div style={styles.controls}>
+// // // // // // // //               <input
+// // // // // // // //                 type="text"
+// // // // // // // //                 placeholder="Search templates..."
+// // // // // // // //                 value={searchTerm}
+// // // // // // // //                 onChange={(e) => setSearchTerm(e.target.value)}
+// // // // // // // //                 style={styles.input}
+// // // // // // // //               />
+
+// // // // // // // //               <select
+// // // // // // // //                 value={categoryFilter}
+// // // // // // // //                 onChange={(e) => setCategoryFilter(e.target.value as any)}
+// // // // // // // //                 style={styles.select}
+// // // // // // // //               >
+// // // // // // // //                 <option value="All">All Categories</option>
+// // // // // // // //                 <option value="Modern">Modern</option>
+// // // // // // // //                 <option value="Classic">Classic</option>
+// // // // // // // //               </select>
+
+// // // // // // // //               <select
+// // // // // // // //                 value={statusFilter}
+// // // // // // // //                 onChange={(e) => setStatusFilter(e.target.value as any)}
+// // // // // // // //                 style={styles.select}
+// // // // // // // //               >
+// // // // // // // //                 <option value="All">All Status</option>
+// // // // // // // //                 <option value="Active">Active</option>
+// // // // // // // //                 <option value="Draft">Draft</option>
+// // // // // // // //               </select>
+// // // // // // // //             </div>
+// // // // // // // //           </div>
+// // // // // // // //         </div>
+
+// // // // // // // //         {/* Table */}
+// // // // // // // //         <div style={styles.tableCard}>
+// // // // // // // //           <div style={styles.tableWrap}>
+// // // // // // // //             <table style={styles.table}>
+// // // // // // // //               <thead>
+// // // // // // // //                 <tr>
+// // // // // // // //                   <th style={styles.th}>Template</th>
+// // // // // // // //                   <th style={styles.th}>Category</th>
+// // // // // // // //                   <th style={styles.th}>Layout</th>
+// // // // // // // //                   <th style={styles.th}>Status</th>
+// // // // // // // //                   <th style={styles.th}>Downloads</th>
+// // // // // // // //                   <th style={styles.th}>Rating</th>
+// // // // // // // //                   <th style={styles.th}>Updated</th>
+// // // // // // // //                   <th style={{ ...styles.th, width: 60 }} />
+// // // // // // // //                 </tr>
+// // // // // // // //               </thead>
+
+// // // // // // // //               <tbody>
+// // // // // // // //                 {filtered.map((t) => {
+// // // // // // // //                   const badge = statusBadge(t.status);
+// // // // // // // //                   return (
+// // // // // // // //                     <tr key={t.id} style={{ backgroundColor: "white" }}>
+// // // // // // // //                       <td style={styles.td}>
+// // // // // // // //                         <div style={styles.templateCell}>
+// // // // // // // //                           <div style={{ ...styles.colorBox, backgroundColor: t.color }} />
+// // // // // // // //                           <div>
+// // // // // // // //                             <p style={styles.name}>{t.name}</p>
+// // // // // // // //                             <p style={styles.small}>Resume Template</p>
+// // // // // // // //                           </div>
+// // // // // // // //                         </div>
+// // // // // // // //                       </td>
+
+// // // // // // // //                       <td style={styles.td}>{t.category}</td>
+// // // // // // // //                       <td style={styles.td}>{t.layout}</td>
+
+// // // // // // // //                       <td style={styles.td}>
+// // // // // // // //                         <span
+// // // // // // // //                           style={{
+// // // // // // // //                             ...styles.badge,
+// // // // // // // //                             backgroundColor: badge.bg,
+// // // // // // // //                             color: badge.fg,
+// // // // // // // //                             borderColor: badge.border,
+// // // // // // // //                           }}
+// // // // // // // //                         >
+// // // // // // // //                           {badge.text}
+// // // // // // // //                         </span>
+// // // // // // // //                       </td>
+
+// // // // // // // //                       <td style={styles.td}>{formatNumber(t.downloads)}</td>
+
+// // // // // // // //                       <td style={styles.td}>
+// // // // // // // //                         <span style={{ color: "#f59e0b", marginRight: 6 }}>★</span>
+// // // // // // // //                         {t.rating.toFixed(1)}
+// // // // // // // //                       </td>
+
+// // // // // // // //                       <td style={styles.td}>{t.updated}</td>
+
+// // // // // // // //                       <td style={{ ...styles.td, textAlign: "right" }}>
+// // // // // // // //                         <button
+// // // // // // // //                           style={styles.menuBtn}
+// // // // // // // //                           onClick={() => alert(`Actions for: ${t.name}`)}
+// // // // // // // //                           onMouseEnter={(e) => {
+// // // // // // // //                             e.currentTarget.style.backgroundColor = "#f3f4f6";
+// // // // // // // //                             e.currentTarget.style.borderColor = "#e5e7eb";
+// // // // // // // //                           }}
+// // // // // // // //                           onMouseLeave={(e) => {
+// // // // // // // //                             e.currentTarget.style.backgroundColor = "transparent";
+// // // // // // // //                             e.currentTarget.style.borderColor = "transparent";
+// // // // // // // //                           }}
+// // // // // // // //                           aria-label={`More actions for ${t.name}`}
+// // // // // // // //                           title="More"
+// // // // // // // //                         >
+// // // // // // // //                           ⋯
+// // // // // // // //                         </button>
+// // // // // // // //                       </td>
+// // // // // // // //                     </tr>
+// // // // // // // //                   );
+// // // // // // // //                 })}
+
+// // // // // // // //                 {filtered.length === 0 && (
+// // // // // // // //                   <tr>
+// // // // // // // //                     <td style={{ ...styles.td, padding: 22 }} colSpan={8}>
+// // // // // // // //                       <div style={{ textAlign: "center" }}>
+// // // // // // // //                         <p style={{ margin: 0, fontWeight: 700, color: "#111827" }}>No templates found</p>
+// // // // // // // //                         <p style={{ margin: "6px 0 0", color: "#6b7280" }}>
+// // // // // // // //                           Search ya filters change karke try karo.
+// // // // // // // //                         </p>
+// // // // // // // //                       </div>
+// // // // // // // //                     </td>
+// // // // // // // //                   </tr>
+// // // // // // // //                 )}
+// // // // // // // //               </tbody>
+// // // // // // // //             </table>
+// // // // // // // //           </div>
+
+// // // // // // // //           <div style={styles.footer}>
+// // // // // // // //             <span>
+// // // // // // // //               Showing <b style={{ color: "#111827" }}>{filtered.length}</b> of{" "}
+// // // // // // // //               <b style={{ color: "#111827" }}>{templates.length}</b>
+// // // // // // // //             </span>
+// // // // // // // //             <span>Admin • Templates</span>
+// // // // // // // //           </div>
+// // // // // // // //         </div>
+// // // // // // // //       </div>
+
+// // // // // // // //       {/* Add Template Modal */}
+// // // // // // // //       {isAddOpen && (
+// // // // // // // //         <div
+// // // // // // // //           style={styles.overlay}
+// // // // // // // //           onClick={(e) => {
+// // // // // // // //             // overlay click closes modal
+// // // // // // // //             if (e.target === e.currentTarget) closeAdd();
+// // // // // // // //           }}
+// // // // // // // //         >
+// // // // // // // //           <div style={styles.modal} role="dialog" aria-modal="true" aria-label="Add Template">
+// // // // // // // //             <div style={styles.modalHeader}>
+// // // // // // // //               <div>
+// // // // // // // //                 <p style={styles.modalTitle}>Add New Template</p>
+// // // // // // // //                 <p style={{ ...styles.subtitle, marginTop: 6 }}>
+// // // // // // // //                   Name + settings fill karo, then create.
+// // // // // // // //                 </p>
+// // // // // // // //               </div>
+
+// // // // // // // //               <button
+// // // // // // // //                 type="button"
+// // // // // // // //                 style={styles.btnGhost}
+// // // // // // // //                 onClick={closeAdd}
+// // // // // // // //                 aria-label="Close"
+// // // // // // // //                 title="Close"
+// // // // // // // //               >
+// // // // // // // //                 ✕
+// // // // // // // //               </button>
+// // // // // // // //             </div>
+
+// // // // // // // //             <form onSubmit={submitAdd}>
+// // // // // // // //               <div style={styles.modalBody}>
+// // // // // // // //                 {formError && <div style={styles.error}>{formError}</div>}
+
+// // // // // // // //                 <div style={{ ...styles.field, ...styles.full }}>
+// // // // // // // //                   <label style={styles.label}>Template Name</label>
+// // // // // // // //                   <input
+// // // // // // // //                     style={{ ...styles.input, minWidth: "unset", width: "100%" }}
+// // // // // // // //                     value={form.name}
+// // // // // // // //                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+// // // // // // // //                     placeholder="e.g. Atlas modern-11"
+// // // // // // // //                     autoFocus
+// // // // // // // //                   />
+// // // // // // // //                 </div>
+
+// // // // // // // //                 <div style={styles.field}>
+// // // // // // // //                   <label style={styles.label}>Category</label>
+// // // // // // // //                   <select
+// // // // // // // //                     style={styles.select}
+// // // // // // // //                     value={form.category}
+// // // // // // // //                     onChange={(e) => setForm((p) => ({ ...p, category: e.target.value as Category }))}
+// // // // // // // //                   >
+// // // // // // // //                     <option value="Modern">Modern</option>
+// // // // // // // //                     <option value="Classic">Classic</option>
+// // // // // // // //                   </select>
+// // // // // // // //                 </div>
+
+// // // // // // // //                 <div style={styles.field}>
+// // // // // // // //                   <label style={styles.label}>Status</label>
+// // // // // // // //                   <select
+// // // // // // // //                     style={styles.select}
+// // // // // // // //                     value={form.status}
+// // // // // // // //                     onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as TemplateStatus }))}
+// // // // // // // //                   >
+// // // // // // // //                     <option value="active">Active</option>
+// // // // // // // //                     <option value="draft">Draft</option>
+// // // // // // // //                   </select>
+// // // // // // // //                 </div>
+
+// // // // // // // //                 <div style={styles.field}>
+// // // // // // // //                   <label style={styles.label}>Layout</label>
+// // // // // // // //                   <select
+// // // // // // // //                     style={styles.select}
+// // // // // // // //                     value={form.layout}
+// // // // // // // //                     onChange={(e) => setForm((p) => ({ ...p, layout: e.target.value as Layout }))}
+// // // // // // // //                   >
+// // // // // // // //                     <option value="Two Column">Two Column</option>
+// // // // // // // //                     <option value="Single Column">Single Column</option>
+// // // // // // // //                     <option value="Sidebar Left">Sidebar Left</option>
+// // // // // // // //                     <option value="Sidebar Right">Sidebar Right</option>
+// // // // // // // //                   </select>
+// // // // // // // //                 </div>
+
+// // // // // // // //                 <div style={styles.field}>
+// // // // // // // //                   <label style={styles.label}>Color</label>
+// // // // // // // //                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+// // // // // // // //                     <input
+// // // // // // // //                       type="color"
+// // // // // // // //                       value={form.color}
+// // // // // // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+// // // // // // // //                       style={{
+// // // // // // // //                         width: 44,
+// // // // // // // //                         height: 40,
+// // // // // // // //                         border: "1px solid #d1d5db",
+// // // // // // // //                         borderRadius: 10,
+// // // // // // // //                         padding: 3,
+// // // // // // // //                         backgroundColor: "white",
+// // // // // // // //                         cursor: "pointer",
+// // // // // // // //                       }}
+// // // // // // // //                     />
+// // // // // // // //                     <input
+// // // // // // // //                       value={form.color}
+// // // // // // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+// // // // // // // //                       placeholder="#2563eb"
+// // // // // // // //                       style={{ ...styles.input, minWidth: "unset", width: "100%" }}
+// // // // // // // //                     />
+// // // // // // // //                   </div>
+// // // // // // // //                 </div>
+// // // // // // // //               </div>
+
+// // // // // // // //               <div style={styles.modalFooter}>
+// // // // // // // //                 <button type="button" style={styles.btnGhost} onClick={closeAdd}>
+// // // // // // // //                   Cancel
+// // // // // // // //                 </button>
+// // // // // // // //                 <button type="submit" style={styles.btnPrimary}>
+// // // // // // // //                   Create Template
+// // // // // // // //                 </button>
+// // // // // // // //               </div>
+// // // // // // // //             </form>
+// // // // // // // //           </div>
+// // // // // // // //         </div>
+// // // // // // // //       )}
+// // // // // // // //     </div>
+// // // // // // // //   );
+// // // // // // // // }
+
+// // // // // // // import React, { useEffect, useMemo, useState } from "react";
+// // // // // // // import axios from "../../api/axiosInstance";
+
+// // // // // // // type TemplateStatus = "active" | "draft";
+// // // // // // // type Category = "Modern" | "Classic";
+// // // // // // // type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+
+// // // // // // // type TemplateRow = {
+// // // // // // //   id: number;
+// // // // // // //   name: string;
+// // // // // // //   category: Category;
+// // // // // // //   layout: Layout;
+// // // // // // //   status: TemplateStatus;
+// // // // // // //   downloads: number;
+// // // // // // //   rating: number;
+// // // // // // //   updated: string; // dd/mm/yyyy
+// // // // // // //   color: string;
+// // // // // // // };
+
+// // // // // // // function getAccessToken() {
+// // // // // // //   return localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+// // // // // // // }
+
+// // // // // // // function authHeaders() {
+// // // // // // //   const token = getAccessToken();
+// // // // // // //   return token ? { Authorization: `Bearer ${token}` } : {};
+// // // // // // // }
+
+// // // // // // // function formatNumber(n: number) {
+// // // // // // //   return Number(n || 0).toLocaleString();
+// // // // // // // }
+
+// // // // // // // function statusBadge(status: TemplateStatus) {
+// // // // // // //   if (status === "active") {
+// // // // // // //     return { bg: "#dbeafe", fg: "#1e40af", border: "#bfdbfe", text: "Active" };
+// // // // // // //   }
+// // // // // // //   return { bg: "#fee2e2", fg: "#991b1b", border: "#fecaca", text: "Draft" };
+// // // // // // // }
+
+// // // // // // // const styles: Record<string, React.CSSProperties> = {
+// // // // // // //   page: { fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", backgroundColor: "#f9fafb", minHeight: "100vh" },
+// // // // // // //   header: { position: "sticky", top: 0, zIndex: 10, backgroundColor: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)", borderBottom: "1px solid #e5e7eb" },
+// // // // // // //   headerInner: { maxWidth: 1440, margin: "0 auto", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 },
+// // // // // // //   title: { margin: 0, fontSize: 22, fontWeight: 750, color: "#111827" },
+// // // // // // //   subtitle: { margin: "4px 0 0", fontSize: 13, color: "#6b7280" },
+// // // // // // //   container: { maxWidth: 1440, margin: "0 auto", padding: 24 },
+
+// // // // // // //   btnPrimary: { backgroundColor: "#2563eb", color: "white", padding: "10px 14px", borderRadius: 12, border: "1px solid #1d4ed8", fontWeight: 750, cursor: "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.08)", display: "inline-flex", alignItems: "center", gap: 8, userSelect: "none" },
+// // // // // // //   btnGhost: { padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", backgroundColor: "white", color: "#111827", fontWeight: 700, cursor: "pointer" },
+
+// // // // // // //   statsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginTop: 12 },
+// // // // // // //   card: { backgroundColor: "white", borderRadius: 14, padding: 18, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", border: "1px solid #f1f5f9" },
+// // // // // // //   statLabel: { margin: 0, fontSize: 13, color: "#6b7280" },
+// // // // // // //   statValue: { margin: "10px 0 0", fontSize: 30, fontWeight: 800, color: "#111827", letterSpacing: "-0.02em" },
+
+// // // // // // //   filtersWrap: { marginTop: 16, backgroundColor: "white", borderRadius: 14, padding: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", border: "1px solid #f1f5f9" },
+// // // // // // //   filtersRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" },
+// // // // // // //   foundText: { margin: 0, fontSize: 13, color: "#6b7280" },
+// // // // // // //   controls: { display: "flex", gap: 10, flexWrap: "wrap" },
+// // // // // // //   input: { padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 12, minWidth: 240, fontSize: 14, outline: "none", boxShadow: "inset 0 1px 0 rgba(0,0,0,0.02)", backgroundColor: "white" },
+// // // // // // //   select: { padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 12, fontSize: 14, outline: "none", backgroundColor: "white" },
+
+// // // // // // //   tableCard: { marginTop: 14, backgroundColor: "white", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", overflow: "hidden", border: "1px solid #f1f5f9" },
+// // // // // // //   tableWrap: { overflowX: "auto" },
+// // // // // // //   table: { width: "100%", borderCollapse: "collapse", minWidth: 950 },
+// // // // // // //   th: { backgroundColor: "#f3f4f6", textAlign: "left", padding: "12px 14px", fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase", color: "#4b5563", borderBottom: "1px solid #e5e7eb", whiteSpace: "nowrap" },
+// // // // // // //   td: { padding: "14px", fontSize: 14, color: "#374151", borderTop: "1px solid #eef2f7", verticalAlign: "middle" },
+
+// // // // // // //   templateCell: { display: "flex", alignItems: "center", gap: 12, minWidth: 260 },
+// // // // // // //   colorBox: { width: 40, height: 40, borderRadius: 10, flexShrink: 0 },
+// // // // // // //   name: { fontWeight: 650, color: "#111827", margin: 0, lineHeight: 1.2 },
+// // // // // // //   small: { margin: "2px 0 0", fontSize: 12, color: "#6b7280" },
+// // // // // // //   badge: { display: "inline-flex", alignItems: "center", padding: "5px 10px", borderRadius: 999, fontSize: 12, fontWeight: 650, border: "1px solid transparent", whiteSpace: "nowrap" },
+
+// // // // // // //   footer: { borderTop: "1px solid #eef2f7", padding: "10px 14px", fontSize: 13, color: "#6b7280", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" },
+
+// // // // // // //   overlay: { position: "fixed", inset: 0, backgroundColor: "rgba(17,24,39,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, zIndex: 50 },
+// // // // // // //   modal: { width: "100%", maxWidth: 560, backgroundColor: "white", borderRadius: 16, boxShadow: "0 10px 30px rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.6)", overflow: "hidden" },
+// // // // // // //   modalHeader: { padding: "16px 18px", borderBottom: "1px solid #eef2f7", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
+// // // // // // //   modalTitle: { margin: 0, fontSize: 16, fontWeight: 800, color: "#111827" },
+// // // // // // //   modalBody: { padding: 18, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+// // // // // // //   field: { display: "flex", flexDirection: "column", gap: 6 },
+// // // // // // //   label: { fontSize: 12, fontWeight: 750, color: "#374151" },
+// // // // // // //   full: { gridColumn: "1 / -1" },
+// // // // // // //   error: { gridColumn: "1 / -1", backgroundColor: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", padding: "10px 12px", borderRadius: 12, fontSize: 13 },
+// // // // // // //   modalFooter: { padding: "14px 18px", borderTop: "1px solid #eef2f7", display: "flex", justifyContent: "flex-end", gap: 10 },
+
+// // // // // // //   dangerBtn: { padding: "8px 10px", borderRadius: 10, border: "1px solid #fecaca", backgroundColor: "#fff", color: "#991b1b", fontWeight: 750, cursor: "pointer" },
+// // // // // // //   smallBtn: { padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", backgroundColor: "white", color: "#111827", fontWeight: 700, cursor: "pointer" },
+// // // // // // // };
+
+// // // // // // // function StatCard({ label, value }: { label: string; value: string | number }) {
+// // // // // // //   return (
+// // // // // // //     <div style={styles.card}>
+// // // // // // //       <p style={styles.statLabel}>{label}</p>
+// // // // // // //       <p style={styles.statValue}>{value}</p>
+// // // // // // //     </div>
+// // // // // // //   );
+// // // // // // // }
+
+// // // // // // // export default function AdminTemplates() {
+// // // // // // //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
+// // // // // // //   const [loading, setLoading] = useState(false);
+
+// // // // // // //   // filters
+// // // // // // //   const [searchTerm, setSearchTerm] = useState("");
+// // // // // // //   const [categoryFilter, setCategoryFilter] = useState<"All" | Category>("All");
+// // // // // // //   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Draft">("All");
+
+// // // // // // //   // modal
+// // // // // // //   const [open, setOpen] = useState(false);
+// // // // // // //   const [mode, setMode] = useState<"add" | "edit">("add");
+// // // // // // //   const [editingId, setEditingId] = useState<number | null>(null);
+// // // // // // //   const [err, setErr] = useState("");
+
+// // // // // // //   const [form, setForm] = useState({
+// // // // // // //     name: "",
+// // // // // // //     category: "Modern" as Category,
+// // // // // // //     layout: "Two Column" as Layout,
+// // // // // // //     status: "active" as TemplateStatus,
+// // // // // // //     color: "#2563eb",
+// // // // // // //   });
+
+// // // // // // //   const fetchTemplates = async () => {
+// // // // // // //     setLoading(true);
+// // // // // // //     try {
+// // // // // // //       const res = await axios.get("/auth/admin/templates/", { headers: authHeaders() });
+// // // // // // //       setTemplates(res.data || []);
+// // // // // // //     } catch (e) {
+// // // // // // //       console.error("Templates fetch failed", e);
+// // // // // // //       setTemplates([]);
+// // // // // // //     } finally {
+// // // // // // //       setLoading(false);
+// // // // // // //     }
+// // // // // // //   };
+
+// // // // // // //   useEffect(() => {
+// // // // // // //     fetchTemplates();
+// // // // // // //   }, []);
+
+// // // // // // //   const filtered = useMemo(() => {
+// // // // // // //     const s = searchTerm.trim().toLowerCase();
+// // // // // // //     return templates.filter((t) => {
+// // // // // // //       const matchesSearch = s === "" || t.name.toLowerCase().includes(s);
+// // // // // // //       const matchesCategory = categoryFilter === "All" || t.category === categoryFilter;
+// // // // // // //       const matchesStatus =
+// // // // // // //         statusFilter === "All" ||
+// // // // // // //         (statusFilter === "Active" && t.status === "active") ||
+// // // // // // //         (statusFilter === "Draft" && t.status === "draft");
+// // // // // // //       return matchesSearch && matchesCategory && matchesStatus;
+// // // // // // //     });
+// // // // // // //   }, [templates, searchTerm, categoryFilter, statusFilter]);
+
+// // // // // // //   // Stats
+// // // // // // //   const totalTemplates = templates.length;
+// // // // // // //   const activeCount = templates.filter((t) => t.status === "active").length;
+// // // // // // //   const draftCount = templates.filter((t) => t.status === "draft").length;
+// // // // // // //   const totalDownloads = templates.reduce((sum, t) => sum + (t.downloads || 0), 0);
+
+// // // // // // //   const openAdd = () => {
+// // // // // // //     setMode("add");
+// // // // // // //     setEditingId(null);
+// // // // // // //     setErr("");
+// // // // // // //     setForm({ name: "", category: "Modern", layout: "Two Column", status: "active", color: "#2563eb" });
+// // // // // // //     setOpen(true);
+// // // // // // //   };
+
+// // // // // // //   const openEdit = (t: TemplateRow) => {
+// // // // // // //     setMode("edit");
+// // // // // // //     setEditingId(t.id);
+// // // // // // //     setErr("");
+// // // // // // //     setForm({ name: t.name, category: t.category, layout: t.layout, status: t.status, color: t.color || "#2563eb" });
+// // // // // // //     setOpen(true);
+// // // // // // //   };
+
+// // // // // // //   const close = () => setOpen(false);
+
+// // // // // // //   const submit = async (e?: React.FormEvent) => {
+// // // // // // //     e?.preventDefault();
+// // // // // // //     setErr("");
+
+// // // // // // //     const name = form.name.trim();
+// // // // // // //     if (!name) return setErr("Template name required.");
+// // // // // // //     if (name.length < 3) return setErr("Template name minimum 3 characters.");
+
+// // // // // // //     try {
+// // // // // // //       if (mode === "add") {
+// // // // // // //         const payload = { name, category: form.category, layout: form.layout, status: form.status, color: form.color };
+// // // // // // //         const res = await axios.post("/auth/admin/templates/", payload, { headers: authHeaders() });
+// // // // // // //         setTemplates((prev) => [res.data, ...prev]);
+// // // // // // //         setOpen(false);
+// // // // // // //         return;
+// // // // // // //       }
+
+// // // // // // //       if (!editingId) return setErr("Edit error: missing id.");
+// // // // // // //       const payload = { name, category: form.category, layout: form.layout, status: form.status, color: form.color };
+// // // // // // //       const res = await axios.put(`/auth/admin/templates/${editingId}/`, payload, { headers: authHeaders() });
+
+// // // // // // //       setTemplates((prev) => prev.map((x) => (x.id === editingId ? res.data : x)));
+// // // // // // //       setOpen(false);
+// // // // // // //     } catch (e: any) {
+// // // // // // //       console.error("Template save failed", e);
+// // // // // // //       const msg =
+// // // // // // //         e?.response?.data?.name?.[0] ||
+// // // // // // //         e?.response?.data?.detail ||
+// // // // // // //         "Save failed (check unique name / auth token).";
+// // // // // // //       setErr(String(msg));
+// // // // // // //     }
+// // // // // // //   };
+
+// // // // // // //   const remove = async (id: number) => {
+// // // // // // //     const ok = window.confirm("Delete this template?");
+// // // // // // //     if (!ok) return;
+// // // // // // //     try {
+// // // // // // //       await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
+// // // // // // //       setTemplates((prev) => prev.filter((x) => x.id !== id));
+// // // // // // //     } catch (e) {
+// // // // // // //       alert("Delete failed");
+// // // // // // //     }
+// // // // // // //   };
+
+// // // // // // //   return (
+// // // // // // //     <div style={styles.page}>
+// // // // // // //       <header style={styles.header}>
+// // // // // // //         <div style={styles.headerInner}>
+// // // // // // //           <div>
+// // // // // // //             <h1 style={styles.title}>Templates</h1>
+// // // // // // //             <p style={styles.subtitle}>Admin panel for managing resume templates</p>
+// // // // // // //           </div>
+
+// // // // // // //           <button type="button" style={styles.btnPrimary} onClick={openAdd}>
+// // // // // // //             <span style={{ fontSize: 18, lineHeight: 0 }}>+</span>
+// // // // // // //             Add Template
+// // // // // // //           </button>
+// // // // // // //         </div>
+// // // // // // //       </header>
+
+// // // // // // //       <div style={styles.container}>
+// // // // // // //         <div style={styles.statsGrid}>
+// // // // // // //           <StatCard label="Total Templates" value={totalTemplates} />
+// // // // // // //           <StatCard label="Active" value={activeCount} />
+// // // // // // //           <StatCard label="Drafts" value={draftCount} />
+// // // // // // //           <StatCard label="Total Downloads" value={formatNumber(totalDownloads)} />
+// // // // // // //         </div>
+
+// // // // // // //         <div style={styles.filtersWrap}>
+// // // // // // //           <div style={styles.filtersRow}>
+// // // // // // //             <p style={styles.foundText}>
+// // // // // // //               <b style={{ color: "#111827" }}>{filtered.length}</b> templates found {loading ? "• loading..." : ""}
+// // // // // // //             </p>
+
+// // // // // // //             <div style={styles.controls}>
+// // // // // // //               <input
+// // // // // // //                 type="text"
+// // // // // // //                 placeholder="Search templates..."
+// // // // // // //                 value={searchTerm}
+// // // // // // //                 onChange={(e) => setSearchTerm(e.target.value)}
+// // // // // // //                 style={styles.input}
+// // // // // // //               />
+
+// // // // // // //               <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)} style={styles.select}>
+// // // // // // //                 <option value="All">All Categories</option>
+// // // // // // //                 <option value="Modern">Modern</option>
+// // // // // // //                 <option value="Classic">Classic</option>
+// // // // // // //               </select>
+
+// // // // // // //               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} style={styles.select}>
+// // // // // // //                 <option value="All">All Status</option>
+// // // // // // //                 <option value="Active">Active</option>
+// // // // // // //                 <option value="Draft">Draft</option>
+// // // // // // //               </select>
+
+// // // // // // //               <button type="button" style={styles.btnGhost} onClick={fetchTemplates}>
+// // // // // // //                 Refresh
+// // // // // // //               </button>
+// // // // // // //             </div>
+// // // // // // //           </div>
+// // // // // // //         </div>
+
+// // // // // // //         <div style={styles.tableCard}>
+// // // // // // //           <div style={styles.tableWrap}>
+// // // // // // //             <table style={styles.table}>
+// // // // // // //               <thead>
+// // // // // // //                 <tr>
+// // // // // // //                   <th style={styles.th}>Template</th>
+// // // // // // //                   <th style={styles.th}>Category</th>
+// // // // // // //                   <th style={styles.th}>Layout</th>
+// // // // // // //                   <th style={styles.th}>Status</th>
+// // // // // // //                   <th style={styles.th}>Downloads</th>
+// // // // // // //                   <th style={styles.th}>Rating</th>
+// // // // // // //                   <th style={styles.th}>Updated</th>
+// // // // // // //                   <th style={{ ...styles.th, width: 220 }} />
+// // // // // // //                 </tr>
+// // // // // // //               </thead>
+
+// // // // // // //               <tbody>
+// // // // // // //                 {filtered.map((t) => {
+// // // // // // //                   const badge = statusBadge(t.status);
+// // // // // // //                   return (
+// // // // // // //                     <tr key={t.id} style={{ backgroundColor: "white" }}>
+// // // // // // //                       <td style={styles.td}>
+// // // // // // //                         <div style={styles.templateCell}>
+// // // // // // //                           <div style={{ ...styles.colorBox, backgroundColor: t.color || "#2563eb" }} />
+// // // // // // //                           <div>
+// // // // // // //                             <p style={styles.name}>{t.name}</p>
+// // // // // // //                             <p style={styles.small}>Resume Template</p>
+// // // // // // //                           </div>
+// // // // // // //                         </div>
+// // // // // // //                       </td>
+
+// // // // // // //                       <td style={styles.td}>{t.category}</td>
+// // // // // // //                       <td style={styles.td}>{t.layout}</td>
+
+// // // // // // //                       <td style={styles.td}>
+// // // // // // //                         <span style={{ ...styles.badge, backgroundColor: badge.bg, color: badge.fg, borderColor: badge.border }}>
+// // // // // // //                           {badge.text}
+// // // // // // //                         </span>
+// // // // // // //                       </td>
+
+// // // // // // //                       <td style={styles.td}>{formatNumber(t.downloads)}</td>
+
+// // // // // // //                       <td style={styles.td}>
+// // // // // // //                         <span style={{ color: "#f59e0b", marginRight: 6 }}>★</span>
+// // // // // // //                         {(t.rating || 0).toFixed(1)}
+// // // // // // //                       </td>
+
+// // // // // // //                       <td style={styles.td}>{t.updated}</td>
+
+// // // // // // //                       <td style={{ ...styles.td, textAlign: "right", whiteSpace: "nowrap" }}>
+// // // // // // //                         <button style={{ ...styles.smallBtn, marginRight: 8 }} onClick={() => openEdit(t)}>
+// // // // // // //                           Edit
+// // // // // // //                         </button>
+// // // // // // //                         <button style={styles.dangerBtn} onClick={() => remove(t.id)}>
+// // // // // // //                           Delete
+// // // // // // //                         </button>
+// // // // // // //                       </td>
+// // // // // // //                     </tr>
+// // // // // // //                   );
+// // // // // // //                 })}
+
+// // // // // // //                 {filtered.length === 0 && (
+// // // // // // //                   <tr>
+// // // // // // //                     <td style={{ ...styles.td, padding: 22 }} colSpan={8}>
+// // // // // // //                       <div style={{ textAlign: "center" }}>
+// // // // // // //                         <p style={{ margin: 0, fontWeight: 800, color: "#111827" }}>No templates found</p>
+// // // // // // //                         <p style={{ margin: "6px 0 0", color: "#6b7280" }}>Search/filters change karke try karo.</p>
+// // // // // // //                       </div>
+// // // // // // //                     </td>
+// // // // // // //                   </tr>
+// // // // // // //                 )}
+// // // // // // //               </tbody>
+// // // // // // //             </table>
+// // // // // // //           </div>
+
+// // // // // // //           <div style={styles.footer}>
+// // // // // // //             <span>
+// // // // // // //               Showing <b style={{ color: "#111827" }}>{filtered.length}</b> of{" "}
+// // // // // // //               <b style={{ color: "#111827" }}>{templates.length}</b>
+// // // // // // //             </span>
+// // // // // // //             <span>Admin • Templates</span>
+// // // // // // //           </div>
+// // // // // // //         </div>
+// // // // // // //       </div>
+
+// // // // // // //       {open && (
+// // // // // // //         <div style={styles.overlay} onClick={(e) => e.target === e.currentTarget && close()}>
+// // // // // // //           <div style={styles.modal} role="dialog" aria-modal="true" aria-label="Template modal">
+// // // // // // //             <div style={styles.modalHeader}>
+// // // // // // //               <div>
+// // // // // // //                 <p style={styles.modalTitle}>{mode === "add" ? "Add New Template" : "Edit Template"}</p>
+// // // // // // //                 <p style={{ ...styles.subtitle, marginTop: 6 }}>Name + settings fill karo.</p>
+// // // // // // //               </div>
+
+// // // // // // //               <button type="button" style={styles.btnGhost} onClick={close} aria-label="Close">
+// // // // // // //                 ✕
+// // // // // // //               </button>
+// // // // // // //             </div>
+
+// // // // // // //             <form onSubmit={submit}>
+// // // // // // //               <div style={styles.modalBody}>
+// // // // // // //                 {err && <div style={styles.error}>{err}</div>}
+
+// // // // // // //                 <div style={{ ...styles.field, ...styles.full }}>
+// // // // // // //                   <label style={styles.label}>Template Name</label>
+// // // // // // //                   <input
+// // // // // // //                     style={{ ...styles.input, minWidth: "unset", width: "100%" }}
+// // // // // // //                     value={form.name}
+// // // // // // //                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+// // // // // // //                     placeholder="e.g. Atlas modern-11"
+// // // // // // //                     autoFocus
+// // // // // // //                   />
+// // // // // // //                 </div>
+
+// // // // // // //                 <div style={styles.field}>
+// // // // // // //                   <label style={styles.label}>Category</label>
+// // // // // // //                   <select style={styles.select} value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value as Category }))}>
+// // // // // // //                     <option value="Modern">Modern</option>
+// // // // // // //                     <option value="Classic">Classic</option>
+// // // // // // //                   </select>
+// // // // // // //                 </div>
+
+// // // // // // //                 <div style={styles.field}>
+// // // // // // //                   <label style={styles.label}>Status</label>
+// // // // // // //                   <select style={styles.select} value={form.status} onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as TemplateStatus }))}>
+// // // // // // //                     <option value="active">Active</option>
+// // // // // // //                     <option value="draft">Draft</option>
+// // // // // // //                   </select>
+// // // // // // //                 </div>
+
+// // // // // // //                 <div style={styles.field}>
+// // // // // // //                   <label style={styles.label}>Layout</label>
+// // // // // // //                   <select style={styles.select} value={form.layout} onChange={(e) => setForm((p) => ({ ...p, layout: e.target.value as Layout }))}>
+// // // // // // //                     <option value="Two Column">Two Column</option>
+// // // // // // //                     <option value="Single Column">Single Column</option>
+// // // // // // //                     <option value="Sidebar Left">Sidebar Left</option>
+// // // // // // //                     <option value="Sidebar Right">Sidebar Right</option>
+// // // // // // //                   </select>
+// // // // // // //                 </div>
+
+// // // // // // //                 <div style={styles.field}>
+// // // // // // //                   <label style={styles.label}>Color</label>
+// // // // // // //                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+// // // // // // //                     <input
+// // // // // // //                       type="color"
+// // // // // // //                       value={form.color}
+// // // // // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+// // // // // // //                       style={{ width: 44, height: 40, border: "1px solid #d1d5db", borderRadius: 10, padding: 3, backgroundColor: "white", cursor: "pointer" }}
+// // // // // // //                     />
+// // // // // // //                     <input
+// // // // // // //                       value={form.color}
+// // // // // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+// // // // // // //                       placeholder="#2563eb"
+// // // // // // //                       style={{ ...styles.input, minWidth: "unset", width: "100%" }}
+// // // // // // //                     />
+// // // // // // //                   </div>
+// // // // // // //                 </div>
+// // // // // // //               </div>
+
+// // // // // // //               <div style={styles.modalFooter}>
+// // // // // // //                 <button type="button" style={styles.btnGhost} onClick={close}>
+// // // // // // //                   Cancel
+// // // // // // //                 </button>
+// // // // // // //                 <button type="submit" style={styles.btnPrimary}>
+// // // // // // //                   {mode === "add" ? "Create Template" : "Save Changes"}
+// // // // // // //                 </button>
+// // // // // // //               </div>
+// // // // // // //             </form>
+// // // // // // //           </div>
+// // // // // // //         </div>
+// // // // // // //       )}
+// // // // // // //     </div>
+// // // // // // //   );
+// // // // // // // }
+
+
+// // // // // // import React, { useEffect, useMemo, useState } from "react";
+// // // // // // import axios from "../../api/axiosInstance";
+// // // // // // import { useNavigate } from "react-router-dom";
+// // // // // // import ResumePreview from "./ResumePreview";
+
+// // // // // // type TemplateStatus = "active" | "draft";
+// // // // // // type Category = "Modern" | "Classic";
+// // // // // // type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+
+// // // // // // type TemplateRow = {
+// // // // // //   id: number;
+// // // // // //   name: string;
+// // // // // //   category: Category;
+// // // // // //   layout: Layout;
+// // // // // //   status: TemplateStatus;
+// // // // // //   downloads: number;
+// // // // // //   rating: number;
+// // // // // //   color: string;
+
+// // // // // //   source?: "custom" | "imported" | "duplicated";
+// // // // // //   description?: string;
+// // // // // //   schema?: any;
+// // // // // //   preview_image?: string; // backend FileField url
+// // // // // //   updated?: string;
+// // // // // // };
+
+// // // // // // type MarketplaceTpl = {
+// // // // // //   key: string;
+// // // // // //   name: string;
+// // // // // //   category: Category;
+// // // // // //   layout: Layout;
+// // // // // //   color: string;
+// // // // // //   price_type: "free" | "paid";
+// // // // // //   price: number;
+// // // // // //   preview_image_url: string;
+// // // // // //   schema: any;
+// // // // // // };
+
+// // // // // // function authHeaders() {
+// // // // // //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+// // // // // //   return token ? { Authorization: `Bearer ${token}` } : {};
+// // // // // // }
+
+// // // // // // function pill(text: string, bg: string, fg: string, border: string) {
+// // // // // //   return (
+// // // // // //     <span style={{ fontSize: 12, fontWeight: 900, padding: "4px 8px", borderRadius: 999, background: bg, color: fg, border: `1px solid ${border}` }}>
+// // // // // //       {text}
+// // // // // //     </span>
+// // // // // //   );
+// // // // // // }
+
+// // // // // // export default function AdminTemplates() {
+// // // // // //   const nav = useNavigate();
+
+// // // // // //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
+// // // // // //   const [loading, setLoading] = useState(false);
+
+// // // // // //   const [search, setSearch] = useState("");
+// // // // // //   const [openAdd, setOpenAdd] = useState(false);
+
+// // // // // //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">("market");
+// // // // // //   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
+// // // // // //   const [marketLoading, setMarketLoading] = useState(false);
+
+// // // // // //   const [previewOpen, setPreviewOpen] = useState(false);
+// // // // // //   const [previewSchema, setPreviewSchema] = useState<any>(null);
+
+// // // // // //   // scratch form
+// // // // // //   const [scratch, setScratch] = useState({
+// // // // // //     name: "",
+// // // // // //     category: "Modern" as Category,
+// // // // // //     layout: "Single Column" as Layout,
+// // // // // //     color: "#2563eb",
+// // // // // //   });
+
+// // // // // //   // duplicate form
+// // // // // //   const [dupFromId, setDupFromId] = useState<number | "">("");
+// // // // // //   const [dupName, setDupName] = useState("");
+
+// // // // // //   const fetchTemplates = async () => {
+// // // // // //     setLoading(true);
+// // // // // //     try {
+// // // // // //       const res = await axios.get("/auth/admin/templates/", { headers: authHeaders() });
+// // // // // //       setTemplates(res.data || []);
+// // // // // //     } finally {
+// // // // // //       setLoading(false);
+// // // // // //     }
+// // // // // //   };
+
+// // // // // //   const fetchMarketplace = async () => {
+// // // // // //     setMarketLoading(true);
+// // // // // //     try {
+// // // // // //       const res = await axios.get("/auth/admin/template-marketplace/", { headers: authHeaders() });
+// // // // // //       setMarket(res.data?.results || []);
+// // // // // //     } finally {
+// // // // // //       setMarketLoading(false);
+// // // // // //     }
+// // // // // //   };
+
+// // // // // //   useEffect(() => {
+// // // // // //     fetchTemplates();
+// // // // // //   }, []);
+
+// // // // // //   const filtered = useMemo(() => {
+// // // // // //     const q = search.trim().toLowerCase();
+// // // // // //     if (!q) return templates;
+// // // // // //     return templates.filter((t) => t.name.toLowerCase().includes(q));
+// // // // // //   }, [templates, search]);
+
+// // // // // //   const doDelete = async (id: number) => {
+// // // // // //     if (!window.confirm("Delete this template?")) return;
+// // // // // //     await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
+// // // // // //     fetchTemplates();
+// // // // // //   };
+
+// // // // // //   const toggleStatus = async (t: TemplateRow) => {
+// // // // // //     const next = t.status === "active" ? "draft" : "active";
+// // // // // //     await axios.put(
+// // // // // //       `/auth/admin/templates/${t.id}/`,
+// // // // // //       { ...t, status: next, schema: t.schema || {} },
+// // // // // //       { headers: authHeaders() }
+// // // // // //     );
+// // // // // //     fetchTemplates();
+// // // // // //   };
+
+// // // // // //   const importFromMarketplace = async (tpl: MarketplaceTpl) => {
+// // // // // //     const res = await axios.post(
+// // // // // //       "/auth/admin/templates/import/",
+// // // // // //       { marketplace_key: tpl.key },
+// // // // // //       { headers: authHeaders() }
+// // // // // //     );
+// // // // // //     setOpenAdd(false);
+// // // // // //     fetchTemplates();
+// // // // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // // // //   };
+
+// // // // // //   const createScratch = async () => {
+// // // // // //     if (!scratch.name.trim()) return alert("Name required");
+// // // // // //     const schema = {
+// // // // // //       version: 1,
+// // // // // //       layout: scratch.layout,
+// // // // // //       theme: {
+// // // // // //         primary: scratch.color,
+// // // // // //         fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+// // // // // //         headingUppercase: true,
+// // // // // //         titleSize: 12,
+// // // // // //         bodySize: 10,
+// // // // // //         lineHeight: 1.35,
+// // // // // //       },
+// // // // // //       order: ["header", "summary", "experience", "education", "skills", "projects"],
+// // // // // //       columns: { left: ["summary", "skills", "education"], right: ["header", "experience", "projects"] },
+// // // // // //       sections: {
+// // // // // //         header: { enabled: true },
+// // // // // //         summary: { enabled: true },
+// // // // // //         experience: { enabled: true },
+// // // // // //         education: { enabled: true },
+// // // // // //         skills: { enabled: true },
+// // // // // //         projects: { enabled: true },
+// // // // // //         certifications: { enabled: false },
+// // // // // //         languages: { enabled: false },
+// // // // // //       },
+// // // // // //     };
+
+// // // // // //     const res = await axios.post(
+// // // // // //       "/auth/admin/templates/",
+// // // // // //       {
+// // // // // //         name: scratch.name,
+// // // // // //         category: scratch.category,
+// // // // // //         layout: scratch.layout,
+// // // // // //         status: "draft",
+// // // // // //         color: scratch.color,
+// // // // // //         source: "custom",
+// // // // // //         schema,
+// // // // // //       },
+// // // // // //       { headers: authHeaders() }
+// // // // // //     );
+
+// // // // // //     setOpenAdd(false);
+// // // // // //     fetchTemplates();
+// // // // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // // // //   };
+
+// // // // // //   const duplicate = async () => {
+// // // // // //     if (!dupFromId) return alert("Select a template");
+// // // // // //     const res = await axios.post(
+// // // // // //       `/auth/admin/templates/${dupFromId}/duplicate/`,
+// // // // // //       { name: dupName.trim() || undefined },
+// // // // // //       { headers: authHeaders() }
+// // // // // //     );
+// // // // // //     setOpenAdd(false);
+// // // // // //     fetchTemplates();
+// // // // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // // // //   };
+
+// // // // // //   const openAddModal = () => {
+// // // // // //     setOpenAdd(true);
+// // // // // //     setAddTab("market");
+// // // // // //     fetchMarketplace();
+// // // // // //   };
+
+// // // // // //   const cardImg = (t: any) => {
+// // // // // //     const src = t.preview_image || t.preview_image_url;
+// // // // // //     if (src) return <img src={src} alt="" style={{ width: "100%", height: 180, objectFit: "cover", borderRadius: 12, border: "1px solid #e5e7eb" }} />;
+// // // // // //     return (
+// // // // // //       <div style={{ width: "100%", height: 180, borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", display: "grid", placeItems: "center", color: "#6b7280", fontWeight: 900 }}>
+// // // // // //         No Preview
+// // // // // //       </div>
+// // // // // //     );
+// // // // // //   };
+
+// // // // // //   return (
+// // // // // //     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: 16 }}>
+// // // // // //       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+// // // // // //         <div>
+// // // // // //           <div style={{ fontWeight: 900, fontSize: 22 }}>Resume Templates</div>
+// // // // // //           <div style={{ color: "#6b7280", fontSize: 12 }}>Import • Scratch • Duplicate • View/Edit/Delete</div>
+// // // // // //         </div>
+// // // // // //         <button onClick={openAddModal} style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // // // // //           + Add Template
+// // // // // //         </button>
+// // // // // //       </div>
+
+// // // // // //       <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+// // // // // //         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search templates..." style={{ flex: 1, padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
+// // // // // //         <button onClick={() => nav("/admin/templates/pricing")} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}>
+// // // // // //           Pricing
+// // // // // //         </button>
+// // // // // //       </div>
+
+// // // // // //       {loading ? (
+// // // // // //         <div style={{ padding: 20 }}>Loading...</div>
+// // // // // //       ) : (
+// // // // // //         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(240px, 1fr))", gap: 12 }}>
+// // // // // //           {filtered.map((t) => (
+// // // // // //             <div key={t.id} style={{ background: "white", border: "1px solid #eef2f7", borderRadius: 14, padding: 12 }}>
+// // // // // //               {cardImg(t)}
+// // // // // //               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
+// // // // // //                 <div style={{ fontWeight: 900 }}>{t.name}</div>
+// // // // // //                 {t.status === "active"
+// // // // // //                   ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
+// // // // // //                   : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
+// // // // // //               </div>
+// // // // // //               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+// // // // // //                 {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // // // // //                 {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // // // // //                 {t.source ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a") : null}
+// // // // // //               </div>
+
+// // // // // //               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+// // // // // //                 <button
+// // // // // //                   onClick={() => {
+// // // // // //                     setPreviewSchema(t.schema || {});
+// // // // // //                     setPreviewOpen(true);
+// // // // // //                   }}
+// // // // // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // // // // //                 >
+// // // // // //                   View
+// // // // // //                 </button>
+// // // // // //                 <button
+// // // // // //                   onClick={() => nav(`/admin/templates/builder/${t.id}`)}
+// // // // // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// // // // // //                 >
+// // // // // //                   Edit
+// // // // // //                 </button>
+// // // // // //                 <button
+// // // // // //                   onClick={() => toggleStatus(t)}
+// // // // // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // // // // //                 >
+// // // // // //                   {t.status === "active" ? "Disable" : "Enable"}
+// // // // // //                 </button>
+// // // // // //                 <button
+// // // // // //                   onClick={() => doDelete(t.id)}
+// // // // // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #fecaca", background: "white", color: "#991b1b", fontWeight: 900 }}
+// // // // // //                 >
+// // // // // //                   Delete
+// // // // // //                 </button>
+// // // // // //               </div>
+// // // // // //             </div>
+// // // // // //           ))}
+// // // // // //         </div>
+// // // // // //       )}
+
+// // // // // //       {/* ✅ Preview Modal */}
+// // // // // //       {previewOpen && (
+// // // // // //         <div onClick={() => setPreviewOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20 }}>
+// // // // // //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 14, width: 560 }}>
+// // // // // //             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+// // // // // //               <div style={{ fontWeight: 900 }}>Preview</div>
+// // // // // //               <button onClick={() => setPreviewOpen(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 10px", fontWeight: 900 }}>Close</button>
+// // // // // //             </div>
+// // // // // //             <div style={{ display: "grid", placeItems: "center" }}>
+// // // // // //               <ResumePreview schema={previewSchema || {}} />
+// // // // // //             </div>
+// // // // // //           </div>
+// // // // // //         </div>
+// // // // // //       )}
+
+// // // // // //       {/* ✅ Add Template Modal */}
+// // // // // //       {openAdd && (
+// // // // // //         <div onClick={() => setOpenAdd(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20 }}>
+// // // // // //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 14, width: 980, maxHeight: "86vh", overflow: "auto" }}>
+// // // // // //             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 10 }}>
+// // // // // //               <div style={{ fontWeight: 900, fontSize: 16 }}>Add Template</div>
+// // // // // //               <button onClick={() => setOpenAdd(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 10px", fontWeight: 900 }}>Close</button>
+// // // // // //             </div>
+
+// // // // // //             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+// // // // // //               <button onClick={() => setAddTab("market")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "market" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // // // // //                 Marketplace
+// // // // // //               </button>
+// // // // // //               <button onClick={() => setAddTab("scratch")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "scratch" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // // // // //                 Create from Scratch
+// // // // // //               </button>
+// // // // // //               <button onClick={() => setAddTab("duplicate")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "duplicate" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // // // // //                 Duplicate Existing
+// // // // // //               </button>
+// // // // // //             </div>
+
+// // // // // //             {addTab === "market" && (
+// // // // // //               <>
+// // // // // //                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 10 }}>
+// // // // // //                   ✅ Choose template → Import → Saved permanently in DB + storage (no external dependency).
+// // // // // //                 </div>
+
+// // // // // //                 {marketLoading ? (
+// // // // // //                   <div style={{ padding: 20 }}>Loading marketplace...</div>
+// // // // // //                 ) : (
+// // // // // //                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(260px, 1fr))", gap: 12 }}>
+// // // // // //                     {market.map((m) => (
+// // // // // //                       <div key={m.key} style={{ border: "1px solid #eef2f7", borderRadius: 14, padding: 12 }}>
+// // // // // //                         {cardImg(m)}
+// // // // // //                         <div style={{ fontWeight: 900, marginTop: 8 }}>{m.name}</div>
+// // // // // //                         <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+// // // // // //                           {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // // // // //                           {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // // // // //                           {m.price_type === "free" ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0") : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+// // // // // //                         </div>
+// // // // // //                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+// // // // // //                           <button
+// // // // // //                             onClick={() => {
+// // // // // //                               setPreviewSchema(m.schema);
+// // // // // //                               setPreviewOpen(true);
+// // // // // //                             }}
+// // // // // //                             style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // // // // //                           >
+// // // // // //                             Preview
+// // // // // //                           </button>
+// // // // // //                           <button
+// // // // // //                             onClick={() => importFromMarketplace(m)}
+// // // // // //                             style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// // // // // //                           >
+// // // // // //                             Use / Import
+// // // // // //                           </button>
+// // // // // //                         </div>
+// // // // // //                       </div>
+// // // // // //                     ))}
+// // // // // //                   </div>
+// // // // // //                 )}
+// // // // // //               </>
+// // // // // //             )}
+
+// // // // // //             {addTab === "scratch" && (
+// // // // // //               <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
+// // // // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // // // //                   ✅ Blank canvas create → draft → open builder
+// // // // // //                 </div>
+// // // // // //                 <input value={scratch.name} onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))} placeholder="Template name" style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
+// // // // // //                 <select value={scratch.category} onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // // // // //                   <option>Modern</option>
+// // // // // //                   <option>Classic</option>
+// // // // // //                 </select>
+// // // // // //                 <select value={scratch.layout} onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // // // // //                   <option>Single Column</option>
+// // // // // //                   <option>Two Column</option>
+// // // // // //                   <option>Sidebar Left</option>
+// // // // // //                   <option>Sidebar Right</option>
+// // // // // //                 </select>
+// // // // // //                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+// // // // // //                   <label style={{ fontWeight: 900, fontSize: 12 }}>Color</label>
+// // // // // //                   <input type="color" value={scratch.color} onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))} />
+// // // // // //                 </div>
+// // // // // //                 <button onClick={createScratch} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // // // // //                   Create & Open Builder
+// // // // // //                 </button>
+// // // // // //               </div>
+// // // // // //             )}
+
+// // // // // //             {addTab === "duplicate" && (
+// // // // // //               <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
+// // // // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // // // //                   ✅ Existing template copy → schema cloned → open builder
+// // // // // //                 </div>
+// // // // // //                 <select value={dupFromId} onChange={(e) => setDupFromId(Number(e.target.value) || "")} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // // // // //                   <option value="">Select template</option>
+// // // // // //                   {templates.map((t) => (
+// // // // // //                     <option key={t.id} value={t.id}>
+// // // // // //                       {t.name}
+// // // // // //                     </option>
+// // // // // //                   ))}
+// // // // // //                 </select>
+// // // // // //                 <input value={dupName} onChange={(e) => setDupName(e.target.value)} placeholder="New name (optional)" style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
+// // // // // //                 <button onClick={duplicate} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // // // // //                   Duplicate & Open Builder
+// // // // // //                 </button>
+// // // // // //               </div>
+// // // // // //             )}
+// // // // // //           </div>
+// // // // // //         </div>
+// // // // // //       )}
+// // // // // //     </div>
+// // // // // //   );
+// // // // // // }
+
+// // // // // // src/pages/dashboard/AdminTemplates.tsx
+
+// // // // // import { useEffect, useMemo, useState } from "react";
+// // // // // import axios from "../../api/axiosInstance";
+// // // // // import { useNavigate } from "react-router-dom";
+// // // // // import ResumePreview from "./ResumePreview";
 
 // // // // // type TemplateStatus = "active" | "draft";
 // // // // // type Category = "Modern" | "Classic";
 // // // // // type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
 
-// // // // // interface Template {
-// // // // //   id: string;
+// // // // // type TemplateRow = {
+// // // // //   id: number;
 // // // // //   name: string;
 // // // // //   category: Category;
 // // // // //   layout: Layout;
 // // // // //   status: TemplateStatus;
 // // // // //   downloads: number;
 // // // // //   rating: number;
-// // // // //   updated: string; // dd/mm/yyyy
-// // // // //   color: string; // HEX or any CSS color
-// // // // // }
-
-// // // // // const dummyTemplates: Template[] = [
-// // // // //   { id: "aurora-01", name: "Aurora modern-01", category: "Modern", layout: "Two Column", status: "draft", downloads: 2462, rating: 3.1, updated: "16/12/2025", color: "#06b6d4" },
-// // // // //   { id: "zenith-02", name: "Zenith modern-02", category: "Modern", layout: "Sidebar Left", status: "active", downloads: 4992, rating: 3.6, updated: "19/12/2025", color: "#22c55e" },
-// // // // //   { id: "prism-03", name: "Prism modern-03", category: "Modern", layout: "Two Column", status: "active", downloads: 2659, rating: 4.6, updated: "30/12/2025", color: "#a855f7" },
-// // // // //   { id: "nexus-04", name: "Nexus modern-04", category: "Modern", layout: "Sidebar Right", status: "active", downloads: 3059, rating: 4.6, updated: "29/12/2025", color: "#f97316" },
-// // // // //   { id: "vertex-05", name: "Vertex modern-05", category: "Modern", layout: "Two Column", status: "active", downloads: 4829, rating: 4.1, updated: "10/12/2025", color: "#14b8a6" },
-// // // // //   { id: "pulse-06", name: "Pulse modern-06", category: "Modern", layout: "Single Column", status: "active", downloads: 844, rating: 4.1, updated: "22/12/2025", color: "#ef4444" },
-// // // // //   { id: "nova-07", name: "Nova modern-07", category: "Modern", layout: "Sidebar Left", status: "active", downloads: 2977, rating: 4.5, updated: "01/01/2026", color: "#a855f7" },
-// // // // //   { id: "flux-08", name: "Flux modern-08", category: "Modern", layout: "Two Column", status: "active", downloads: 2601, rating: 4.2, updated: "27/12/2025", color: "#ec4899" },
-// // // // //   { id: "edge-09", name: "Edge modern-09", category: "Modern", layout: "Sidebar Right", status: "active", downloads: 564, rating: 3.3, updated: "15/12/2025", color: "#22c55e" },
-// // // // //   { id: "spark-10", name: "Spark modern-10", category: "Modern", layout: "Two Column", status: "active", downloads: 2618, rating: 4.6, updated: "18/12/2025", color: "#eab308" },
-// // // // //   { id: "heritage-01", name: "Heritage classic-01", category: "Classic", layout: "Single Column", status: "draft", downloads: 612, rating: 4.5, updated: "26/12/2025", color: "#111827" },
-// // // // //   { id: "legacy-02", name: "Legacy classic-02", category: "Classic", layout: "Single Column", status: "active", downloads: 3544, rating: 3.7, updated: "14/12/2025", color: "#374151" },
-// // // // //   { id: "prestige-03", name: "Prestige classic-03", category: "Classic", layout: "Two Column", status: "active", downloads: 551, rating: 4.8, updated: "22/12/2025", color: "#92400e" },
-// // // // //   { id: "tradition-04", name: "Tradition classic-04", category: "Classic", layout: "Single Column", status: "active", downloads: 2273, rating: 3.4, updated: "08/12/2025", color: "#0b1220" },
-// // // // //   { id: "regal-05", name: "Regal classic-05", category: "Classic", layout: "Sidebar Left", status: "active", downloads: 1168, rating: 3.4, updated: "13/12/2025", color: "#7f1d1d" },
-// // // // // ];
-
-// // // // // function formatNumber(n: number) {
-// // // // //   return n.toLocaleString();
-// // // // // }
-
-// // // // // function todayDDMMYYYY() {
-// // // // //   const d = new Date();
-// // // // //   const dd = String(d.getDate()).padStart(2, "0");
-// // // // //   const mm = String(d.getMonth() + 1).padStart(2, "0");
-// // // // //   const yyyy = d.getFullYear();
-// // // // //   return `${dd}/${mm}/${yyyy}`;
-// // // // // }
-
-// // // // // function safeIdFromName(name: string) {
-// // // // //   return (
-// // // // //     name
-// // // // //       .trim()
-// // // // //       .toLowerCase()
-// // // // //       .replace(/[^a-z0-9]+/g, "-")
-// // // // //       .replace(/^-+|-+$/g, "") +
-// // // // //     "-" +
-// // // // //     Math.random().toString(16).slice(2, 6)
-// // // // //   );
-// // // // // }
-
-// // // // // function statusBadge(status: TemplateStatus) {
-// // // // //   if (status === "active") {
-// // // // //     return { bg: "#dbeafe", fg: "#1e40af", border: "#bfdbfe", text: "Active" };
-// // // // //   }
-// // // // //   return { bg: "#fee2e2", fg: "#991b1b", border: "#fecaca", text: "Draft" };
-// // // // // }
-
-// // // // // const styles = {
-// // // // //   page: {
-// // // // //     fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
-// // // // //     backgroundColor: "#f9fafb",
-// // // // //     minHeight: "100vh",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   container: {
-// // // // //     maxWidth: 1440,
-// // // // //     margin: "0 auto",
-// // // // //     padding: 24,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   header: {
-// // // // //     position: "sticky" as const,
-// // // // //     top: 0,
-// // // // //     zIndex: 10,
-// // // // //     backgroundColor: "rgba(255,255,255,0.85)",
-// // // // //     backdropFilter: "blur(8px)",
-// // // // //     borderBottom: "1px solid #e5e7eb",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   headerInner: {
-// // // // //     maxWidth: 1440,
-// // // // //     margin: "0 auto",
-// // // // //     padding: "16px 24px",
-// // // // //     display: "flex",
-// // // // //     alignItems: "center",
-// // // // //     justifyContent: "space-between",
-// // // // //     gap: 16,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   title: {
-// // // // //     margin: 0,
-// // // // //     fontSize: 22,
-// // // // //     fontWeight: 650,
-// // // // //     color: "#111827",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   subtitle: {
-// // // // //     margin: "4px 0 0",
-// // // // //     fontSize: 13,
-// // // // //     color: "#6b7280",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   addBtn: {
-// // // // //     backgroundColor: "#2563eb",
-// // // // //     color: "white",
-// // // // //     padding: "10px 14px",
-// // // // //     borderRadius: 10,
-// // // // //     border: "1px solid #1d4ed8",
-// // // // //     fontWeight: 650,
-// // // // //     cursor: "pointer",
-// // // // //     boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-// // // // //     display: "inline-flex",
-// // // // //     alignItems: "center",
-// // // // //     gap: 8,
-// // // // //     userSelect: "none",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   addBtnDisabled: {
-// // // // //     opacity: 0.7,
-// // // // //     cursor: "not-allowed",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   statsGrid: {
-// // // // //     display: "grid",
-// // // // //     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-// // // // //     gap: 16,
-// // // // //     marginTop: 18,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   card: {
-// // // // //     backgroundColor: "white",
-// // // // //     borderRadius: 14,
-// // // // //     padding: 18,
-// // // // //     boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-// // // // //     border: "1px solid #f1f5f9",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   statTopRow: {
-// // // // //     display: "flex",
-// // // // //     alignItems: "flex-start",
-// // // // //     justifyContent: "space-between",
-// // // // //     gap: 12,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   dot: {
-// // // // //     width: 10,
-// // // // //     height: 10,
-// // // // //     borderRadius: 999,
-// // // // //     marginTop: 3,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   statLabel: {
-// // // // //     margin: 0,
-// // // // //     fontSize: 13,
-// // // // //     color: "#6b7280",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   statValue: {
-// // // // //     margin: "10px 0 0",
-// // // // //     fontSize: 30,
-// // // // //     fontWeight: 750,
-// // // // //     color: "#111827",
-// // // // //     letterSpacing: "-0.02em",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   filtersWrap: {
-// // // // //     marginTop: 16,
-// // // // //     backgroundColor: "white",
-// // // // //     borderRadius: 14,
-// // // // //     padding: 14,
-// // // // //     boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-// // // // //     border: "1px solid #f1f5f9",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   filtersRow: {
-// // // // //     display: "flex",
-// // // // //     alignItems: "center",
-// // // // //     justifyContent: "space-between",
-// // // // //     gap: 12,
-// // // // //     flexWrap: "wrap",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   foundText: {
-// // // // //     margin: 0,
-// // // // //     fontSize: 13,
-// // // // //     color: "#6b7280",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   controls: {
-// // // // //     display: "flex",
-// // // // //     gap: 10,
-// // // // //     flexWrap: "wrap",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   input: {
-// // // // //     padding: "9px 12px",
-// // // // //     border: "1px solid #d1d5db",
-// // // // //     borderRadius: 10,
-// // // // //     minWidth: 240,
-// // // // //     fontSize: 14,
-// // // // //     outline: "none",
-// // // // //     boxShadow: "inset 0 1px 0 rgba(0,0,0,0.02)",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   select: {
-// // // // //     padding: "9px 12px",
-// // // // //     border: "1px solid #d1d5db",
-// // // // //     borderRadius: 10,
-// // // // //     fontSize: 14,
-// // // // //     outline: "none",
-// // // // //     backgroundColor: "white",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   tableCard: {
-// // // // //     marginTop: 14,
-// // // // //     backgroundColor: "white",
-// // // // //     borderRadius: 14,
-// // // // //     boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-// // // // //     overflow: "hidden",
-// // // // //     border: "1px solid #f1f5f9",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   tableWrap: {
-// // // // //     overflowX: "auto" as const,
-// // // // //   },
-
-// // // // //   table: {
-// // // // //     width: "100%",
-// // // // //     borderCollapse: "collapse" as const,
-// // // // //     minWidth: 950,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   th: {
-// // // // //     backgroundColor: "#f3f4f6",
-// // // // //     textAlign: "left" as const,
-// // // // //     padding: "12px 14px",
-// // // // //     fontSize: 12,
-// // // // //     letterSpacing: "0.04em",
-// // // // //     textTransform: "uppercase" as const,
-// // // // //     color: "#4b5563",
-// // // // //     borderBottom: "1px solid #e5e7eb",
-// // // // //     whiteSpace: "nowrap" as const,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   td: {
-// // // // //     padding: "14px",
-// // // // //     fontSize: 14,
-// // // // //     color: "#374151",
-// // // // //     borderTop: "1px solid #eef2f7",
-// // // // //     verticalAlign: "middle" as const,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   templateCell: {
-// // // // //     display: "flex",
-// // // // //     alignItems: "center",
-// // // // //     gap: 12,
-// // // // //     minWidth: 260,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   colorBox: {
-// // // // //     width: 40,
-// // // // //     height: 40,
-// // // // //     borderRadius: 10,
-// // // // //     flexShrink: 0,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   name: {
-// // // // //     fontWeight: 650,
-// // // // //     color: "#111827",
-// // // // //     margin: 0,
-// // // // //     lineHeight: 1.2,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   small: {
-// // // // //     margin: "2px 0 0",
-// // // // //     fontSize: 12,
-// // // // //     color: "#6b7280",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   badge: {
-// // // // //     display: "inline-flex",
-// // // // //     alignItems: "center",
-// // // // //     padding: "5px 10px",
-// // // // //     borderRadius: 999,
-// // // // //     fontSize: 12,
-// // // // //     fontWeight: 650,
-// // // // //     border: "1px solid transparent",
-// // // // //     whiteSpace: "nowrap" as const,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   menuBtn: {
-// // // // //     background: "transparent",
-// // // // //     border: "1px solid transparent",
-// // // // //     color: "#6b7280",
-// // // // //     fontSize: 18,
-// // // // //     cursor: "pointer",
-// // // // //     borderRadius: 10,
-// // // // //     padding: "6px 8px",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   footer: {
-// // // // //     borderTop: "1px solid #eef2f7",
-// // // // //     padding: "10px 14px",
-// // // // //     fontSize: 13,
-// // // // //     color: "#6b7280",
-// // // // //     display: "flex",
-// // // // //     alignItems: "center",
-// // // // //     justifyContent: "space-between",
-// // // // //     gap: 10,
-// // // // //     flexWrap: "wrap" as const,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   // Modal
-// // // // //   overlay: {
-// // // // //     position: "fixed" as const,
-// // // // //     inset: 0,
-// // // // //     backgroundColor: "rgba(17,24,39,0.45)",
-// // // // //     display: "flex",
-// // // // //     alignItems: "center",
-// // // // //     justifyContent: "center",
-// // // // //     padding: 16,
-// // // // //     zIndex: 50,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   modal: {
-// // // // //     width: "100%",
-// // // // //     maxWidth: 560,
-// // // // //     backgroundColor: "white",
-// // // // //     borderRadius: 16,
-// // // // //     boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-// // // // //     border: "1px solid rgba(255,255,255,0.6)",
-// // // // //     overflow: "hidden",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   modalHeader: {
-// // // // //     padding: "16px 18px",
-// // // // //     borderBottom: "1px solid #eef2f7",
-// // // // //     display: "flex",
-// // // // //     alignItems: "flex-start",
-// // // // //     justifyContent: "space-between",
-// // // // //     gap: 12,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   modalTitle: {
-// // // // //     margin: 0,
-// // // // //     fontSize: 16,
-// // // // //     fontWeight: 750,
-// // // // //     color: "#111827",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   modalBody: {
-// // // // //     padding: 18,
-// // // // //     display: "grid",
-// // // // //     gridTemplateColumns: "1fr 1fr",
-// // // // //     gap: 12,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   field: {
-// // // // //     display: "flex",
-// // // // //     flexDirection: "column" as const,
-// // // // //     gap: 6,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   label: {
-// // // // //     fontSize: 12,
-// // // // //     fontWeight: 650,
-// // // // //     color: "#374151",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   full: {
-// // // // //     gridColumn: "1 / -1",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   modalFooter: {
-// // // // //     padding: "14px 18px",
-// // // // //     borderTop: "1px solid #eef2f7",
-// // // // //     display: "flex",
-// // // // //     justifyContent: "flex-end",
-// // // // //     gap: 10,
-// // // // //   } as React.CSSProperties,
-
-// // // // //   btnGhost: {
-// // // // //     padding: "10px 12px",
-// // // // //     borderRadius: 12,
-// // // // //     border: "1px solid #e5e7eb",
-// // // // //     backgroundColor: "white",
-// // // // //     color: "#111827",
-// // // // //     fontWeight: 650,
-// // // // //     cursor: "pointer",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   btnPrimary: {
-// // // // //     padding: "10px 12px",
-// // // // //     borderRadius: 12,
-// // // // //     border: "1px solid #1d4ed8",
-// // // // //     backgroundColor: "#2563eb",
-// // // // //     color: "white",
-// // // // //     fontWeight: 750,
-// // // // //     cursor: "pointer",
-// // // // //   } as React.CSSProperties,
-
-// // // // //   error: {
-// // // // //     gridColumn: "1 / -1",
-// // // // //     backgroundColor: "#fef2f2",
-// // // // //     color: "#991b1b",
-// // // // //     border: "1px solid #fecaca",
-// // // // //     padding: "10px 12px",
-// // // // //     borderRadius: 12,
-// // // // //     fontSize: 13,
-// // // // //   } as React.CSSProperties,
+// // // // //   color: string;
+// // // // //   source?: "custom" | "imported" | "duplicated";
+// // // // //   description?: string;
+// // // // //   schema?: any;
+// // // // //   preview_image?: string;
+// // // // //   updated?: string;
 // // // // // };
 
-// // // // // function StatCard({
-// // // // //   label,
-// // // // //   value,
-// // // // //   dotColor,
-// // // // // }: {
-// // // // //   label: string;
-// // // // //   value: string | number;
-// // // // //   dotColor: string;
-// // // // // }) {
+// // // // // type MarketplaceTpl = {
+// // // // //   key: string;
+// // // // //   name: string;
+// // // // //   category: Category;
+// // // // //   layout: Layout;
+// // // // //   color: string;
+// // // // //   price_type: "free" | "paid";
+// // // // //   price: number;
+// // // // //   preview_image_url: string;
+// // // // //   schema: any;
+// // // // // };
+
+// // // // // function authHeaders() {
+// // // // //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+// // // // //   return token ? { Authorization: `Bearer ${token}` } : {};
+// // // // // }
+
+// // // // // function pill(text: string, bg: string, fg: string, border: string) {
 // // // // //   return (
-// // // // //     <div style={styles.card}>
-// // // // //       <div style={styles.statTopRow}>
-// // // // //         <p style={styles.statLabel}>{label}</p>
-// // // // //         <span style={{ ...styles.dot, backgroundColor: dotColor }} />
-// // // // //       </div>
-// // // // //       <p style={styles.statValue}>{value}</p>
-// // // // //     </div>
+// // // // //     <span style={{ fontSize: 12, fontWeight: 900, padding: "4px 8px", borderRadius: 999, background: bg, color: fg, border: `1px solid ${border}` }}>
+// // // // //       {text}
+// // // // //     </span>
 // // // // //   );
 // // // // // }
 
-// // // // // export default function App() {
-// // // // //   const [templates, setTemplates] = useState<Template[]>(dummyTemplates);
+// // // // // export default function AdminTemplates() {
+// // // // //   const nav = useNavigate();
 
-// // // // //   // filters
-// // // // //   const [searchTerm, setSearchTerm] = useState("");
-// // // // //   const [categoryFilter, setCategoryFilter] = useState<"All" | Category>("All");
-// // // // //   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Draft">("All");
+// // // // //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
+// // // // //   const [loading, setLoading] = useState(false);
 
-// // // // //   // Add Template modal
-// // // // //   const [isAddOpen, setIsAddOpen] = useState(false);
-// // // // //   const [form, setForm] = useState({
+// // // // //   const [search, setSearch] = useState("");
+// // // // //   const [openAdd, setOpenAdd] = useState(false);
+
+// // // // //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">("market");
+// // // // //   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
+// // // // //   const [marketLoading, setMarketLoading] = useState(false);
+
+// // // // //   const [previewOpen, setPreviewOpen] = useState(false);
+// // // // //   const [previewSchema, setPreviewSchema] = useState<any>(null);
+
+// // // // //   // scratch form
+// // // // //   const [scratch, setScratch] = useState({
 // // // // //     name: "",
 // // // // //     category: "Modern" as Category,
-// // // // //     layout: "Two Column" as Layout,
-// // // // //     status: "active" as TemplateStatus,
+// // // // //     layout: "Single Column" as Layout,
 // // // // //     color: "#2563eb",
 // // // // //   });
-// // // // //   const [formError, setFormError] = useState<string>("");
 
-// // // // //   const filtered = useMemo(() => {
-// // // // //     const s = searchTerm.trim().toLowerCase();
-// // // // //     return templates.filter((t) => {
-// // // // //       const matchesSearch = s === "" || t.name.toLowerCase().includes(s);
-// // // // //       const matchesCategory = categoryFilter === "All" || t.category === categoryFilter;
-// // // // //       const matchesStatus =
-// // // // //         statusFilter === "All" ||
-// // // // //         (statusFilter === "Active" && t.status === "active") ||
-// // // // //         (statusFilter === "Draft" && t.status === "draft");
-// // // // //       return matchesSearch && matchesCategory && matchesStatus;
-// // // // //     });
-// // // // //   }, [templates, searchTerm, categoryFilter, statusFilter]);
+// // // // //   // duplicate form
+// // // // //   const [dupFromId, setDupFromId] = useState<number | "">("");
+// // // // //   const [dupName, setDupName] = useState("");
 
-// // // // //   // Stats
-// // // // //   const totalTemplates = templates.length;
-// // // // //   const activeCount = templates.filter((t) => t.status === "active").length;
-// // // // //   const draftCount = templates.filter((t) => t.status === "draft").length;
-// // // // //   const totalDownloads = templates.reduce((sum, t) => sum + t.downloads, 0);
-
-// // // // //   const openAdd = () => {
-// // // // //     setFormError("");
-// // // // //     setForm({
-// // // // //       name: "",
-// // // // //       category: "Modern",
-// // // // //       layout: "Two Column",
-// // // // //       status: "active",
-// // // // //       color: "#2563eb",
-// // // // //     });
-// // // // //     setIsAddOpen(true);
+// // // // //   const fetchTemplates = async () => {
+// // // // //     setLoading(true);
+// // // // //     try {
+// // // // //       const res = await axios.get("/auth/admin/templates/", { headers: authHeaders() });
+// // // // //       setTemplates(res.data || []);
+// // // // //     } finally {
+// // // // //       setLoading(false);
+// // // // //     }
 // // // // //   };
 
-// // // // //   const closeAdd = () => setIsAddOpen(false);
-
-// // // // //   const submitAdd = (e?: React.FormEvent) => {
-// // // // //     e?.preventDefault();
-// // // // //     setFormError("");
-
-// // // // //     const name = form.name.trim();
-// // // // //     if (!name) {
-// // // // //       setFormError("Template name required.");
-// // // // //       return;
+// // // // //   const fetchMarketplace = async () => {
+// // // // //     setMarketLoading(true);
+// // // // //     try {
+// // // // //       const res = await axios.get("/auth/admin/template-marketplace/", { headers: authHeaders() });
+// // // // //       setMarket(res.data?.results || []);
+// // // // //     } finally {
+// // // // //       setMarketLoading(false);
 // // // // //     }
-// // // // //     if (name.length < 3) {
-// // // // //       setFormError("Template name minimum 3 characters.");
-// // // // //       return;
-// // // // //     }
+// // // // //   };
 
-// // // // //     // duplicate check
-// // // // //     const exists = templates.some((t) => t.name.toLowerCase() === name.toLowerCase());
-// // // // //     if (exists) {
-// // // // //       setFormError("Same name already exists. Please use different name.");
-// // // // //       return;
-// // // // //     }
+// // // // //   useEffect(() => {
+// // // // //     fetchTemplates();
+// // // // //   }, []);
 
-// // // // //     const newTemplate: Template = {
-// // // // //       id: safeIdFromName(name),
-// // // // //       name,
-// // // // //       category: form.category,
-// // // // //       layout: form.layout,
-// // // // //       status: form.status,
-// // // // //       downloads: 0,
-// // // // //       rating: 0,
-// // // // //       updated: todayDDMMYYYY(),
-// // // // //       color: form.color || "#2563eb",
+// // // // //   const filtered = useMemo(() => {
+// // // // //     const q = search.trim().toLowerCase();
+// // // // //     if (!q) return templates;
+// // // // //     return templates.filter((t) => t.name.toLowerCase().includes(q));
+// // // // //   }, [templates, search]);
+
+// // // // //   const doDelete = async (id: number) => {
+// // // // //     if (!window.confirm("Delete this template?")) return;
+// // // // //     await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
+// // // // //     fetchTemplates();
+// // // // //   };
+
+// // // // //   const toggleStatus = async (t: TemplateRow) => {
+// // // // //     const next = t.status === "active" ? "draft" : "active";
+// // // // //     await axios.put(
+// // // // //       `/auth/admin/templates/${t.id}/`,
+// // // // //       { ...t, status: next, schema: t.schema || {} },
+// // // // //       { headers: authHeaders() }
+// // // // //     );
+// // // // //     fetchTemplates();
+// // // // //   };
+
+// // // // //   const importFromMarketplace = async (tpl: MarketplaceTpl) => {
+// // // // //     const res = await axios.post(
+// // // // //       "/auth/admin/templates/import/",
+// // // // //       { marketplace_key: tpl.key },
+// // // // //       { headers: authHeaders() }
+// // // // //     );
+// // // // //     setOpenAdd(false);
+// // // // //     fetchTemplates();
+// // // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // // //   };
+
+// // // // //   const createScratch = async () => {
+// // // // //     if (!scratch.name.trim()) return alert("Name required");
+// // // // //     const schema = {
+// // // // //       version: 1,
+// // // // //       layout: scratch.layout,
+// // // // //       theme: {
+// // // // //         primary: scratch.color,
+// // // // //         fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+// // // // //         headingUppercase: true,
+// // // // //         titleSize: 12,
+// // // // //         bodySize: 10,
+// // // // //         lineHeight: 1.35,
+// // // // //       },
+// // // // //       order: ["header", "summary", "experience", "education", "skills", "projects"],
+// // // // //       columns: { left: ["summary", "skills", "education"], right: ["header", "experience", "projects"] },
+// // // // //       sections: {
+// // // // //         header: { enabled: true },
+// // // // //         summary: { enabled: true },
+// // // // //         experience: { enabled: true },
+// // // // //         education: { enabled: true },
+// // // // //         skills: { enabled: true },
+// // // // //         projects: { enabled: true },
+// // // // //         certifications: { enabled: false },
+// // // // //         languages: { enabled: false },
+// // // // //       },
 // // // // //     };
 
-// // // // //     setTemplates((prev) => [newTemplate, ...prev]);
-// // // // //     setIsAddOpen(false);
+// // // // //     const res = await axios.post(
+// // // // //       "/auth/admin/templates/",
+// // // // //       {
+// // // // //         name: scratch.name,
+// // // // //         category: scratch.category,
+// // // // //         layout: scratch.layout,
+// // // // //         status: "draft",
+// // // // //         color: scratch.color,
+// // // // //         source: "custom",
+// // // // //         schema,
+// // // // //       },
+// // // // //       { headers: authHeaders() }
+// // // // //     );
+
+// // // // //     setOpenAdd(false);
+// // // // //     fetchTemplates();
+// // // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // // //   };
+
+// // // // //   const duplicate = async () => {
+// // // // //     if (!dupFromId) return alert("Select a template");
+// // // // //     const res = await axios.post(
+// // // // //       `/auth/admin/templates/${dupFromId}/duplicate/`,
+// // // // //       { name: dupName.trim() || undefined },
+// // // // //       { headers: authHeaders() }
+// // // // //     );
+// // // // //     setOpenAdd(false);
+// // // // //     fetchTemplates();
+// // // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // // //   };
+
+// // // // //   const openAddModal = () => {
+// // // // //     setOpenAdd(true);
+// // // // //     setAddTab("market");
+// // // // //     fetchMarketplace();
+// // // // //   };
+
+// // // // //   const cardImg = (t: any) => {
+// // // // //     const src = t.preview_image || t.preview_image_url;
+// // // // //     if (src) return <img src={src} alt="" style={{ width: "100%", height: 180, objectFit: "cover", borderRadius: 12, border: "1px solid #e5e7eb" }} />;
+// // // // //     return (
+// // // // //       <div style={{ width: "100%", height: 180, borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", display: "grid", placeItems: "center", color: "#6b7280", fontWeight: 900 }}>
+// // // // //         No Preview
+// // // // //       </div>
+// // // // //     );
 // // // // //   };
 
 // // // // //   return (
-// // // // //     <div style={styles.page}>
-// // // // //       {/* Header */}
-// // // // //       <header style={styles.header}>
-// // // // //         <div style={styles.headerInner}>
-// // // // //           <div>
-// // // // //             <h1 style={styles.title}>Templates</h1>
-// // // // //             <p style={styles.subtitle}>Admin panel for managing resume templates</p>
-// // // // //           </div>
-
-// // // // //           <button
-// // // // //             type="button"
-// // // // //             style={styles.addBtn}
-// // // // //             onClick={openAdd}
-// // // // //             onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.98)")}
-// // // // //             onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-// // // // //             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-// // // // //           >
-// // // // //             <span style={{ fontSize: 18, lineHeight: 0 }}>+</span>
-// // // // //             Add Template
-// // // // //           </button>
+// // // // //     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: 16 }}>
+// // // // //       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+// // // // //         <div>
+// // // // //           <div style={{ fontWeight: 900, fontSize: 22 }}>Resume Templates</div>
+// // // // //           <div style={{ color: "#6b7280", fontSize: 12 }}>Import • Scratch • Duplicate • View/Edit/Delete</div>
 // // // // //         </div>
-// // // // //       </header>
+// // // // //         <button onClick={openAddModal} style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // // // //           + Add Template
+// // // // //         </button>
+// // // // //       </div>
 
-// // // // //       <div style={styles.container}>
-// // // // //         {/* Stats */}
-// // // // //         <div style={styles.statsGrid}>
-// // // // //           <StatCard label="Total Templates" value={totalTemplates} dotColor="#111827" />
-// // // // //           <StatCard label="Active" value={activeCount} dotColor="#10b981" />
-// // // // //           <StatCard label="Drafts" value={draftCount} dotColor="#f59e0b" />
-// // // // //           <StatCard label="Total Downloads" value={formatNumber(totalDownloads)} dotColor="#2563eb" />
+// // // // //       <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+// // // // //         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search templates..." style={{ flex: 1, padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
+// // // // //         <button onClick={() => nav("/admin/templates/pricing")} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}>
+// // // // //           Pricing
+// // // // //         </button>
+// // // // //       </div>
+
+// // // // //       {loading ? (
+// // // // //         <div style={{ padding: 20 }}>Loading...</div>
+// // // // //       ) : (
+// // // // //         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+// // // // //           {filtered.map((t) => (
+// // // // //             <div key={t.id} style={{ background: "white", border: "1px solid #eef2f7", borderRadius: 16, padding: 16, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+// // // // //               {cardImg(t)}
+// // // // //               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+// // // // //                 <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
+// // // // //                 {t.status === "active"
+// // // // //                   ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
+// // // // //                   : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
+// // // // //               </div>
+// // // // //               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+// // // // //                 {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // // // //                 {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // // // //                 {t.source ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a") : null}
+// // // // //               </div>
+
+// // // // //               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+// // // // //                 <button
+// // // // //                   onClick={() => {
+// // // // //                     setPreviewSchema(t.schema || {});
+// // // // //                     setPreviewOpen(true);
+// // // // //                   }}
+// // // // //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // // // //                 >
+// // // // //                   View
+// // // // //                 </button>
+// // // // //                 <button
+// // // // //                   onClick={() => nav(`/admin/templates/builder/${t.id}`)}
+// // // // //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// // // // //                 >
+// // // // //                   Edit
+// // // // //                 </button>
+// // // // //                 {/* <button
+// // // // //                   onClick={() => nav(`/admin/template/test/${t.id}`)}
+// // // // //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #10b981", background: "#10b981", color: "white", fontWeight: 900 }}
+// // // // //                 >
+// // // // //                   Test
+// // // // //                 </button> */}
+// // // // //                 <button
+// // // // //                   onClick={() => nav(`/admin/resume/create/${t.id}`)}
+// // // // //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #8b5cf6", background: "#8b5cf6", color: "white", fontWeight: 900 }}
+// // // // //                 >
+// // // // //                   Create Resume
+// // // // //                 </button>
+// // // // //                 <button
+// // // // //                   onClick={() => toggleStatus(t)}
+// // // // //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // // // //                 >
+// // // // //                   {t.status === "active" ? "Disable" : "Enable"}
+// // // // //                 </button>
+// // // // //                 <button
+// // // // //                   onClick={() => doDelete(t.id)}
+// // // // //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #fecaca", background: "white", color: "#991b1b", fontWeight: 900 }}
+// // // // //                 >
+// // // // //                   Delete
+// // // // //                 </button>
+// // // // //               </div>
+// // // // //             </div>
+// // // // //           ))}
 // // // // //         </div>
+// // // // //       )}
 
-// // // // //         {/* Filters */}
-// // // // //         <div style={styles.filtersWrap}>
-// // // // //           <div style={styles.filtersRow}>
-// // // // //             <p style={styles.foundText}>
-// // // // //               <b style={{ color: "#111827" }}>{filtered.length}</b> templates found
-// // // // //             </p>
-
-// // // // //             <div style={styles.controls}>
-// // // // //               <input
-// // // // //                 type="text"
-// // // // //                 placeholder="Search templates..."
-// // // // //                 value={searchTerm}
-// // // // //                 onChange={(e) => setSearchTerm(e.target.value)}
-// // // // //                 style={styles.input}
-// // // // //               />
-
-// // // // //               <select
-// // // // //                 value={categoryFilter}
-// // // // //                 onChange={(e) => setCategoryFilter(e.target.value as any)}
-// // // // //                 style={styles.select}
-// // // // //               >
-// // // // //                 <option value="All">All Categories</option>
-// // // // //                 <option value="Modern">Modern</option>
-// // // // //                 <option value="Classic">Classic</option>
-// // // // //               </select>
-
-// // // // //               <select
-// // // // //                 value={statusFilter}
-// // // // //                 onChange={(e) => setStatusFilter(e.target.value as any)}
-// // // // //                 style={styles.select}
-// // // // //               >
-// // // // //                 <option value="All">All Status</option>
-// // // // //                 <option value="Active">Active</option>
-// // // // //                 <option value="Draft">Draft</option>
-// // // // //               </select>
+// // // // //       {/* Preview Modal */}
+// // // // //       {previewOpen && (
+// // // // //         <div onClick={() => setPreviewOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20, zIndex: 1000 }}>
+// // // // //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 20, width: "90%", maxWidth: 600, maxHeight: "80vh", overflow: "auto" }}>
+// // // // //             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+// // // // //               <div style={{ fontWeight: 900, fontSize: 18 }}>Template Preview</div>
+// // // // //               <button onClick={() => setPreviewOpen(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 12px", fontWeight: 900 }}>Close</button>
+// // // // //             </div>
+// // // // //             <div style={{ display: "grid", placeItems: "center" }}>
+// // // // //               <ResumePreview schema={previewSchema || {}} />
 // // // // //             </div>
 // // // // //           </div>
 // // // // //         </div>
-
-// // // // //         {/* Table */}
-// // // // //         <div style={styles.tableCard}>
-// // // // //           <div style={styles.tableWrap}>
-// // // // //             <table style={styles.table}>
-// // // // //               <thead>
-// // // // //                 <tr>
-// // // // //                   <th style={styles.th}>Template</th>
-// // // // //                   <th style={styles.th}>Category</th>
-// // // // //                   <th style={styles.th}>Layout</th>
-// // // // //                   <th style={styles.th}>Status</th>
-// // // // //                   <th style={styles.th}>Downloads</th>
-// // // // //                   <th style={styles.th}>Rating</th>
-// // // // //                   <th style={styles.th}>Updated</th>
-// // // // //                   <th style={{ ...styles.th, width: 60 }} />
-// // // // //                 </tr>
-// // // // //               </thead>
-
-// // // // //               <tbody>
-// // // // //                 {filtered.map((t) => {
-// // // // //                   const badge = statusBadge(t.status);
-// // // // //                   return (
-// // // // //                     <tr key={t.id} style={{ backgroundColor: "white" }}>
-// // // // //                       <td style={styles.td}>
-// // // // //                         <div style={styles.templateCell}>
-// // // // //                           <div style={{ ...styles.colorBox, backgroundColor: t.color }} />
-// // // // //                           <div>
-// // // // //                             <p style={styles.name}>{t.name}</p>
-// // // // //                             <p style={styles.small}>Resume Template</p>
-// // // // //                           </div>
-// // // // //                         </div>
-// // // // //                       </td>
-
-// // // // //                       <td style={styles.td}>{t.category}</td>
-// // // // //                       <td style={styles.td}>{t.layout}</td>
-
-// // // // //                       <td style={styles.td}>
-// // // // //                         <span
-// // // // //                           style={{
-// // // // //                             ...styles.badge,
-// // // // //                             backgroundColor: badge.bg,
-// // // // //                             color: badge.fg,
-// // // // //                             borderColor: badge.border,
-// // // // //                           }}
-// // // // //                         >
-// // // // //                           {badge.text}
-// // // // //                         </span>
-// // // // //                       </td>
-
-// // // // //                       <td style={styles.td}>{formatNumber(t.downloads)}</td>
-
-// // // // //                       <td style={styles.td}>
-// // // // //                         <span style={{ color: "#f59e0b", marginRight: 6 }}>★</span>
-// // // // //                         {t.rating.toFixed(1)}
-// // // // //                       </td>
-
-// // // // //                       <td style={styles.td}>{t.updated}</td>
-
-// // // // //                       <td style={{ ...styles.td, textAlign: "right" }}>
-// // // // //                         <button
-// // // // //                           style={styles.menuBtn}
-// // // // //                           onClick={() => alert(`Actions for: ${t.name}`)}
-// // // // //                           onMouseEnter={(e) => {
-// // // // //                             e.currentTarget.style.backgroundColor = "#f3f4f6";
-// // // // //                             e.currentTarget.style.borderColor = "#e5e7eb";
-// // // // //                           }}
-// // // // //                           onMouseLeave={(e) => {
-// // // // //                             e.currentTarget.style.backgroundColor = "transparent";
-// // // // //                             e.currentTarget.style.borderColor = "transparent";
-// // // // //                           }}
-// // // // //                           aria-label={`More actions for ${t.name}`}
-// // // // //                           title="More"
-// // // // //                         >
-// // // // //                           ⋯
-// // // // //                         </button>
-// // // // //                       </td>
-// // // // //                     </tr>
-// // // // //                   );
-// // // // //                 })}
-
-// // // // //                 {filtered.length === 0 && (
-// // // // //                   <tr>
-// // // // //                     <td style={{ ...styles.td, padding: 22 }} colSpan={8}>
-// // // // //                       <div style={{ textAlign: "center" }}>
-// // // // //                         <p style={{ margin: 0, fontWeight: 700, color: "#111827" }}>No templates found</p>
-// // // // //                         <p style={{ margin: "6px 0 0", color: "#6b7280" }}>
-// // // // //                           Search ya filters change karke try karo.
-// // // // //                         </p>
-// // // // //                       </div>
-// // // // //                     </td>
-// // // // //                   </tr>
-// // // // //                 )}
-// // // // //               </tbody>
-// // // // //             </table>
-// // // // //           </div>
-
-// // // // //           <div style={styles.footer}>
-// // // // //             <span>
-// // // // //               Showing <b style={{ color: "#111827" }}>{filtered.length}</b> of{" "}
-// // // // //               <b style={{ color: "#111827" }}>{templates.length}</b>
-// // // // //             </span>
-// // // // //             <span>Admin • Templates</span>
-// // // // //           </div>
-// // // // //         </div>
-// // // // //       </div>
+// // // // //       )}
 
 // // // // //       {/* Add Template Modal */}
-// // // // //       {isAddOpen && (
-// // // // //         <div
-// // // // //           style={styles.overlay}
-// // // // //           onClick={(e) => {
-// // // // //             // overlay click closes modal
-// // // // //             if (e.target === e.currentTarget) closeAdd();
-// // // // //           }}
-// // // // //         >
-// // // // //           <div style={styles.modal} role="dialog" aria-modal="true" aria-label="Add Template">
-// // // // //             <div style={styles.modalHeader}>
-// // // // //               <div>
-// // // // //                 <p style={styles.modalTitle}>Add New Template</p>
-// // // // //                 <p style={{ ...styles.subtitle, marginTop: 6 }}>
-// // // // //                   Name + settings fill karo, then create.
-// // // // //                 </p>
-// // // // //               </div>
+// // // // //       {openAdd && (
+// // // // //         <div onClick={() => setOpenAdd(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20, zIndex: 1000 }}>
+// // // // //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 20, width: "90%", maxWidth: 1000, maxHeight: "86vh", overflow: "auto" }}>
+// // // // //             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 16 }}>
+// // // // //               <div style={{ fontWeight: 900, fontSize: 18 }}>Add Template</div>
+// // // // //               <button onClick={() => setOpenAdd(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 12px", fontWeight: 900 }}>Close</button>
+// // // // //             </div>
 
-// // // // //               <button
-// // // // //                 type="button"
-// // // // //                 style={styles.btnGhost}
-// // // // //                 onClick={closeAdd}
-// // // // //                 aria-label="Close"
-// // // // //                 title="Close"
-// // // // //               >
-// // // // //                 ✕
+// // // // //             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+// // // // //               <button onClick={() => setAddTab("market")} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "market" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // // // //                 Marketplace
+// // // // //               </button>
+// // // // //               <button onClick={() => setAddTab("scratch")} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "scratch" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // // // //                 Create from Scratch
+// // // // //               </button>
+// // // // //               <button onClick={() => setAddTab("duplicate")} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "duplicate" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // // // //                 Duplicate Existing
 // // // // //               </button>
 // // // // //             </div>
 
-// // // // //             <form onSubmit={submitAdd}>
-// // // // //               <div style={styles.modalBody}>
-// // // // //                 {formError && <div style={styles.error}>{formError}</div>}
-
-// // // // //                 <div style={{ ...styles.field, ...styles.full }}>
-// // // // //                   <label style={styles.label}>Template Name</label>
-// // // // //                   <input
-// // // // //                     style={{ ...styles.input, minWidth: "unset", width: "100%" }}
-// // // // //                     value={form.name}
-// // // // //                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-// // // // //                     placeholder="e.g. Atlas modern-11"
-// // // // //                     autoFocus
-// // // // //                   />
+// // // // //             {addTab === "market" && (
+// // // // //               <>
+// // // // //                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}>
+// // // // //                   ✅ Choose template → Import → Saved permanently in DB + storage (no external dependency).
 // // // // //                 </div>
 
-// // // // //                 <div style={styles.field}>
-// // // // //                   <label style={styles.label}>Category</label>
-// // // // //                   <select
-// // // // //                     style={styles.select}
-// // // // //                     value={form.category}
-// // // // //                     onChange={(e) => setForm((p) => ({ ...p, category: e.target.value as Category }))}
-// // // // //                   >
-// // // // //                     <option value="Modern">Modern</option>
-// // // // //                     <option value="Classic">Classic</option>
-// // // // //                   </select>
-// // // // //                 </div>
-
-// // // // //                 <div style={styles.field}>
-// // // // //                   <label style={styles.label}>Status</label>
-// // // // //                   <select
-// // // // //                     style={styles.select}
-// // // // //                     value={form.status}
-// // // // //                     onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as TemplateStatus }))}
-// // // // //                   >
-// // // // //                     <option value="active">Active</option>
-// // // // //                     <option value="draft">Draft</option>
-// // // // //                   </select>
-// // // // //                 </div>
-
-// // // // //                 <div style={styles.field}>
-// // // // //                   <label style={styles.label}>Layout</label>
-// // // // //                   <select
-// // // // //                     style={styles.select}
-// // // // //                     value={form.layout}
-// // // // //                     onChange={(e) => setForm((p) => ({ ...p, layout: e.target.value as Layout }))}
-// // // // //                   >
-// // // // //                     <option value="Two Column">Two Column</option>
-// // // // //                     <option value="Single Column">Single Column</option>
-// // // // //                     <option value="Sidebar Left">Sidebar Left</option>
-// // // // //                     <option value="Sidebar Right">Sidebar Right</option>
-// // // // //                   </select>
-// // // // //                 </div>
-
-// // // // //                 <div style={styles.field}>
-// // // // //                   <label style={styles.label}>Color</label>
-// // // // //                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-// // // // //                     <input
-// // // // //                       type="color"
-// // // // //                       value={form.color}
-// // // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-// // // // //                       style={{
-// // // // //                         width: 44,
-// // // // //                         height: 40,
-// // // // //                         border: "1px solid #d1d5db",
-// // // // //                         borderRadius: 10,
-// // // // //                         padding: 3,
-// // // // //                         backgroundColor: "white",
-// // // // //                         cursor: "pointer",
-// // // // //                       }}
-// // // // //                     />
-// // // // //                     <input
-// // // // //                       value={form.color}
-// // // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-// // // // //                       placeholder="#2563eb"
-// // // // //                       style={{ ...styles.input, minWidth: "unset", width: "100%" }}
-// // // // //                     />
+// // // // //                 {marketLoading ? (
+// // // // //                   <div style={{ padding: 20 }}>Loading marketplace...</div>
+// // // // //                 ) : (
+// // // // //                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+// // // // //                     {market.map((m) => (
+// // // // //                       <div key={m.key} style={{ border: "1px solid #eef2f7", borderRadius: 14, padding: 16 }}>
+// // // // //                         {cardImg(m)}
+// // // // //                         <div style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}>{m.name}</div>
+// // // // //                         <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+// // // // //                           {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // // // //                           {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // // // //                           {m.price_type === "free" ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0") : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+// // // // //                         </div>
+// // // // //                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+// // // // //                           <button
+// // // // //                             onClick={() => {
+// // // // //                               setPreviewSchema(m.schema);
+// // // // //                               setPreviewOpen(true);
+// // // // //                             }}
+// // // // //                             style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // // // //                           >
+// // // // //                             Preview
+// // // // //                           </button>
+// // // // //                           <button
+// // // // //                             onClick={() => importFromMarketplace(m)}
+// // // // //                             style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// // // // //                           >
+// // // // //                             Use / Import
+// // // // //                           </button>
+// // // // //                         </div>
+// // // // //                       </div>
+// // // // //                     ))}
 // // // // //                   </div>
-// // // // //                 </div>
-// // // // //               </div>
+// // // // //                 )}
+// // // // //               </>
+// // // // //             )}
 
-// // // // //               <div style={styles.modalFooter}>
-// // // // //                 <button type="button" style={styles.btnGhost} onClick={closeAdd}>
-// // // // //                   Cancel
-// // // // //                 </button>
-// // // // //                 <button type="submit" style={styles.btnPrimary}>
-// // // // //                   Create Template
+// // // // //             {addTab === "scratch" && (
+// // // // //               <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
+// // // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // // //                   ✅ Blank canvas create → draft → open builder
+// // // // //                 </div>
+// // // // //                 <input value={scratch.name} onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))} placeholder="Template name" style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }} />
+// // // // //                 <select value={scratch.category} onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))} style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // // // //                   <option>Modern</option>
+// // // // //                   <option>Classic</option>
+// // // // //                 </select>
+// // // // //                 <select value={scratch.layout} onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))} style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // // // //                   <option>Single Column</option>
+// // // // //                   <option>Two Column</option>
+// // // // //                   <option>Sidebar Left</option>
+// // // // //                   <option>Sidebar Right</option>
+// // // // //                 </select>
+// // // // //                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+// // // // //                   <label style={{ fontWeight: 900, fontSize: 14 }}>Color</label>
+// // // // //                   <input type="color" value={scratch.color} onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))} style={{ width: 50, height: 50, borderRadius: 10 }} />
+// // // // //                   <span style={{ fontSize: 14 }}>{scratch.color}</span>
+// // // // //                 </div>
+// // // // //                 <button onClick={createScratch} style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // // // //                   Create & Open Builder
 // // // // //                 </button>
 // // // // //               </div>
-// // // // //             </form>
+// // // // //             )}
+
+// // // // //             {addTab === "duplicate" && (
+// // // // //               <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
+// // // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // // //                   ✅ Existing template copy → schema cloned → open builder
+// // // // //                 </div>
+// // // // //                 <select value={dupFromId} onChange={(e) => setDupFromId(Number(e.target.value) || "")} style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // // // //                   <option value="">Select template</option>
+// // // // //                   {templates.map((t) => (
+// // // // //                     <option key={t.id} value={t.id}>
+// // // // //                       {t.name} ({t.category})
+// // // // //                     </option>
+// // // // //                   ))}
+// // // // //                 </select>
+// // // // //                 <input value={dupName} onChange={(e) => setDupName(e.target.value)} placeholder="New name (optional)" style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }} />
+// // // // //                 <button onClick={duplicate} style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // // // //                   Duplicate & Open Builder
+// // // // //                 </button>
+// // // // //               </div>
+// // // // //             )}
 // // // // //           </div>
 // // // // //         </div>
 // // // // //       )}
@@ -832,8 +2127,10 @@
 // // // // //   );
 // // // // // }
 
-// // // // import React, { useEffect, useMemo, useState } from "react";
+// // // // import { useEffect, useMemo, useRef, useState } from "react";
 // // // // import axios from "../../api/axiosInstance";
+// // // // import { useNavigate } from "react-router-dom";
+// // // // import ResumePreview from "./ResumePreview";
 
 // // // // type TemplateStatus = "active" | "draft";
 // // // // type Category = "Modern" | "Classic";
@@ -847,124 +2144,106 @@
 // // // //   status: TemplateStatus;
 // // // //   downloads: number;
 // // // //   rating: number;
-// // // //   updated: string; // dd/mm/yyyy
 // // // //   color: string;
+// // // //   source?: "custom" | "imported" | "duplicated";
+// // // //   description?: string;
+// // // //   schema?: any;
+// // // //   preview_image?: string;
+// // // //   updated?: string;
 // // // // };
 
-// // // // function getAccessToken() {
-// // // //   return localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
-// // // // }
+// // // // type MarketplaceTpl = {
+// // // //   key: string;
+// // // //   name: string;
+// // // //   category: Category;
+// // // //   layout: Layout;
+// // // //   color: string;
+// // // //   price_type: "free" | "paid";
+// // // //   price: number;
+// // // //   preview_image_url: string;
+// // // //   schema: any;
+// // // // };
 
 // // // // function authHeaders() {
-// // // //   const token = getAccessToken();
+// // // //   const token =
+// // // //     localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // // // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // // // }
 
-// // // // function formatNumber(n: number) {
-// // // //   return Number(n || 0).toLocaleString();
-// // // // }
-
-// // // // function statusBadge(status: TemplateStatus) {
-// // // //   if (status === "active") {
-// // // //     return { bg: "#dbeafe", fg: "#1e40af", border: "#bfdbfe", text: "Active" };
-// // // //   }
-// // // //   return { bg: "#fee2e2", fg: "#991b1b", border: "#fecaca", text: "Draft" };
-// // // // }
-
-// // // // const styles: Record<string, React.CSSProperties> = {
-// // // //   page: { fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", backgroundColor: "#f9fafb", minHeight: "100vh" },
-// // // //   header: { position: "sticky", top: 0, zIndex: 10, backgroundColor: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)", borderBottom: "1px solid #e5e7eb" },
-// // // //   headerInner: { maxWidth: 1440, margin: "0 auto", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 },
-// // // //   title: { margin: 0, fontSize: 22, fontWeight: 750, color: "#111827" },
-// // // //   subtitle: { margin: "4px 0 0", fontSize: 13, color: "#6b7280" },
-// // // //   container: { maxWidth: 1440, margin: "0 auto", padding: 24 },
-
-// // // //   btnPrimary: { backgroundColor: "#2563eb", color: "white", padding: "10px 14px", borderRadius: 12, border: "1px solid #1d4ed8", fontWeight: 750, cursor: "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.08)", display: "inline-flex", alignItems: "center", gap: 8, userSelect: "none" },
-// // // //   btnGhost: { padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", backgroundColor: "white", color: "#111827", fontWeight: 700, cursor: "pointer" },
-
-// // // //   statsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginTop: 12 },
-// // // //   card: { backgroundColor: "white", borderRadius: 14, padding: 18, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", border: "1px solid #f1f5f9" },
-// // // //   statLabel: { margin: 0, fontSize: 13, color: "#6b7280" },
-// // // //   statValue: { margin: "10px 0 0", fontSize: 30, fontWeight: 800, color: "#111827", letterSpacing: "-0.02em" },
-
-// // // //   filtersWrap: { marginTop: 16, backgroundColor: "white", borderRadius: 14, padding: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", border: "1px solid #f1f5f9" },
-// // // //   filtersRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" },
-// // // //   foundText: { margin: 0, fontSize: 13, color: "#6b7280" },
-// // // //   controls: { display: "flex", gap: 10, flexWrap: "wrap" },
-// // // //   input: { padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 12, minWidth: 240, fontSize: 14, outline: "none", boxShadow: "inset 0 1px 0 rgba(0,0,0,0.02)", backgroundColor: "white" },
-// // // //   select: { padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 12, fontSize: 14, outline: "none", backgroundColor: "white" },
-
-// // // //   tableCard: { marginTop: 14, backgroundColor: "white", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", overflow: "hidden", border: "1px solid #f1f5f9" },
-// // // //   tableWrap: { overflowX: "auto" },
-// // // //   table: { width: "100%", borderCollapse: "collapse", minWidth: 950 },
-// // // //   th: { backgroundColor: "#f3f4f6", textAlign: "left", padding: "12px 14px", fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase", color: "#4b5563", borderBottom: "1px solid #e5e7eb", whiteSpace: "nowrap" },
-// // // //   td: { padding: "14px", fontSize: 14, color: "#374151", borderTop: "1px solid #eef2f7", verticalAlign: "middle" },
-
-// // // //   templateCell: { display: "flex", alignItems: "center", gap: 12, minWidth: 260 },
-// // // //   colorBox: { width: 40, height: 40, borderRadius: 10, flexShrink: 0 },
-// // // //   name: { fontWeight: 650, color: "#111827", margin: 0, lineHeight: 1.2 },
-// // // //   small: { margin: "2px 0 0", fontSize: 12, color: "#6b7280" },
-// // // //   badge: { display: "inline-flex", alignItems: "center", padding: "5px 10px", borderRadius: 999, fontSize: 12, fontWeight: 650, border: "1px solid transparent", whiteSpace: "nowrap" },
-
-// // // //   footer: { borderTop: "1px solid #eef2f7", padding: "10px 14px", fontSize: 13, color: "#6b7280", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" },
-
-// // // //   overlay: { position: "fixed", inset: 0, backgroundColor: "rgba(17,24,39,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, zIndex: 50 },
-// // // //   modal: { width: "100%", maxWidth: 560, backgroundColor: "white", borderRadius: 16, boxShadow: "0 10px 30px rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.6)", overflow: "hidden" },
-// // // //   modalHeader: { padding: "16px 18px", borderBottom: "1px solid #eef2f7", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
-// // // //   modalTitle: { margin: 0, fontSize: 16, fontWeight: 800, color: "#111827" },
-// // // //   modalBody: { padding: 18, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-// // // //   field: { display: "flex", flexDirection: "column", gap: 6 },
-// // // //   label: { fontSize: 12, fontWeight: 750, color: "#374151" },
-// // // //   full: { gridColumn: "1 / -1" },
-// // // //   error: { gridColumn: "1 / -1", backgroundColor: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", padding: "10px 12px", borderRadius: 12, fontSize: 13 },
-// // // //   modalFooter: { padding: "14px 18px", borderTop: "1px solid #eef2f7", display: "flex", justifyContent: "flex-end", gap: 10 },
-
-// // // //   dangerBtn: { padding: "8px 10px", borderRadius: 10, border: "1px solid #fecaca", backgroundColor: "#fff", color: "#991b1b", fontWeight: 750, cursor: "pointer" },
-// // // //   smallBtn: { padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", backgroundColor: "white", color: "#111827", fontWeight: 700, cursor: "pointer" },
-// // // // };
-
-// // // // function StatCard({ label, value }: { label: string; value: string | number }) {
+// // // // function pill(text: string, bg: string, fg: string, border: string) {
 // // // //   return (
-// // // //     <div style={styles.card}>
-// // // //       <p style={styles.statLabel}>{label}</p>
-// // // //       <p style={styles.statValue}>{value}</p>
-// // // //     </div>
+// // // //     <span
+// // // //       style={{
+// // // //         fontSize: 12,
+// // // //         fontWeight: 900,
+// // // //         padding: "4px 8px",
+// // // //         borderRadius: 999,
+// // // //         background: bg,
+// // // //         color: fg,
+// // // //         border: `1px solid ${border}`,
+// // // //       }}
+// // // //     >
+// // // //       {text}
+// // // //     </span>
 // // // //   );
 // // // // }
 
 // // // // export default function AdminTemplates() {
+// // // //   const nav = useNavigate();
+
 // // // //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
 // // // //   const [loading, setLoading] = useState(false);
 
-// // // //   // filters
-// // // //   const [searchTerm, setSearchTerm] = useState("");
-// // // //   const [categoryFilter, setCategoryFilter] = useState<"All" | Category>("All");
-// // // //   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Draft">("All");
+// // // //   const [search, setSearch] = useState("");
+// // // //   const [openAdd, setOpenAdd] = useState(false);
 
-// // // //   // modal
-// // // //   const [open, setOpen] = useState(false);
-// // // //   const [mode, setMode] = useState<"add" | "edit">("add");
-// // // //   const [editingId, setEditingId] = useState<number | null>(null);
-// // // //   const [err, setErr] = useState("");
+// // // //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">(
+// // // //     "market"
+// // // //   );
+// // // //   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
+// // // //   const [marketLoading, setMarketLoading] = useState(false);
 
-// // // //   const [form, setForm] = useState({
+// // // //   const [previewOpen, setPreviewOpen] = useState(false);
+// // // //   const [previewSchema, setPreviewSchema] = useState<any>(null);
+
+// // // //   // ✅ PREVIEW SCALE (NO SCROLL)
+// // // //   const previewViewportRef = useRef<HTMLDivElement | null>(null);
+// // // //   const previewPageRef = useRef<HTMLDivElement | null>(null);
+// // // //   const [previewScale, setPreviewScale] = useState(1);
+
+// // // //   // scratch form
+// // // //   const [scratch, setScratch] = useState({
 // // // //     name: "",
 // // // //     category: "Modern" as Category,
-// // // //     layout: "Two Column" as Layout,
-// // // //     status: "active" as TemplateStatus,
+// // // //     layout: "Single Column" as Layout,
 // // // //     color: "#2563eb",
 // // // //   });
+
+// // // //   // duplicate form
+// // // //   const [dupFromId, setDupFromId] = useState<number | "">("");
+// // // //   const [dupName, setDupName] = useState("");
 
 // // // //   const fetchTemplates = async () => {
 // // // //     setLoading(true);
 // // // //     try {
-// // // //       const res = await axios.get("/auth/admin/templates/", { headers: authHeaders() });
+// // // //       const res = await axios.get("/auth/admin/templates/", {
+// // // //         headers: authHeaders(),
+// // // //       });
 // // // //       setTemplates(res.data || []);
-// // // //     } catch (e) {
-// // // //       console.error("Templates fetch failed", e);
-// // // //       setTemplates([]);
 // // // //     } finally {
 // // // //       setLoading(false);
+// // // //     }
+// // // //   };
+
+// // // //   const fetchMarketplace = async () => {
+// // // //     setMarketLoading(true);
+// // // //     try {
+// // // //       const res = await axios.get("/auth/admin/template-marketplace/", {
+// // // //         headers: authHeaders(),
+// // // //       });
+// // // //       setMarket(res.data?.results || []);
+// // // //     } finally {
+// // // //       setMarketLoading(false);
 // // // //     }
 // // // //   };
 
@@ -973,312 +2252,800 @@
 // // // //   }, []);
 
 // // // //   const filtered = useMemo(() => {
-// // // //     const s = searchTerm.trim().toLowerCase();
-// // // //     return templates.filter((t) => {
-// // // //       const matchesSearch = s === "" || t.name.toLowerCase().includes(s);
-// // // //       const matchesCategory = categoryFilter === "All" || t.category === categoryFilter;
-// // // //       const matchesStatus =
-// // // //         statusFilter === "All" ||
-// // // //         (statusFilter === "Active" && t.status === "active") ||
-// // // //         (statusFilter === "Draft" && t.status === "draft");
-// // // //       return matchesSearch && matchesCategory && matchesStatus;
+// // // //     const q = search.trim().toLowerCase();
+// // // //     if (!q) return templates;
+// // // //     return templates.filter((t) => t.name.toLowerCase().includes(q));
+// // // //   }, [templates, search]);
+
+// // // //   const doDelete = async (id: number) => {
+// // // //     if (!window.confirm("Delete this template?")) return;
+// // // //     await axios.delete(`/auth/admin/templates/${id}/`, {
+// // // //       headers: authHeaders(),
 // // // //     });
-// // // //   }, [templates, searchTerm, categoryFilter, statusFilter]);
-
-// // // //   // Stats
-// // // //   const totalTemplates = templates.length;
-// // // //   const activeCount = templates.filter((t) => t.status === "active").length;
-// // // //   const draftCount = templates.filter((t) => t.status === "draft").length;
-// // // //   const totalDownloads = templates.reduce((sum, t) => sum + (t.downloads || 0), 0);
-
-// // // //   const openAdd = () => {
-// // // //     setMode("add");
-// // // //     setEditingId(null);
-// // // //     setErr("");
-// // // //     setForm({ name: "", category: "Modern", layout: "Two Column", status: "active", color: "#2563eb" });
-// // // //     setOpen(true);
+// // // //     fetchTemplates();
 // // // //   };
 
-// // // //   const openEdit = (t: TemplateRow) => {
-// // // //     setMode("edit");
-// // // //     setEditingId(t.id);
-// // // //     setErr("");
-// // // //     setForm({ name: t.name, category: t.category, layout: t.layout, status: t.status, color: t.color || "#2563eb" });
-// // // //     setOpen(true);
+// // // //   const toggleStatus = async (t: TemplateRow) => {
+// // // //     const next = t.status === "active" ? "draft" : "active";
+// // // //     await axios.put(
+// // // //       `/auth/admin/templates/${t.id}/`,
+// // // //       { ...t, status: next, schema: t.schema || {} },
+// // // //       { headers: authHeaders() }
+// // // //     );
+// // // //     fetchTemplates();
 // // // //   };
 
-// // // //   const close = () => setOpen(false);
+// // // //   const importFromMarketplace = async (tpl: MarketplaceTpl) => {
+// // // //     const res = await axios.post(
+// // // //       "/auth/admin/templates/import/",
+// // // //       { marketplace_key: tpl.key },
+// // // //       { headers: authHeaders() }
+// // // //     );
+// // // //     setOpenAdd(false);
+// // // //     fetchTemplates();
+// // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // //   };
 
-// // // //   const submit = async (e?: React.FormEvent) => {
-// // // //     e?.preventDefault();
-// // // //     setErr("");
+// // // //   const createScratch = async () => {
+// // // //     if (!scratch.name.trim()) return alert("Name required");
+// // // //     const schema = {
+// // // //       version: 1,
+// // // //       layout: scratch.layout,
+// // // //       theme: {
+// // // //         primary: scratch.color,
+// // // //         fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+// // // //         headingUppercase: true,
+// // // //         titleSize: 12,
+// // // //         bodySize: 10,
+// // // //         lineHeight: 1.35,
+// // // //       },
+// // // //       order: [
+// // // //         "header",
+// // // //         "summary",
+// // // //         "experience",
+// // // //         "education",
+// // // //         "skills",
+// // // //         "projects",
+// // // //       ],
+// // // //       columns: {
+// // // //         left: ["summary", "skills", "education"],
+// // // //         right: ["header", "experience", "projects"],
+// // // //       },
+// // // //       sections: {
+// // // //         header: { enabled: true },
+// // // //         summary: { enabled: true },
+// // // //         experience: { enabled: true },
+// // // //         education: { enabled: true },
+// // // //         skills: { enabled: true },
+// // // //         projects: { enabled: true },
+// // // //         certifications: { enabled: false },
+// // // //         languages: { enabled: false },
+// // // //       },
+// // // //     };
 
-// // // //     const name = form.name.trim();
-// // // //     if (!name) return setErr("Template name required.");
-// // // //     if (name.length < 3) return setErr("Template name minimum 3 characters.");
+// // // //     const res = await axios.post(
+// // // //       "/auth/admin/templates/",
+// // // //       {
+// // // //         name: scratch.name,
+// // // //         category: scratch.category,
+// // // //         layout: scratch.layout,
+// // // //         status: "draft",
+// // // //         color: scratch.color,
+// // // //         source: "custom",
+// // // //         schema,
+// // // //       },
+// // // //       { headers: authHeaders() }
+// // // //     );
 
-// // // //     try {
-// // // //       if (mode === "add") {
-// // // //         const payload = { name, category: form.category, layout: form.layout, status: form.status, color: form.color };
-// // // //         const res = await axios.post("/auth/admin/templates/", payload, { headers: authHeaders() });
-// // // //         setTemplates((prev) => [res.data, ...prev]);
-// // // //         setOpen(false);
-// // // //         return;
-// // // //       }
+// // // //     setOpenAdd(false);
+// // // //     fetchTemplates();
+// // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // //   };
 
-// // // //       if (!editingId) return setErr("Edit error: missing id.");
-// // // //       const payload = { name, category: form.category, layout: form.layout, status: form.status, color: form.color };
-// // // //       const res = await axios.put(`/auth/admin/templates/${editingId}/`, payload, { headers: authHeaders() });
+// // // //   const duplicate = async () => {
+// // // //     if (!dupFromId) return alert("Select a template");
+// // // //     const res = await axios.post(
+// // // //       `/auth/admin/templates/${dupFromId}/duplicate/`,
+// // // //       { name: dupName.trim() || undefined },
+// // // //       { headers: authHeaders() }
+// // // //     );
+// // // //     setOpenAdd(false);
+// // // //     fetchTemplates();
+// // // //     nav(`/admin/templates/builder/${res.data.id}`);
+// // // //   };
 
-// // // //       setTemplates((prev) => prev.map((x) => (x.id === editingId ? res.data : x)));
-// // // //       setOpen(false);
-// // // //     } catch (e: any) {
-// // // //       console.error("Template save failed", e);
-// // // //       const msg =
-// // // //         e?.response?.data?.name?.[0] ||
-// // // //         e?.response?.data?.detail ||
-// // // //         "Save failed (check unique name / auth token).";
-// // // //       setErr(String(msg));
+// // // //   const openAddModal = () => {
+// // // //     setOpenAdd(true);
+// // // //     setAddTab("market");
+// // // //     fetchMarketplace();
+// // // //   };
+
+// // // //   const cardImg = (t: any) => {
+// // // //     const src = t.preview_image || t.preview_image_url;
+// // // //     if (src)
+// // // //       return (
+// // // //         <img
+// // // //           src={src}
+// // // //           alt=""
+// // // //           style={{
+// // // //             width: "100%",
+// // // //             height: 180,
+// // // //             objectFit: "cover",
+// // // //             borderRadius: 12,
+// // // //             border: "1px solid #e5e7eb",
+// // // //           }}
+// // // //         />
+// // // //       );
+// // // //     return (
+// // // //       <div
+// // // //         style={{
+// // // //           width: "100%",
+// // // //           height: 180,
+// // // //           borderRadius: 12,
+// // // //           border: "1px solid #e5e7eb",
+// // // //           background: "#f3f4f6",
+// // // //           display: "grid",
+// // // //           placeItems: "center",
+// // // //           color: "#6b7280",
+// // // //           fontWeight: 900,
+// // // //         }}
+// // // //       >
+// // // //         No Preview
+// // // //       </div>
+// // // //     );
+// // // //   };
+
+// // // //   // ✅ scale calculation (fit preview into viewport, no scrolling)
+// // // //   const recalcPreviewScale = () => {
+// // // //     const viewport = previewViewportRef.current;
+// // // //     const page = previewPageRef.current;
+// // // //     if (!viewport || !page) return;
+
+// // // //     page.style.transform = "scale(1)";
+// // // //     page.style.transformOrigin = "top center";
+
+// // // //     const vw = viewport.clientWidth;
+// // // //     const vh = viewport.clientHeight;
+
+// // // //     const pw = page.scrollWidth || page.offsetWidth;
+// // // //     const ph = page.scrollHeight || page.offsetHeight;
+
+// // // //     if (!pw || !ph || !vw || !vh) return;
+
+// // // //     const padding = 24;
+// // // //     const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
+// // // //     const clamped = Math.max(0.2, Math.min(1, scale));
+// // // //     setPreviewScale(clamped);
+// // // //   };
+
+// // // //   useEffect(() => {
+// // // //     if (!previewOpen) return;
+
+// // // //     const t = window.setTimeout(() => recalcPreviewScale(), 0);
+
+// // // //     const viewport = previewViewportRef.current;
+// // // //     let ro: ResizeObserver | null = null;
+
+// // // //     if (viewport) {
+// // // //       ro = new ResizeObserver(() => recalcPreviewScale());
+// // // //       ro.observe(viewport);
 // // // //     }
-// // // //   };
 
-// // // //   const remove = async (id: number) => {
-// // // //     const ok = window.confirm("Delete this template?");
-// // // //     if (!ok) return;
-// // // //     try {
-// // // //       await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
-// // // //       setTemplates((prev) => prev.filter((x) => x.id !== id));
-// // // //     } catch (e) {
-// // // //       alert("Delete failed");
-// // // //     }
+// // // //     window.addEventListener("resize", recalcPreviewScale);
+
+// // // //     return () => {
+// // // //       window.clearTimeout(t);
+// // // //       window.removeEventListener("resize", recalcPreviewScale);
+// // // //       if (ro) ro.disconnect();
+// // // //     };
+// // // //     // eslint-disable-next-line react-hooks/exhaustive-deps
+// // // //   }, [previewOpen, previewSchema]);
+
+// // // //   // ✅ FIX: If preview opens, close Add modal automatically
+// // // //   useEffect(() => {
+// // // //     if (previewOpen) setOpenAdd(false);
+// // // //   }, [previewOpen]);
+
+// // // //   // ✅ helper to open preview from anywhere (main cards OR marketplace cards)
+// // // //   const openPreview = (schema: any) => {
+// // // //     // close Add modal immediately so preview shows DIRECT (no waiting for close)
+// // // //     setOpenAdd(false);
+// // // //     setPreviewSchema(schema || {});
+// // // //     setPreviewOpen(true);
 // // // //   };
 
 // // // //   return (
-// // // //     <div style={styles.page}>
-// // // //       <header style={styles.header}>
-// // // //         <div style={styles.headerInner}>
-// // // //           <div>
-// // // //             <h1 style={styles.title}>Templates</h1>
-// // // //             <p style={styles.subtitle}>Admin panel for managing resume templates</p>
-// // // //           </div>
-
-// // // //           <button type="button" style={styles.btnPrimary} onClick={openAdd}>
-// // // //             <span style={{ fontSize: 18, lineHeight: 0 }}>+</span>
-// // // //             Add Template
-// // // //           </button>
-// // // //         </div>
-// // // //       </header>
-
-// // // //       <div style={styles.container}>
-// // // //         <div style={styles.statsGrid}>
-// // // //           <StatCard label="Total Templates" value={totalTemplates} />
-// // // //           <StatCard label="Active" value={activeCount} />
-// // // //           <StatCard label="Drafts" value={draftCount} />
-// // // //           <StatCard label="Total Downloads" value={formatNumber(totalDownloads)} />
-// // // //         </div>
-
-// // // //         <div style={styles.filtersWrap}>
-// // // //           <div style={styles.filtersRow}>
-// // // //             <p style={styles.foundText}>
-// // // //               <b style={{ color: "#111827" }}>{filtered.length}</b> templates found {loading ? "• loading..." : ""}
-// // // //             </p>
-
-// // // //             <div style={styles.controls}>
-// // // //               <input
-// // // //                 type="text"
-// // // //                 placeholder="Search templates..."
-// // // //                 value={searchTerm}
-// // // //                 onChange={(e) => setSearchTerm(e.target.value)}
-// // // //                 style={styles.input}
-// // // //               />
-
-// // // //               <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)} style={styles.select}>
-// // // //                 <option value="All">All Categories</option>
-// // // //                 <option value="Modern">Modern</option>
-// // // //                 <option value="Classic">Classic</option>
-// // // //               </select>
-
-// // // //               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} style={styles.select}>
-// // // //                 <option value="All">All Status</option>
-// // // //                 <option value="Active">Active</option>
-// // // //                 <option value="Draft">Draft</option>
-// // // //               </select>
-
-// // // //               <button type="button" style={styles.btnGhost} onClick={fetchTemplates}>
-// // // //                 Refresh
-// // // //               </button>
-// // // //             </div>
+// // // //     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: 16 }}>
+// // // //       <div
+// // // //         style={{
+// // // //           display: "flex",
+// // // //           justifyContent: "space-between",
+// // // //           gap: 12,
+// // // //           marginBottom: 14,
+// // // //         }}
+// // // //       >
+// // // //         <div>
+// // // //           <div style={{ fontWeight: 900, fontSize: 22 }}>Resume Templates</div>
+// // // //           <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // //             Import • Scratch • Duplicate • View/Edit/Delete
 // // // //           </div>
 // // // //         </div>
-
-// // // //         <div style={styles.tableCard}>
-// // // //           <div style={styles.tableWrap}>
-// // // //             <table style={styles.table}>
-// // // //               <thead>
-// // // //                 <tr>
-// // // //                   <th style={styles.th}>Template</th>
-// // // //                   <th style={styles.th}>Category</th>
-// // // //                   <th style={styles.th}>Layout</th>
-// // // //                   <th style={styles.th}>Status</th>
-// // // //                   <th style={styles.th}>Downloads</th>
-// // // //                   <th style={styles.th}>Rating</th>
-// // // //                   <th style={styles.th}>Updated</th>
-// // // //                   <th style={{ ...styles.th, width: 220 }} />
-// // // //                 </tr>
-// // // //               </thead>
-
-// // // //               <tbody>
-// // // //                 {filtered.map((t) => {
-// // // //                   const badge = statusBadge(t.status);
-// // // //                   return (
-// // // //                     <tr key={t.id} style={{ backgroundColor: "white" }}>
-// // // //                       <td style={styles.td}>
-// // // //                         <div style={styles.templateCell}>
-// // // //                           <div style={{ ...styles.colorBox, backgroundColor: t.color || "#2563eb" }} />
-// // // //                           <div>
-// // // //                             <p style={styles.name}>{t.name}</p>
-// // // //                             <p style={styles.small}>Resume Template</p>
-// // // //                           </div>
-// // // //                         </div>
-// // // //                       </td>
-
-// // // //                       <td style={styles.td}>{t.category}</td>
-// // // //                       <td style={styles.td}>{t.layout}</td>
-
-// // // //                       <td style={styles.td}>
-// // // //                         <span style={{ ...styles.badge, backgroundColor: badge.bg, color: badge.fg, borderColor: badge.border }}>
-// // // //                           {badge.text}
-// // // //                         </span>
-// // // //                       </td>
-
-// // // //                       <td style={styles.td}>{formatNumber(t.downloads)}</td>
-
-// // // //                       <td style={styles.td}>
-// // // //                         <span style={{ color: "#f59e0b", marginRight: 6 }}>★</span>
-// // // //                         {(t.rating || 0).toFixed(1)}
-// // // //                       </td>
-
-// // // //                       <td style={styles.td}>{t.updated}</td>
-
-// // // //                       <td style={{ ...styles.td, textAlign: "right", whiteSpace: "nowrap" }}>
-// // // //                         <button style={{ ...styles.smallBtn, marginRight: 8 }} onClick={() => openEdit(t)}>
-// // // //                           Edit
-// // // //                         </button>
-// // // //                         <button style={styles.dangerBtn} onClick={() => remove(t.id)}>
-// // // //                           Delete
-// // // //                         </button>
-// // // //                       </td>
-// // // //                     </tr>
-// // // //                   );
-// // // //                 })}
-
-// // // //                 {filtered.length === 0 && (
-// // // //                   <tr>
-// // // //                     <td style={{ ...styles.td, padding: 22 }} colSpan={8}>
-// // // //                       <div style={{ textAlign: "center" }}>
-// // // //                         <p style={{ margin: 0, fontWeight: 800, color: "#111827" }}>No templates found</p>
-// // // //                         <p style={{ margin: "6px 0 0", color: "#6b7280" }}>Search/filters change karke try karo.</p>
-// // // //                       </div>
-// // // //                     </td>
-// // // //                   </tr>
-// // // //                 )}
-// // // //               </tbody>
-// // // //             </table>
-// // // //           </div>
-
-// // // //           <div style={styles.footer}>
-// // // //             <span>
-// // // //               Showing <b style={{ color: "#111827" }}>{filtered.length}</b> of{" "}
-// // // //               <b style={{ color: "#111827" }}>{templates.length}</b>
-// // // //             </span>
-// // // //             <span>Admin • Templates</span>
-// // // //           </div>
-// // // //         </div>
+// // // //         <button
+// // // //           onClick={openAddModal}
+// // // //           style={{
+// // // //             padding: "10px 14px",
+// // // //             borderRadius: 12,
+// // // //             border: "1px solid #1d4ed8",
+// // // //             background: "#2563eb",
+// // // //             color: "white",
+// // // //             fontWeight: 900,
+// // // //           }}
+// // // //         >
+// // // //           + Add Template
+// // // //         </button>
 // // // //       </div>
 
-// // // //       {open && (
-// // // //         <div style={styles.overlay} onClick={(e) => e.target === e.currentTarget && close()}>
-// // // //           <div style={styles.modal} role="dialog" aria-modal="true" aria-label="Template modal">
-// // // //             <div style={styles.modalHeader}>
-// // // //               <div>
-// // // //                 <p style={styles.modalTitle}>{mode === "add" ? "Add New Template" : "Edit Template"}</p>
-// // // //                 <p style={{ ...styles.subtitle, marginTop: 6 }}>Name + settings fill karo.</p>
+// // // //       <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+// // // //         <input
+// // // //           value={search}
+// // // //           onChange={(e) => setSearch(e.target.value)}
+// // // //           placeholder="Search templates..."
+// // // //           style={{
+// // // //             flex: 1,
+// // // //             padding: 10,
+// // // //             borderRadius: 12,
+// // // //             border: "1px solid #e5e7eb",
+// // // //           }}
+// // // //         />
+// // // //         <button
+// // // //           onClick={() => nav("/admin/templates/pricing")}
+// // // //           style={{
+// // // //             padding: "10px 12px",
+// // // //             borderRadius: 12,
+// // // //             border: "1px solid #e5e7eb",
+// // // //             background: "white",
+// // // //             fontWeight: 900,
+// // // //           }}
+// // // //         >
+// // // //           Pricing
+// // // //         </button>
+// // // //       </div>
+
+// // // //       {loading ? (
+// // // //         <div style={{ padding: 20 }}>Loading...</div>
+// // // //       ) : (
+// // // //         <div
+// // // //           style={{
+// // // //             display: "grid",
+// // // //             gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+// // // //             gap: 16,
+// // // //           }}
+// // // //         >
+// // // //           {filtered.map((t) => (
+// // // //             <div
+// // // //               key={t.id}
+// // // //               style={{
+// // // //                 background: "white",
+// // // //                 border: "1px solid #eef2f7",
+// // // //                 borderRadius: 16,
+// // // //                 padding: 16,
+// // // //                 boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+// // // //               }}
+// // // //             >
+// // // //               {cardImg(t)}
+// // // //               <div
+// // // //                 style={{
+// // // //                   display: "flex",
+// // // //                   justifyContent: "space-between",
+// // // //                   alignItems: "center",
+// // // //                   marginTop: 12,
+// // // //                 }}
+// // // //               >
+// // // //                 <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
+// // // //                 {t.status === "active"
+// // // //                   ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
+// // // //                   : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
 // // // //               </div>
 
-// // // //               <button type="button" style={styles.btnGhost} onClick={close} aria-label="Close">
-// // // //                 ✕
+// // // //               <div
+// // // //                 style={{
+// // // //                   display: "flex",
+// // // //                   gap: 8,
+// // // //                   marginTop: 8,
+// // // //                   flexWrap: "wrap",
+// // // //                 }}
+// // // //               >
+// // // //                 {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // // //                 {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // // //                 {t.source
+// // // //                   ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a")
+// // // //                   : null}
+// // // //               </div>
+
+// // // //               <div
+// // // //                 style={{
+// // // //                   display: "grid",
+// // // //                   gridTemplateColumns: "1fr 1fr",
+// // // //                   gap: 10,
+// // // //                   marginTop: 16,
+// // // //                 }}
+// // // //               >
+// // // //                 <button
+// // // //                   onClick={() => openPreview(t.schema || {})}
+// // // //                   style={{
+// // // //                     padding: "10px 12px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                     background: "white",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   View
+// // // //                 </button>
+
+// // // //                 <button
+// // // //                   onClick={() => nav(`/admin/templates/builder/${t.id}`)}
+// // // //                   style={{
+// // // //                     padding: "10px 12px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #1d4ed8",
+// // // //                     background: "#2563eb",
+// // // //                     color: "white",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Edit
+// // // //                 </button>
+
+// // // //                 <button
+// // // //                   onClick={() => nav(`/admin/resume/create/${t.id}`)}
+// // // //                   style={{
+// // // //                     padding: "10px 12px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #8b5cf6",
+// // // //                     background: "#8b5cf6",
+// // // //                     color: "white",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Create Resume
+// // // //                 </button>
+
+// // // //                 <button
+// // // //                   onClick={() => toggleStatus(t)}
+// // // //                   style={{
+// // // //                     padding: "10px 12px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                     background: "white",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   {t.status === "active" ? "Disable" : "Enable"}
+// // // //                 </button>
+
+// // // //                 <button
+// // // //                   onClick={() => doDelete(t.id)}
+// // // //                   style={{
+// // // //                     padding: "10px 12px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #fecaca",
+// // // //                     background: "white",
+// // // //                     color: "#991b1b",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Delete
+// // // //                 </button>
+// // // //               </div>
+// // // //             </div>
+// // // //           ))}
+// // // //         </div>
+// // // //       )}
+
+// // // //       {/* ✅ Preview Modal (always on top) */}
+// // // //       {previewOpen && (
+// // // //         <div
+// // // //           onClick={() => setPreviewOpen(false)}
+// // // //           style={{
+// // // //             position: "fixed",
+// // // //             inset: 0,
+// // // //             background: "rgba(0,0,0,0.45)",
+// // // //             display: "grid",
+// // // //             placeItems: "center",
+// // // //             padding: 16,
+// // // //             zIndex: 3000, // ✅ higher than Add modal
+// // // //           }}
+// // // //         >
+// // // //           <div
+// // // //             onClick={(e) => e.stopPropagation()}
+// // // //             style={{
+// // // //               background: "white",
+// // // //               borderRadius: 16,
+// // // //               border: "1px solid #e5e7eb",
+// // // //               width: "min(1100px, 96vw)",
+// // // //               height: "min(92vh, 900px)",
+// // // //               display: "flex",
+// // // //               flexDirection: "column",
+// // // //               overflow: "hidden",
+// // // //             }}
+// // // //           >
+// // // //             <div
+// // // //               style={{
+// // // //                 padding: 14,
+// // // //                 borderBottom: "1px solid #e5e7eb",
+// // // //                 display: "flex",
+// // // //                 justifyContent: "space-between",
+// // // //                 alignItems: "center",
+// // // //                 gap: 10,
+// // // //               }}
+// // // //             >
+// // // //               <div style={{ fontWeight: 900, fontSize: 18 }}>
+// // // //                 Template Preview
+// // // //               </div>
+// // // //               <div style={{ display: "flex", gap: 8 }}>
+// // // //                 <button
+// // // //                   onClick={() => recalcPreviewScale()}
+// // // //                   style={{
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                     background: "white",
+// // // //                     borderRadius: 10,
+// // // //                     padding: "8px 12px",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Fit
+// // // //                 </button>
+// // // //                 <button
+// // // //                   onClick={() => setPreviewOpen(false)}
+// // // //                   style={{
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                     background: "white",
+// // // //                     borderRadius: 10,
+// // // //                     padding: "8px 12px",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Close
+// // // //                 </button>
+// // // //               </div>
+// // // //             </div>
+
+// // // //             <div
+// // // //               ref={previewViewportRef}
+// // // //               style={{
+// // // //                 flex: 1,
+// // // //                 background: "#f3f4f6",
+// // // //                 display: "grid",
+// // // //                 placeItems: "center",
+// // // //                 padding: 12,
+// // // //                 overflow: "hidden",
+// // // //               }}
+// // // //             >
+// // // //               <div
+// // // //                 ref={previewPageRef}
+// // // //                 style={{
+// // // //                   transform: `scale(${previewScale})`,
+// // // //                   transformOrigin: "top center",
+// // // //                 }}
+// // // //               >
+// // // //                 <ResumePreview schema={previewSchema || {}} />
+// // // //               </div>
+// // // //             </div>
+// // // //           </div>
+// // // //         </div>
+// // // //       )}
+
+// // // //       {/* Add Template Modal */}
+// // // //       {openAdd && (
+// // // //         <div
+// // // //           onClick={() => setOpenAdd(false)}
+// // // //           style={{
+// // // //             position: "fixed",
+// // // //             inset: 0,
+// // // //             background: "rgba(0,0,0,0.35)",
+// // // //             display: "grid",
+// // // //             placeItems: "center",
+// // // //             padding: 20,
+// // // //             zIndex: 1000,
+// // // //           }}
+// // // //         >
+// // // //           <div
+// // // //             onClick={(e) => e.stopPropagation()}
+// // // //             style={{
+// // // //               background: "white",
+// // // //               borderRadius: 16,
+// // // //               border: "1px solid #e5e7eb",
+// // // //               padding: 20,
+// // // //               width: "90%",
+// // // //               maxWidth: 1000,
+// // // //               maxHeight: "86vh",
+// // // //               overflow: "auto",
+// // // //             }}
+// // // //           >
+// // // //             <div
+// // // //               style={{
+// // // //                 display: "flex",
+// // // //                 justifyContent: "space-between",
+// // // //                 gap: 10,
+// // // //                 alignItems: "center",
+// // // //                 marginBottom: 16,
+// // // //               }}
+// // // //             >
+// // // //               <div style={{ fontWeight: 900, fontSize: 18 }}>Add Template</div>
+// // // //               <button
+// // // //                 onClick={() => setOpenAdd(false)}
+// // // //                 style={{
+// // // //                   border: "1px solid #e5e7eb",
+// // // //                   background: "white",
+// // // //                   borderRadius: 10,
+// // // //                   padding: "8px 12px",
+// // // //                   fontWeight: 900,
+// // // //                 }}
+// // // //               >
+// // // //                 Close
 // // // //               </button>
 // // // //             </div>
 
-// // // //             <form onSubmit={submit}>
-// // // //               <div style={styles.modalBody}>
-// // // //                 {err && <div style={styles.error}>{err}</div>}
+// // // //             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+// // // //               <button
+// // // //                 onClick={() => setAddTab("market")}
+// // // //                 style={{
+// // // //                   padding: "10px 14px",
+// // // //                   borderRadius: 10,
+// // // //                   border: "1px solid #e5e7eb",
+// // // //                   background: addTab === "market" ? "#f3f4f6" : "white",
+// // // //                   fontWeight: 900,
+// // // //                 }}
+// // // //               >
+// // // //                 Marketplace
+// // // //               </button>
+// // // //               <button
+// // // //                 onClick={() => setAddTab("scratch")}
+// // // //                 style={{
+// // // //                   padding: "10px 14px",
+// // // //                   borderRadius: 10,
+// // // //                   border: "1px solid #e5e7eb",
+// // // //                   background: addTab === "scratch" ? "#f3f4f6" : "white",
+// // // //                   fontWeight: 900,
+// // // //                 }}
+// // // //               >
+// // // //                 Create from Scratch
+// // // //               </button>
+// // // //               <button
+// // // //                 onClick={() => setAddTab("duplicate")}
+// // // //                 style={{
+// // // //                   padding: "10px 14px",
+// // // //                   borderRadius: 10,
+// // // //                   border: "1px solid #e5e7eb",
+// // // //                   background: addTab === "duplicate" ? "#f3f4f6" : "white",
+// // // //                   fontWeight: 900,
+// // // //                 }}
+// // // //               >
+// // // //                 Duplicate Existing
+// // // //               </button>
+// // // //             </div>
 
-// // // //                 <div style={{ ...styles.field, ...styles.full }}>
-// // // //                   <label style={styles.label}>Template Name</label>
-// // // //                   <input
-// // // //                     style={{ ...styles.input, minWidth: "unset", width: "100%" }}
-// // // //                     value={form.name}
-// // // //                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-// // // //                     placeholder="e.g. Atlas modern-11"
-// // // //                     autoFocus
-// // // //                   />
+// // // //             {addTab === "market" && (
+// // // //               <>
+// // // //                 <div
+// // // //                   style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}
+// // // //                 >
+// // // //                   ✅ Choose template → Import → Saved permanently in DB + storage
+// // // //                   (no external dependency).
 // // // //                 </div>
 
-// // // //                 <div style={styles.field}>
-// // // //                   <label style={styles.label}>Category</label>
-// // // //                   <select style={styles.select} value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value as Category }))}>
-// // // //                     <option value="Modern">Modern</option>
-// // // //                     <option value="Classic">Classic</option>
-// // // //                   </select>
-// // // //                 </div>
+// // // //                 {marketLoading ? (
+// // // //                   <div style={{ padding: 20 }}>Loading marketplace...</div>
+// // // //                 ) : (
+// // // //                   <div
+// // // //                     style={{
+// // // //                       display: "grid",
+// // // //                       gridTemplateColumns:
+// // // //                         "repeat(auto-fill, minmax(280px, 1fr))",
+// // // //                       gap: 16,
+// // // //                     }}
+// // // //                   >
+// // // //                     {market.map((m) => (
+// // // //                       <div
+// // // //                         key={m.key}
+// // // //                         style={{
+// // // //                           border: "1px solid #eef2f7",
+// // // //                           borderRadius: 14,
+// // // //                           padding: 16,
+// // // //                         }}
+// // // //                       >
+// // // //                         {cardImg(m)}
+// // // //                         <div
+// // // //                           style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}
+// // // //                         >
+// // // //                           {m.name}
+// // // //                         </div>
+// // // //                         <div
+// // // //                           style={{
+// // // //                             display: "flex",
+// // // //                             gap: 8,
+// // // //                             marginTop: 8,
+// // // //                             flexWrap: "wrap",
+// // // //                           }}
+// // // //                         >
+// // // //                           {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // // //                           {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // // //                           {m.price_type === "free"
+// // // //                             ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
+// // // //                             : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+// // // //                         </div>
 
-// // // //                 <div style={styles.field}>
-// // // //                   <label style={styles.label}>Status</label>
-// // // //                   <select style={styles.select} value={form.status} onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as TemplateStatus }))}>
-// // // //                     <option value="active">Active</option>
-// // // //                     <option value="draft">Draft</option>
-// // // //                   </select>
-// // // //                 </div>
+// // // //                         <div
+// // // //                           style={{
+// // // //                             display: "grid",
+// // // //                             gridTemplateColumns: "1fr 1fr",
+// // // //                             gap: 10,
+// // // //                             marginTop: 16,
+// // // //                           }}
+// // // //                         >
+// // // //                           {/* ✅ FIXED: direct preview open (close add + open preview) */}
+// // // //                           <button
+// // // //                             onClick={() => openPreview(m.schema)}
+// // // //                             style={{
+// // // //                               padding: "10px 12px",
+// // // //                               borderRadius: 12,
+// // // //                               border: "1px solid #e5e7eb",
+// // // //                               background: "white",
+// // // //                               fontWeight: 900,
+// // // //                             }}
+// // // //                           >
+// // // //                             Preview
+// // // //                           </button>
 
-// // // //                 <div style={styles.field}>
-// // // //                   <label style={styles.label}>Layout</label>
-// // // //                   <select style={styles.select} value={form.layout} onChange={(e) => setForm((p) => ({ ...p, layout: e.target.value as Layout }))}>
-// // // //                     <option value="Two Column">Two Column</option>
-// // // //                     <option value="Single Column">Single Column</option>
-// // // //                     <option value="Sidebar Left">Sidebar Left</option>
-// // // //                     <option value="Sidebar Right">Sidebar Right</option>
-// // // //                   </select>
-// // // //                 </div>
-
-// // // //                 <div style={styles.field}>
-// // // //                   <label style={styles.label}>Color</label>
-// // // //                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-// // // //                     <input
-// // // //                       type="color"
-// // // //                       value={form.color}
-// // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-// // // //                       style={{ width: 44, height: 40, border: "1px solid #d1d5db", borderRadius: 10, padding: 3, backgroundColor: "white", cursor: "pointer" }}
-// // // //                     />
-// // // //                     <input
-// // // //                       value={form.color}
-// // // //                       onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-// // // //                       placeholder="#2563eb"
-// // // //                       style={{ ...styles.input, minWidth: "unset", width: "100%" }}
-// // // //                     />
+// // // //                           <button
+// // // //                             onClick={() => importFromMarketplace(m)}
+// // // //                             style={{
+// // // //                               padding: "10px 12px",
+// // // //                               borderRadius: 12,
+// // // //                               border: "1px solid #1d4ed8",
+// // // //                               background: "#2563eb",
+// // // //                               color: "white",
+// // // //                               fontWeight: 900,
+// // // //                             }}
+// // // //                           >
+// // // //                             Use / Import
+// // // //                           </button>
+// // // //                         </div>
+// // // //                       </div>
+// // // //                     ))}
 // // // //                   </div>
-// // // //                 </div>
-// // // //               </div>
+// // // //                 )}
+// // // //               </>
+// // // //             )}
 
-// // // //               <div style={styles.modalFooter}>
-// // // //                 <button type="button" style={styles.btnGhost} onClick={close}>
-// // // //                   Cancel
-// // // //                 </button>
-// // // //                 <button type="submit" style={styles.btnPrimary}>
-// // // //                   {mode === "add" ? "Create Template" : "Save Changes"}
+// // // //             {addTab === "scratch" && (
+// // // //               <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
+// // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // //                   ✅ Blank canvas create → draft → open builder
+// // // //                 </div>
+// // // //                 <input
+// // // //                   value={scratch.name}
+// // // //                   onChange={(e) =>
+// // // //                     setScratch((p) => ({ ...p, name: e.target.value }))
+// // // //                   }
+// // // //                   placeholder="Template name"
+// // // //                   style={{
+// // // //                     padding: 12,
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                   }}
+// // // //                 />
+// // // //                 <select
+// // // //                   value={scratch.category}
+// // // //                   onChange={(e) =>
+// // // //                     setScratch((p) => ({
+// // // //                       ...p,
+// // // //                       category: e.target.value as Category,
+// // // //                     }))
+// // // //                   }
+// // // //                   style={{
+// // // //                     padding: 12,
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                   }}
+// // // //                 >
+// // // //                   <option>Modern</option>
+// // // //                   <option>Classic</option>
+// // // //                 </select>
+// // // //                 <select
+// // // //                   value={scratch.layout}
+// // // //                   onChange={(e) =>
+// // // //                     setScratch((p) => ({
+// // // //                       ...p,
+// // // //                       layout: e.target.value as Layout,
+// // // //                     }))
+// // // //                   }
+// // // //                   style={{
+// // // //                     padding: 12,
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                   }}
+// // // //                 >
+// // // //                   <option>Single Column</option>
+// // // //                   <option>Two Column</option>
+// // // //                   <option>Sidebar Left</option>
+// // // //                   <option>Sidebar Right</option>
+// // // //                 </select>
+// // // //                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+// // // //                   <label style={{ fontWeight: 900, fontSize: 14 }}>Color</label>
+// // // //                   <input
+// // // //                     type="color"
+// // // //                     value={scratch.color}
+// // // //                     onChange={(e) =>
+// // // //                       setScratch((p) => ({ ...p, color: e.target.value }))
+// // // //                     }
+// // // //                     style={{ width: 50, height: 50, borderRadius: 10 }}
+// // // //                   />
+// // // //                   <span style={{ fontSize: 14 }}>{scratch.color}</span>
+// // // //                 </div>
+// // // //                 <button
+// // // //                   onClick={createScratch}
+// // // //                   style={{
+// // // //                     padding: "12px 16px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #1d4ed8",
+// // // //                     background: "#2563eb",
+// // // //                     color: "white",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Create & Open Builder
 // // // //                 </button>
 // // // //               </div>
-// // // //             </form>
+// // // //             )}
+
+// // // //             {addTab === "duplicate" && (
+// // // //               <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
+// // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // // //                   ✅ Existing template copy → schema cloned → open builder
+// // // //                 </div>
+// // // //                 <select
+// // // //                   value={dupFromId}
+// // // //                   onChange={(e) => setDupFromId(Number(e.target.value) || "")}
+// // // //                   style={{
+// // // //                     padding: 12,
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                   }}
+// // // //                 >
+// // // //                   <option value="">Select template</option>
+// // // //                   {templates.map((t) => (
+// // // //                     <option key={t.id} value={t.id}>
+// // // //                       {t.name} ({t.category})
+// // // //                     </option>
+// // // //                   ))}
+// // // //                 </select>
+// // // //                 <input
+// // // //                   value={dupName}
+// // // //                   onChange={(e) => setDupName(e.target.value)}
+// // // //                   placeholder="New name (optional)"
+// // // //                   style={{
+// // // //                     padding: 12,
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #e5e7eb",
+// // // //                   }}
+// // // //                 />
+// // // //                 <button
+// // // //                   onClick={duplicate}
+// // // //                   style={{
+// // // //                     padding: "12px 16px",
+// // // //                     borderRadius: 12,
+// // // //                     border: "1px solid #1d4ed8",
+// // // //                     background: "#2563eb",
+// // // //                     color: "white",
+// // // //                     fontWeight: 900,
+// // // //                   }}
+// // // //                 >
+// // // //                   Duplicate & Open Builder
+// // // //                 </button>
+// // // //               </div>
+// // // //             )}
 // // // //           </div>
 // // // //         </div>
 // // // //       )}
@@ -1286,15 +3053,17 @@
 // // // //   );
 // // // // }
 
-
-// // // import React, { useEffect, useMemo, useState } from "react";
+// // // import { useEffect, useMemo, useRef, useState } from "react";
 // // // import axios from "../../api/axiosInstance";
-// // // import { useNavigate } from "react-router-dom";
+// // // import { useLocation, useNavigate } from "react-router-dom";
 // // // import ResumePreview from "./ResumePreview";
 
 // // // type TemplateStatus = "active" | "draft";
 // // // type Category = "Modern" | "Classic";
 // // // type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+
+// // // type PricingStatus = "active" | "inactive";
+// // // type BillingType = "free" | "one_time" | "subscription";
 
 // // // type TemplateRow = {
 // // //   id: number;
@@ -1305,12 +3074,22 @@
 // // //   downloads: number;
 // // //   rating: number;
 // // //   color: string;
-
 // // //   source?: "custom" | "imported" | "duplicated";
 // // //   description?: string;
 // // //   schema?: any;
-// // //   preview_image?: string; // backend FileField url
+// // //   preview_image?: string;
 // // //   updated?: string;
+
+// // //   // ✅ for student store
+// // //   pricing?: {
+// // //     billing_type: BillingType;
+// // //     currency: "INR" | "USD";
+// // //     price: number;
+// // //     discount_percent: number;
+// // //     final_price: number;
+// // //     status: PricingStatus;
+// // //   };
+// // //   has_access?: boolean;
 // // // };
 
 // // // type MarketplaceTpl = {
@@ -1326,20 +3105,38 @@
 // // // };
 
 // // // function authHeaders() {
-// // //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+// // //   const token =
+// // //     localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
 // // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // // }
 
 // // // function pill(text: string, bg: string, fg: string, border: string) {
 // // //   return (
-// // //     <span style={{ fontSize: 12, fontWeight: 900, padding: "4px 8px", borderRadius: 999, background: bg, color: fg, border: `1px solid ${border}` }}>
+// // //     <span
+// // //       style={{
+// // //         fontSize: 12,
+// // //         fontWeight: 900,
+// // //         padding: "4px 8px",
+// // //         borderRadius: 999,
+// // //         background: bg,
+// // //         color: fg,
+// // //         border: `1px solid ${border}`,
+// // //       }}
+// // //     >
 // // //       {text}
 // // //     </span>
 // // //   );
 // // // }
 
+// // // const currencySymbol = (c?: "INR" | "USD") => (c === "USD" ? "$" : "₹");
+
 // // // export default function AdminTemplates() {
 // // //   const nav = useNavigate();
+// // //   const location = useLocation();
+
+// // //   const mode: "admin" | "student" = location.pathname.startsWith("/admin")
+// // //     ? "admin"
+// // //     : "student";
 
 // // //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
 // // //   const [loading, setLoading] = useState(false);
@@ -1347,12 +3144,19 @@
 // // //   const [search, setSearch] = useState("");
 // // //   const [openAdd, setOpenAdd] = useState(false);
 
-// // //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">("market");
+// // //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">(
+// // //     "market"
+// // //   );
 // // //   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
 // // //   const [marketLoading, setMarketLoading] = useState(false);
 
 // // //   const [previewOpen, setPreviewOpen] = useState(false);
 // // //   const [previewSchema, setPreviewSchema] = useState<any>(null);
+
+// // //   // ✅ PREVIEW SCALE (NO SCROLL)
+// // //   const previewViewportRef = useRef<HTMLDivElement | null>(null);
+// // //   const previewPageRef = useRef<HTMLDivElement | null>(null);
+// // //   const [previewScale, setPreviewScale] = useState(1);
 
 // // //   // scratch form
 // // //   const [scratch, setScratch] = useState({
@@ -1366,10 +3170,112 @@
 // // //   const [dupFromId, setDupFromId] = useState<number | "">("");
 // // //   const [dupName, setDupName] = useState("");
 
+// // //   // payment state
+// // //   const [payingId, setPayingId] = useState<number | null>(null);
+
+// // //   const isLocked = (t: TemplateRow) => {
+// // //     if (mode !== "student") return false;
+// // //     const p = t.pricing;
+// // //     if (!p) return false; // pricing missing => free treat
+// // //     if (p.status !== "active") return true;
+// // //     if (p.billing_type === "free") return false;
+// // //     return !t.has_access;
+// // //   };
+
+// // //   const loadRazorpay = () =>
+// // //     new Promise<boolean>((resolve) => {
+// // //       if ((window as any).Razorpay) return resolve(true);
+// // //       const id = "razorpay-checkout-js";
+// // //       if (document.getElementById(id)) return resolve(true);
+
+// // //       const s = document.createElement("script");
+// // //       s.id = id;
+// // //       s.src = "https://checkout.razorpay.com/v1/checkout.js";
+// // //       s.onload = () => resolve(true);
+// // //       s.onerror = () => resolve(false);
+// // //       document.body.appendChild(s);
+// // //     });
+
+// // //   const handleBuy = async (t: TemplateRow) => {
+// // //     if (mode !== "student") return;
+// // //     setPayingId(t.id);
+
+// // //     try {
+// // //       const ok = await loadRazorpay();
+// // //       if (!ok) {
+// // //         alert("Razorpay script load failed");
+// // //         return;
+// // //       }
+
+// // //       // Subscription case -> backend returns 402; we show msg.
+// // //       let orderRes: any;
+// // //       try {
+// // //         orderRes = await axios.post(
+// // //           "/auth/student/payments/template/order/",
+// // //           { template_id: t.id },
+// // //           { headers: authHeaders() }
+// // //         );
+// // //       } catch (e: any) {
+// // //         if (e?.response?.status === 402) {
+// // //           alert("Subscription required for this template.");
+// // //           return;
+// // //         }
+// // //         alert(e?.response?.data?.detail || "Order create failed");
+// // //         return;
+// // //       }
+
+// // //       if (orderRes?.data?.has_access) {
+// // //         await fetchTemplates();
+// // //         nav(`/resume/create/${t.id}`);
+// // //         return;
+// // //       }
+
+// // //       const { key, order_id, amount, currency } = orderRes.data || {};
+// // //       if (!key || !order_id) {
+// // //         alert("Invalid order response from backend");
+// // //         return;
+// // //       }
+
+// // //       const rz = new (window as any).Razorpay({
+// // //         key,
+// // //         order_id,
+// // //         amount,
+// // //         currency,
+// // //         name: "Resume Templates",
+// // //         description: `Unlock template: ${t.name}`,
+// // //         handler: async (resp: any) => {
+// // //           try {
+// // //             await axios.post(
+// // //               "/auth/student/payments/template/verify/",
+// // //               {
+// // //                 razorpay_order_id: resp.razorpay_order_id,
+// // //                 razorpay_payment_id: resp.razorpay_payment_id,
+// // //                 razorpay_signature: resp.razorpay_signature,
+// // //               },
+// // //               { headers: authHeaders() }
+// // //             );
+
+// // //             alert("Payment successful ✅ Template unlocked!");
+// // //             await fetchTemplates();
+// // //             nav(`/resume/create/${t.id}`);
+// // //           } catch (e: any) {
+// // //             alert(e?.response?.data?.detail || "Verify failed");
+// // //           }
+// // //         },
+// // //       });
+
+// // //       rz.open();
+// // //     } finally {
+// // //       setPayingId(null);
+// // //     }
+// // //   };
+
 // // //   const fetchTemplates = async () => {
 // // //     setLoading(true);
 // // //     try {
-// // //       const res = await axios.get("/auth/admin/templates/", { headers: authHeaders() });
+// // //       const url =
+// // //         mode === "admin" ? "/auth/admin/templates/" : "/auth/student/templates/";
+// // //       const res = await axios.get(url, { headers: authHeaders() });
 // // //       setTemplates(res.data || []);
 // // //     } finally {
 // // //       setLoading(false);
@@ -1379,7 +3285,9 @@
 // // //   const fetchMarketplace = async () => {
 // // //     setMarketLoading(true);
 // // //     try {
-// // //       const res = await axios.get("/auth/admin/template-marketplace/", { headers: authHeaders() });
+// // //       const res = await axios.get("/auth/admin/template-marketplace/", {
+// // //         headers: authHeaders(),
+// // //       });
 // // //       setMarket(res.data?.results || []);
 // // //     } finally {
 // // //       setMarketLoading(false);
@@ -1388,21 +3296,27 @@
 
 // // //   useEffect(() => {
 // // //     fetchTemplates();
-// // //   }, []);
+// // //     // eslint-disable-next-line react-hooks/exhaustive-deps
+// // //   }, [mode]);
 
 // // //   const filtered = useMemo(() => {
 // // //     const q = search.trim().toLowerCase();
 // // //     if (!q) return templates;
-// // //     return templates.filter((t) => t.name.toLowerCase().includes(q));
+// // //     return templates.filter((t) => (t.name || "").toLowerCase().includes(q));
 // // //   }, [templates, search]);
 
+// // //   // --------- ADMIN ONLY ACTIONS ----------
 // // //   const doDelete = async (id: number) => {
+// // //     if (mode !== "admin") return;
 // // //     if (!window.confirm("Delete this template?")) return;
-// // //     await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
+// // //     await axios.delete(`/auth/admin/templates/${id}/`, {
+// // //       headers: authHeaders(),
+// // //     });
 // // //     fetchTemplates();
 // // //   };
 
 // // //   const toggleStatus = async (t: TemplateRow) => {
+// // //     if (mode !== "admin") return;
 // // //     const next = t.status === "active" ? "draft" : "active";
 // // //     await axios.put(
 // // //       `/auth/admin/templates/${t.id}/`,
@@ -1413,6 +3327,7 @@
 // // //   };
 
 // // //   const importFromMarketplace = async (tpl: MarketplaceTpl) => {
+// // //     if (mode !== "admin") return;
 // // //     const res = await axios.post(
 // // //       "/auth/admin/templates/import/",
 // // //       { marketplace_key: tpl.key },
@@ -1424,7 +3339,9 @@
 // // //   };
 
 // // //   const createScratch = async () => {
+// // //     if (mode !== "admin") return;
 // // //     if (!scratch.name.trim()) return alert("Name required");
+
 // // //     const schema = {
 // // //       version: 1,
 // // //       layout: scratch.layout,
@@ -1437,7 +3354,10 @@
 // // //         lineHeight: 1.35,
 // // //       },
 // // //       order: ["header", "summary", "experience", "education", "skills", "projects"],
-// // //       columns: { left: ["summary", "skills", "education"], right: ["header", "experience", "projects"] },
+// // //       columns: {
+// // //         left: ["summary", "skills", "education"],
+// // //         right: ["header", "experience", "projects"],
+// // //       },
 // // //       sections: {
 // // //         header: { enabled: true },
 // // //         summary: { enabled: true },
@@ -1470,7 +3390,9 @@
 // // //   };
 
 // // //   const duplicate = async () => {
+// // //     if (mode !== "admin") return;
 // // //     if (!dupFromId) return alert("Select a template");
+
 // // //     const res = await axios.post(
 // // //       `/auth/admin/templates/${dupFromId}/duplicate/`,
 // // //       { name: dupName.trim() || undefined },
@@ -1482,6 +3404,7 @@
 // // //   };
 
 // // //   const openAddModal = () => {
+// // //     if (mode !== "admin") return;
 // // //     setOpenAdd(true);
 // // //     setAddTab("market");
 // // //     fetchMarketplace();
@@ -1489,154 +3412,640 @@
 
 // // //   const cardImg = (t: any) => {
 // // //     const src = t.preview_image || t.preview_image_url;
-// // //     if (src) return <img src={src} alt="" style={{ width: "100%", height: 180, objectFit: "cover", borderRadius: 12, border: "1px solid #e5e7eb" }} />;
+// // //     if (src)
+// // //       return (
+// // //         <img
+// // //           src={src}
+// // //           alt=""
+// // //           style={{
+// // //             width: "100%",
+// // //             height: 180,
+// // //             objectFit: "cover",
+// // //             borderRadius: 12,
+// // //             border: "1px solid #e5e7eb",
+// // //           }}
+// // //         />
+// // //       );
 // // //     return (
-// // //       <div style={{ width: "100%", height: 180, borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", display: "grid", placeItems: "center", color: "#6b7280", fontWeight: 900 }}>
+// // //       <div
+// // //         style={{
+// // //           width: "100%",
+// // //           height: 180,
+// // //           borderRadius: 12,
+// // //           border: "1px solid #e5e7eb",
+// // //           background: "#f3f4f6",
+// // //           display: "grid",
+// // //           placeItems: "center",
+// // //           color: "#6b7280",
+// // //           fontWeight: 900,
+// // //         }}
+// // //       >
 // // //         No Preview
 // // //       </div>
 // // //     );
 // // //   };
 
+// // //   // ✅ scale calculation (fit preview into viewport, no scrolling)
+// // //   const recalcPreviewScale = () => {
+// // //     const viewport = previewViewportRef.current;
+// // //     const page = previewPageRef.current;
+// // //     if (!viewport || !page) return;
+
+// // //     page.style.transform = "scale(1)";
+// // //     page.style.transformOrigin = "top center";
+
+// // //     const vw = viewport.clientWidth;
+// // //     const vh = viewport.clientHeight;
+
+// // //     const pw = page.scrollWidth || page.offsetWidth;
+// // //     const ph = page.scrollHeight || page.offsetHeight;
+
+// // //     if (!pw || !ph || !vw || !vh) return;
+
+// // //     const padding = 24;
+// // //     const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
+// // //     const clamped = Math.max(0.2, Math.min(1, scale));
+// // //     setPreviewScale(clamped);
+// // //   };
+
+// // //   useEffect(() => {
+// // //     if (!previewOpen) return;
+
+// // //     const t = window.setTimeout(() => recalcPreviewScale(), 0);
+
+// // //     const viewport = previewViewportRef.current;
+// // //     let ro: ResizeObserver | null = null;
+
+// // //     if (viewport) {
+// // //       ro = new ResizeObserver(() => recalcPreviewScale());
+// // //       ro.observe(viewport);
+// // //     }
+
+// // //     window.addEventListener("resize", recalcPreviewScale);
+
+// // //     return () => {
+// // //       window.clearTimeout(t);
+// // //       window.removeEventListener("resize", recalcPreviewScale);
+// // //       if (ro) ro.disconnect();
+// // //     };
+// // //     // eslint-disable-next-line react-hooks/exhaustive-deps
+// // //   }, [previewOpen, previewSchema]);
+
+// // //   // ✅ FIX: If preview opens, close Add modal automatically
+// // //   useEffect(() => {
+// // //     if (previewOpen) setOpenAdd(false);
+// // //   }, [previewOpen]);
+
+// // //   // ✅ helper to open preview from anywhere (main cards OR marketplace cards)
+// // //   const openPreview = (schema: any) => {
+// // //     setOpenAdd(false);
+// // //     setPreviewSchema(schema || {});
+// // //     setPreviewOpen(true);
+// // //   };
+
 // // //   return (
 // // //     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: 16 }}>
-// // //       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+// // //       <div
+// // //         style={{
+// // //           display: "flex",
+// // //           justifyContent: "space-between",
+// // //           gap: 12,
+// // //           marginBottom: 14,
+// // //         }}
+// // //       >
 // // //         <div>
-// // //           <div style={{ fontWeight: 900, fontSize: 22 }}>Resume Templates</div>
-// // //           <div style={{ color: "#6b7280", fontSize: 12 }}>Import • Scratch • Duplicate • View/Edit/Delete</div>
+// // //           <div style={{ fontWeight: 900, fontSize: 22 }}>
+// // //             {mode === "admin" ? "Resume Templates" : "Choose a Template"}
+// // //           </div>
+// // //           <div style={{ color: "#6b7280", fontSize: 12 }}>
+// // //             {mode === "admin"
+// // //               ? "Import • Scratch • Duplicate • View/Edit/Delete"
+// // //               : "Preview • Unlock (if paid) • Use Template"}
+// // //           </div>
 // // //         </div>
-// // //         <button onClick={openAddModal} style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
-// // //           + Add Template
-// // //         </button>
+
+// // //         {mode === "admin" ? (
+// // //           <button
+// // //             onClick={openAddModal}
+// // //             style={{
+// // //               padding: "10px 14px",
+// // //               borderRadius: 12,
+// // //               border: "1px solid #1d4ed8",
+// // //               background: "#2563eb",
+// // //               color: "white",
+// // //               fontWeight: 900,
+// // //             }}
+// // //           >
+// // //             + Add Template
+// // //           </button>
+// // //         ) : null}
 // // //       </div>
 
 // // //       <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-// // //         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search templates..." style={{ flex: 1, padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
-// // //         <button onClick={() => nav("/admin/templates/pricing")} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}>
-// // //           Pricing
-// // //         </button>
+// // //         <input
+// // //           value={search}
+// // //           onChange={(e) => setSearch(e.target.value)}
+// // //           placeholder="Search templates..."
+// // //           style={{
+// // //             flex: 1,
+// // //             padding: 10,
+// // //             borderRadius: 12,
+// // //             border: "1px solid #e5e7eb",
+// // //           }}
+// // //         />
+
+// // //         {mode === "admin" ? (
+// // //           <button
+// // //             onClick={() => nav("/admin/templates/pricing")}
+// // //             style={{
+// // //               padding: "10px 12px",
+// // //               borderRadius: 12,
+// // //               border: "1px solid #e5e7eb",
+// // //               background: "white",
+// // //               fontWeight: 900,
+// // //             }}
+// // //           >
+// // //             Pricing
+// // //           </button>
+// // //         ) : (
+// // //           <button
+// // //             onClick={() => fetchTemplates()}
+// // //             style={{
+// // //               padding: "10px 12px",
+// // //               borderRadius: 12,
+// // //               border: "1px solid #e5e7eb",
+// // //               background: "white",
+// // //               fontWeight: 900,
+// // //             }}
+// // //           >
+// // //             Refresh
+// // //           </button>
+// // //         )}
 // // //       </div>
 
 // // //       {loading ? (
 // // //         <div style={{ padding: 20 }}>Loading...</div>
 // // //       ) : (
-// // //         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(240px, 1fr))", gap: 12 }}>
-// // //           {filtered.map((t) => (
-// // //             <div key={t.id} style={{ background: "white", border: "1px solid #eef2f7", borderRadius: 14, padding: 12 }}>
-// // //               {cardImg(t)}
-// // //               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
-// // //                 <div style={{ fontWeight: 900 }}>{t.name}</div>
-// // //                 {t.status === "active"
-// // //                   ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
-// // //                   : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
-// // //               </div>
-// // //               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-// // //                 {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
-// // //                 {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-// // //                 {t.source ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a") : null}
-// // //               </div>
+// // //         <div
+// // //           style={{
+// // //             display: "grid",
+// // //             gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+// // //             gap: 16,
+// // //           }}
+// // //         >
+// // //           {filtered.map((t) => {
+// // //             const locked = isLocked(t);
+// // //             const p = t.pricing;
 
-// // //               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
-// // //                 <button
-// // //                   onClick={() => {
-// // //                     setPreviewSchema(t.schema || {});
-// // //                     setPreviewOpen(true);
+// // //             return (
+// // //               <div
+// // //                 key={t.id}
+// // //                 style={{
+// // //                   background: "white",
+// // //                   border: "1px solid #eef2f7",
+// // //                   borderRadius: 16,
+// // //                   padding: 16,
+// // //                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+// // //                 }}
+// // //               >
+// // //                 {cardImg(t)}
+// // //                 <div
+// // //                   style={{
+// // //                     display: "flex",
+// // //                     justifyContent: "space-between",
+// // //                     alignItems: "center",
+// // //                     marginTop: 12,
 // // //                   }}
-// // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
 // // //                 >
-// // //                   View
-// // //                 </button>
-// // //                 <button
-// // //                   onClick={() => nav(`/admin/templates/builder/${t.id}`)}
-// // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// // //                   <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
+// // //                   {t.status === "active"
+// // //                     ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
+// // //                     : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
+// // //                 </div>
+
+// // //                 <div
+// // //                   style={{
+// // //                     display: "flex",
+// // //                     gap: 8,
+// // //                     marginTop: 8,
+// // //                     flexWrap: "wrap",
+// // //                   }}
 // // //                 >
-// // //                   Edit
-// // //                 </button>
-// // //                 <button
-// // //                   onClick={() => toggleStatus(t)}
-// // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+// // //                   {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
+// // //                   {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// // //                   {t.source
+// // //                     ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a")
+// // //                     : null}
+// // //                 </div>
+
+// // //                 {mode === "student" && p?.status === "active" ? (
+// // //                   <div style={{ marginTop: 10, fontSize: 13, color: "#374151" }}>
+// // //                     {p.billing_type === "free" ? (
+// // //                       <b>Free</b>
+// // //                     ) : p.billing_type === "subscription" ? (
+// // //                       <b>Subscription</b>
+// // //                     ) : (
+// // //                       <b>
+// // //                         {currencySymbol(p.currency)}
+// // //                         {Number(p.final_price || 0)}
+// // //                       </b>
+// // //                     )}
+// // //                     {" • "}
+// // //                     {locked ? (
+// // //                       <span style={{ color: "#991b1b", fontWeight: 900 }}>Locked</span>
+// // //                     ) : (
+// // //                       <span style={{ color: "#166534", fontWeight: 900 }}>Unlocked</span>
+// // //                     )}
+// // //                   </div>
+// // //                 ) : null}
+
+// // //                 <div
+// // //                   style={{
+// // //                     display: "grid",
+// // //                     gridTemplateColumns: "1fr 1fr",
+// // //                     gap: 10,
+// // //                     marginTop: 16,
+// // //                   }}
 // // //                 >
-// // //                   {t.status === "active" ? "Disable" : "Enable"}
-// // //                 </button>
-// // //                 <button
-// // //                   onClick={() => doDelete(t.id)}
-// // //                   style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #fecaca", background: "white", color: "#991b1b", fontWeight: 900 }}
-// // //                 >
-// // //                   Delete
-// // //                 </button>
+// // //                   <button
+// // //                     onClick={() => openPreview(t.schema || {})}
+// // //                     style={{
+// // //                       padding: "10px 12px",
+// // //                       borderRadius: 12,
+// // //                       border: "1px solid #e5e7eb",
+// // //                       background: "white",
+// // //                       fontWeight: 900,
+// // //                     }}
+// // //                   >
+// // //                     View
+// // //                   </button>
+
+// // //                   {mode === "admin" ? (
+// // //                     <button
+// // //                       onClick={() => nav(`/admin/templates/builder/${t.id}`)}
+// // //                       style={{
+// // //                         padding: "10px 12px",
+// // //                         borderRadius: 12,
+// // //                         border: "1px solid #1d4ed8",
+// // //                         background: "#2563eb",
+// // //                         color: "white",
+// // //                         fontWeight: 900,
+// // //                       }}
+// // //                     >
+// // //                       Edit
+// // //                     </button>
+// // //                   ) : locked ? (
+// // //                     <button
+// // //                       onClick={() => handleBuy(t)}
+// // //                       disabled={payingId === t.id || p?.billing_type === "subscription"}
+// // //                       style={{
+// // //                         padding: "10px 12px",
+// // //                         borderRadius: 12,
+// // //                         border: "1px solid #7c2d12",
+// // //                         background: p?.billing_type === "subscription" ? "#9ca3af" : "#ea580c",
+// // //                         color: "white",
+// // //                         fontWeight: 950,
+// // //                         opacity: payingId === t.id ? 0.7 : 1,
+// // //                         cursor:
+// // //                           payingId === t.id || p?.billing_type === "subscription"
+// // //                             ? "not-allowed"
+// // //                             : "pointer",
+// // //                       }}
+// // //                     >
+// // //                       {payingId === t.id
+// // //                         ? "Processing..."
+// // //                         : p?.billing_type === "subscription"
+// // //                         ? "Subscription Required"
+// // //                         : `Buy & Unlock ${currencySymbol(p?.currency)}${Number(
+// // //                             p?.final_price || 0
+// // //                           )}`}
+// // //                     </button>
+// // //                   ) : (
+// // //                     <button
+// // //                       onClick={() => nav(`/resume/create/${t.id}`)}
+// // //                       style={{
+// // //                         padding: "10px 12px",
+// // //                         borderRadius: 12,
+// // //                         border: "1px solid #16a34a",
+// // //                         background: "#16a34a",
+// // //                         color: "white",
+// // //                         fontWeight: 950,
+// // //                       }}
+// // //                     >
+// // //                       Use Template
+// // //                     </button>
+// // //                   )}
+
+// // //                   {mode === "admin" ? (
+// // //                     <>
+// // //                       <button
+// // //                         onClick={() => nav(`/admin/resume/create/${t.id}`)}
+// // //                         style={{
+// // //                           padding: "10px 12px",
+// // //                           borderRadius: 12,
+// // //                           border: "1px solid #8b5cf6",
+// // //                           background: "#8b5cf6",
+// // //                           color: "white",
+// // //                           fontWeight: 900,
+// // //                         }}
+// // //                       >
+// // //                         Create Resume
+// // //                       </button>
+
+// // //                       <button
+// // //                         onClick={() => toggleStatus(t)}
+// // //                         style={{
+// // //                           padding: "10px 12px",
+// // //                           borderRadius: 12,
+// // //                           border: "1px solid #e5e7eb",
+// // //                           background: "white",
+// // //                           fontWeight: 900,
+// // //                         }}
+// // //                       >
+// // //                         {t.status === "active" ? "Disable" : "Enable"}
+// // //                       </button>
+
+// // //                       <button
+// // //                         onClick={() => doDelete(t.id)}
+// // //                         style={{
+// // //                           padding: "10px 12px",
+// // //                           borderRadius: 12,
+// // //                           border: "1px solid #fecaca",
+// // //                           background: "white",
+// // //                           color: "#991b1b",
+// // //                           fontWeight: 900,
+// // //                         }}
+// // //                       >
+// // //                         Delete
+// // //                       </button>
+// // //                     </>
+// // //                   ) : null}
+// // //                 </div>
 // // //               </div>
-// // //             </div>
-// // //           ))}
+// // //             );
+// // //           })}
 // // //         </div>
 // // //       )}
 
-// // //       {/* ✅ Preview Modal */}
+// // //       {/* ✅ Preview Modal (always on top) */}
 // // //       {previewOpen && (
-// // //         <div onClick={() => setPreviewOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20 }}>
-// // //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 14, width: 560 }}>
-// // //             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-// // //               <div style={{ fontWeight: 900 }}>Preview</div>
-// // //               <button onClick={() => setPreviewOpen(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 10px", fontWeight: 900 }}>Close</button>
+// // //         <div
+// // //           onClick={() => setPreviewOpen(false)}
+// // //           style={{
+// // //             position: "fixed",
+// // //             inset: 0,
+// // //             background: "rgba(0,0,0,0.45)",
+// // //             display: "grid",
+// // //             placeItems: "center",
+// // //             padding: 16,
+// // //             zIndex: 3000,
+// // //           }}
+// // //         >
+// // //           <div
+// // //             onClick={(e) => e.stopPropagation()}
+// // //             style={{
+// // //               background: "white",
+// // //               borderRadius: 16,
+// // //               border: "1px solid #e5e7eb",
+// // //               width: "min(1100px, 96vw)",
+// // //               height: "min(92vh, 900px)",
+// // //               display: "flex",
+// // //               flexDirection: "column",
+// // //               overflow: "hidden",
+// // //             }}
+// // //           >
+// // //             <div
+// // //               style={{
+// // //                 padding: 14,
+// // //                 borderBottom: "1px solid #e5e7eb",
+// // //                 display: "flex",
+// // //                 justifyContent: "space-between",
+// // //                 alignItems: "center",
+// // //                 gap: 10,
+// // //               }}
+// // //             >
+// // //               <div style={{ fontWeight: 900, fontSize: 18 }}>
+// // //                 Template Preview
+// // //               </div>
+// // //               <div style={{ display: "flex", gap: 8 }}>
+// // //                 <button
+// // //                   onClick={() => recalcPreviewScale()}
+// // //                   style={{
+// // //                     border: "1px solid #e5e7eb",
+// // //                     background: "white",
+// // //                     borderRadius: 10,
+// // //                     padding: "8px 12px",
+// // //                     fontWeight: 900,
+// // //                   }}
+// // //                 >
+// // //                   Fit
+// // //                 </button>
+// // //                 <button
+// // //                   onClick={() => setPreviewOpen(false)}
+// // //                   style={{
+// // //                     border: "1px solid #e5e7eb",
+// // //                     background: "white",
+// // //                     borderRadius: 10,
+// // //                     padding: "8px 12px",
+// // //                     fontWeight: 900,
+// // //                   }}
+// // //                 >
+// // //                   Close
+// // //                 </button>
+// // //               </div>
 // // //             </div>
-// // //             <div style={{ display: "grid", placeItems: "center" }}>
-// // //               <ResumePreview schema={previewSchema || {}} />
+
+// // //             <div
+// // //               ref={previewViewportRef}
+// // //               style={{
+// // //                 flex: 1,
+// // //                 background: "#f3f4f6",
+// // //                 display: "grid",
+// // //                 placeItems: "center",
+// // //                 padding: 12,
+// // //                 overflow: "hidden",
+// // //               }}
+// // //             >
+// // //               <div
+// // //                 ref={previewPageRef}
+// // //                 style={{
+// // //                   transform: `scale(${previewScale})`,
+// // //                   transformOrigin: "top center",
+// // //                 }}
+// // //               >
+// // //                 <ResumePreview schema={previewSchema || {}} />
+// // //               </div>
 // // //             </div>
 // // //           </div>
 // // //         </div>
 // // //       )}
 
-// // //       {/* ✅ Add Template Modal */}
-// // //       {openAdd && (
-// // //         <div onClick={() => setOpenAdd(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20 }}>
-// // //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 14, width: 980, maxHeight: "86vh", overflow: "auto" }}>
-// // //             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 10 }}>
-// // //               <div style={{ fontWeight: 900, fontSize: 16 }}>Add Template</div>
-// // //               <button onClick={() => setOpenAdd(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 10px", fontWeight: 900 }}>Close</button>
+// // //       {/* Add Template Modal (ADMIN ONLY) */}
+// // //       {mode === "admin" && openAdd && (
+// // //         <div
+// // //           onClick={() => setOpenAdd(false)}
+// // //           style={{
+// // //             position: "fixed",
+// // //             inset: 0,
+// // //             background: "rgba(0,0,0,0.35)",
+// // //             display: "grid",
+// // //             placeItems: "center",
+// // //             padding: 20,
+// // //             zIndex: 1000,
+// // //           }}
+// // //         >
+// // //           <div
+// // //             onClick={(e) => e.stopPropagation()}
+// // //             style={{
+// // //               background: "white",
+// // //               borderRadius: 16,
+// // //               border: "1px solid #e5e7eb",
+// // //               padding: 20,
+// // //               width: "90%",
+// // //               maxWidth: 1000,
+// // //               maxHeight: "86vh",
+// // //               overflow: "auto",
+// // //             }}
+// // //           >
+// // //             <div
+// // //               style={{
+// // //                 display: "flex",
+// // //                 justifyContent: "space-between",
+// // //                 gap: 10,
+// // //                 alignItems: "center",
+// // //                 marginBottom: 16,
+// // //               }}
+// // //             >
+// // //               <div style={{ fontWeight: 900, fontSize: 18 }}>Add Template</div>
+// // //               <button
+// // //                 onClick={() => setOpenAdd(false)}
+// // //                 style={{
+// // //                   border: "1px solid #e5e7eb",
+// // //                   background: "white",
+// // //                   borderRadius: 10,
+// // //                   padding: "8px 12px",
+// // //                   fontWeight: 900,
+// // //                 }}
+// // //               >
+// // //                 Close
+// // //               </button>
 // // //             </div>
 
-// // //             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-// // //               <button onClick={() => setAddTab("market")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "market" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // //             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+// // //               <button
+// // //                 onClick={() => setAddTab("market")}
+// // //                 style={{
+// // //                   padding: "10px 14px",
+// // //                   borderRadius: 10,
+// // //                   border: "1px solid #e5e7eb",
+// // //                   background: addTab === "market" ? "#f3f4f6" : "white",
+// // //                   fontWeight: 900,
+// // //                 }}
+// // //               >
 // // //                 Marketplace
 // // //               </button>
-// // //               <button onClick={() => setAddTab("scratch")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "scratch" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // //               <button
+// // //                 onClick={() => setAddTab("scratch")}
+// // //                 style={{
+// // //                   padding: "10px 14px",
+// // //                   borderRadius: 10,
+// // //                   border: "1px solid #e5e7eb",
+// // //                   background: addTab === "scratch" ? "#f3f4f6" : "white",
+// // //                   fontWeight: 900,
+// // //                 }}
+// // //               >
 // // //                 Create from Scratch
 // // //               </button>
-// // //               <button onClick={() => setAddTab("duplicate")} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "duplicate" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// // //               <button
+// // //                 onClick={() => setAddTab("duplicate")}
+// // //                 style={{
+// // //                   padding: "10px 14px",
+// // //                   borderRadius: 10,
+// // //                   border: "1px solid #e5e7eb",
+// // //                   background: addTab === "duplicate" ? "#f3f4f6" : "white",
+// // //                   fontWeight: 900,
+// // //                 }}
+// // //               >
 // // //                 Duplicate Existing
 // // //               </button>
 // // //             </div>
 
 // // //             {addTab === "market" && (
 // // //               <>
-// // //                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 10 }}>
-// // //                   ✅ Choose template → Import → Saved permanently in DB + storage (no external dependency).
+// // //                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}>
+// // //                   ✅ Choose template → Import → Saved permanently in DB + storage
+// // //                   (no external dependency).
 // // //                 </div>
 
 // // //                 {marketLoading ? (
 // // //                   <div style={{ padding: 20 }}>Loading marketplace...</div>
 // // //                 ) : (
-// // //                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(260px, 1fr))", gap: 12 }}>
+// // //                   <div
+// // //                     style={{
+// // //                       display: "grid",
+// // //                       gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+// // //                       gap: 16,
+// // //                     }}
+// // //                   >
 // // //                     {market.map((m) => (
-// // //                       <div key={m.key} style={{ border: "1px solid #eef2f7", borderRadius: 14, padding: 12 }}>
+// // //                       <div
+// // //                         key={m.key}
+// // //                         style={{
+// // //                           border: "1px solid #eef2f7",
+// // //                           borderRadius: 14,
+// // //                           padding: 16,
+// // //                         }}
+// // //                       >
 // // //                         {cardImg(m)}
-// // //                         <div style={{ fontWeight: 900, marginTop: 8 }}>{m.name}</div>
-// // //                         <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+// // //                         <div style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}>
+// // //                           {m.name}
+// // //                         </div>
+// // //                         <div
+// // //                           style={{
+// // //                             display: "flex",
+// // //                             gap: 8,
+// // //                             marginTop: 8,
+// // //                             flexWrap: "wrap",
+// // //                           }}
+// // //                         >
 // // //                           {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
 // // //                           {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-// // //                           {m.price_type === "free" ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0") : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+// // //                           {m.price_type === "free"
+// // //                             ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
+// // //                             : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
 // // //                         </div>
-// // //                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+
+// // //                         <div
+// // //                           style={{
+// // //                             display: "grid",
+// // //                             gridTemplateColumns: "1fr 1fr",
+// // //                             gap: 10,
+// // //                             marginTop: 16,
+// // //                           }}
+// // //                         >
 // // //                           <button
-// // //                             onClick={() => {
-// // //                               setPreviewSchema(m.schema);
-// // //                               setPreviewOpen(true);
+// // //                             onClick={() => openPreview(m.schema)}
+// // //                             style={{
+// // //                               padding: "10px 12px",
+// // //                               borderRadius: 12,
+// // //                               border: "1px solid #e5e7eb",
+// // //                               background: "white",
+// // //                               fontWeight: 900,
 // // //                             }}
-// // //                             style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
 // // //                           >
 // // //                             Preview
 // // //                           </button>
+
 // // //                           <button
 // // //                             onClick={() => importFromMarketplace(m)}
-// // //                             style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// // //                             style={{
+// // //                               padding: "10px 12px",
+// // //                               borderRadius: 12,
+// // //                               border: "1px solid #1d4ed8",
+// // //                               background: "#2563eb",
+// // //                               color: "white",
+// // //                               fontWeight: 900,
+// // //                             }}
 // // //                           >
 // // //                             Use / Import
 // // //                           </button>
@@ -1649,46 +4058,124 @@
 // // //             )}
 
 // // //             {addTab === "scratch" && (
-// // //               <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
+// // //               <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
 // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
 // // //                   ✅ Blank canvas create → draft → open builder
 // // //                 </div>
-// // //                 <input value={scratch.name} onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))} placeholder="Template name" style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
-// // //                 <select value={scratch.category} onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // //                 <input
+// // //                   value={scratch.name}
+// // //                   onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))}
+// // //                   placeholder="Template name"
+// // //                   style={{
+// // //                     padding: 12,
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #e5e7eb",
+// // //                   }}
+// // //                 />
+// // //                 <select
+// // //                   value={scratch.category}
+// // //                   onChange={(e) =>
+// // //                     setScratch((p) => ({
+// // //                       ...p,
+// // //                       category: e.target.value as Category,
+// // //                     }))
+// // //                   }
+// // //                   style={{
+// // //                     padding: 12,
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #e5e7eb",
+// // //                   }}
+// // //                 >
 // // //                   <option>Modern</option>
 // // //                   <option>Classic</option>
 // // //                 </select>
-// // //                 <select value={scratch.layout} onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // //                 <select
+// // //                   value={scratch.layout}
+// // //                   onChange={(e) =>
+// // //                     setScratch((p) => ({
+// // //                       ...p,
+// // //                       layout: e.target.value as Layout,
+// // //                     }))
+// // //                   }
+// // //                   style={{
+// // //                     padding: 12,
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #e5e7eb",
+// // //                   }}
+// // //                 >
 // // //                   <option>Single Column</option>
 // // //                   <option>Two Column</option>
 // // //                   <option>Sidebar Left</option>
 // // //                   <option>Sidebar Right</option>
 // // //                 </select>
-// // //                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-// // //                   <label style={{ fontWeight: 900, fontSize: 12 }}>Color</label>
-// // //                   <input type="color" value={scratch.color} onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))} />
+// // //                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+// // //                   <label style={{ fontWeight: 900, fontSize: 14 }}>Color</label>
+// // //                   <input
+// // //                     type="color"
+// // //                     value={scratch.color}
+// // //                     onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))}
+// // //                     style={{ width: 50, height: 50, borderRadius: 10 }}
+// // //                   />
+// // //                   <span style={{ fontSize: 14 }}>{scratch.color}</span>
 // // //                 </div>
-// // //                 <button onClick={createScratch} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // //                 <button
+// // //                   onClick={createScratch}
+// // //                   style={{
+// // //                     padding: "12px 16px",
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #1d4ed8",
+// // //                     background: "#2563eb",
+// // //                     color: "white",
+// // //                     fontWeight: 900,
+// // //                   }}
+// // //                 >
 // // //                   Create & Open Builder
 // // //                 </button>
 // // //               </div>
 // // //             )}
 
 // // //             {addTab === "duplicate" && (
-// // //               <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
+// // //               <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
 // // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
 // // //                   ✅ Existing template copy → schema cloned → open builder
 // // //                 </div>
-// // //                 <select value={dupFromId} onChange={(e) => setDupFromId(Number(e.target.value) || "")} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// // //                 <select
+// // //                   value={dupFromId}
+// // //                   onChange={(e) => setDupFromId(Number(e.target.value) || "")}
+// // //                   style={{
+// // //                     padding: 12,
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #e5e7eb",
+// // //                   }}
+// // //                 >
 // // //                   <option value="">Select template</option>
 // // //                   {templates.map((t) => (
 // // //                     <option key={t.id} value={t.id}>
-// // //                       {t.name}
+// // //                       {t.name} ({t.category})
 // // //                     </option>
 // // //                   ))}
 // // //                 </select>
-// // //                 <input value={dupName} onChange={(e) => setDupName(e.target.value)} placeholder="New name (optional)" style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
-// // //                 <button onClick={duplicate} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// // //                 <input
+// // //                   value={dupName}
+// // //                   onChange={(e) => setDupName(e.target.value)}
+// // //                   placeholder="New name (optional)"
+// // //                   style={{
+// // //                     padding: 12,
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #e5e7eb",
+// // //                   }}
+// // //                 />
+// // //                 <button
+// // //                   onClick={duplicate}
+// // //                   style={{
+// // //                     padding: "12px 16px",
+// // //                     borderRadius: 12,
+// // //                     border: "1px solid #1d4ed8",
+// // //                     background: "#2563eb",
+// // //                     color: "white",
+// // //                     fontWeight: 900,
+// // //                   }}
+// // //                 >
 // // //                   Duplicate & Open Builder
 // // //                 </button>
 // // //               </div>
@@ -1700,16 +4187,23 @@
 // // //   );
 // // // }
 
-// // // src/pages/dashboard/AdminTemplates.tsx
-
-// // import { useEffect, useMemo, useState } from "react";
+// // import { useEffect, useMemo, useRef, useState } from "react";
 // // import axios from "../../api/axiosInstance";
-// // import { useNavigate } from "react-router-dom";
+// // import { useLocation, useNavigate } from "react-router-dom";
 // // import ResumePreview from "./ResumePreview";
 
 // // type TemplateStatus = "active" | "draft";
 // // type Category = "Modern" | "Classic";
-// // type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+// // type Layout =
+// //   | "Two Column"
+// //   | "Single Column"
+// //   | "Sidebar Left"
+// //   | "Sidebar Right"
+// //   | "PDF Template"
+// //   | "PDF Background";
+
+// // type PricingStatus = "active" | "inactive";
+// // type BillingType = "free" | "one_time" | "subscription";
 
 // // type TemplateRow = {
 // //   id: number;
@@ -1725,6 +4219,19 @@
 // //   schema?: any;
 // //   preview_image?: string;
 // //   updated?: string;
+
+// //   pages?: any[];
+// //   pdf_file?: string;
+
+// //   pricing?: {
+// //     billing_type: BillingType;
+// //     currency: "INR" | "USD";
+// //     price: number;
+// //     discount_percent: number;
+// //     final_price: number;
+// //     status: PricingStatus;
+// //   };
+// //   has_access?: boolean;
 // // };
 
 // // type MarketplaceTpl = {
@@ -1740,20 +4247,147 @@
 // // };
 
 // // function authHeaders() {
-// //   const token = localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+// //   const token =
+// //     localStorage.getItem("admin_access") ||
+// //     localStorage.getItem("access") ||
+// //     "";
 // //   return token ? { Authorization: `Bearer ${token}` } : {};
 // // }
 
 // // function pill(text: string, bg: string, fg: string, border: string) {
 // //   return (
-// //     <span style={{ fontSize: 12, fontWeight: 900, padding: "4px 8px", borderRadius: 999, background: bg, color: fg, border: `1px solid ${border}` }}>
+// //     <span
+// //       style={{
+// //         fontSize: 12,
+// //         fontWeight: 900,
+// //         padding: "4px 8px",
+// //         borderRadius: 999,
+// //         background: bg,
+// //         color: fg,
+// //         border: `1px solid ${border}`,
+// //       }}
+// //     >
 // //       {text}
 // //     </span>
 // //   );
 // // }
 
+// // const currencySymbol = (c?: "INR" | "USD") => (c === "USD" ? "$" : "₹");
+
+// // /** ---------- Helpers: PDF detect + pages resolve ---------- */
+// // function isPdfTemplate(schema?: any, t?: any) {
+// //   const s = schema || {};
+// //   if (s?.layout === "PDF Template" || s?.layout === "PDF Background") return true;
+// //   if (s?.pdf?.pages?.length) return true;
+// //   if (t?.pages?.length) return true;
+// //   if (t?.schema?.pdf?.pages?.length) return true;
+// //   if (t?.pdf_pages?.length) return true;
+// //   return false;
+// // }
+
+// // function resolvePdfPages(schema?: any, t?: any) {
+// //   const s = schema || {};
+// //   const raw = s?.pdf?.pages || t?.pages || t?.schema?.pdf?.pages || t?.pdf_pages || [];
+// //   const out: string[] = [];
+// //   for (const p of raw) {
+// //     if (!p) continue;
+// //     if (typeof p === "string") out.push(p);
+// //     else out.push(p.url || p.image || p.src || "");
+// //   }
+// //   return out.filter(Boolean);
+// // }
+
+// // /** ✅ Card thumbnail: fit width (readable) and crop height */
+// // function LiveTemplateThumb({ schema, template }: { schema: any; template: any }) {
+// //   const A4_W = 794;
+// //   const A4_H = 1123;
+
+// //   const wrapRef = useRef<HTMLDivElement | null>(null);
+// //   const [w, setW] = useState(280);
+
+// //   useEffect(() => {
+// //     const el = wrapRef.current;
+// //     if (!el) return;
+// //     const ro = new ResizeObserver(() => {
+// //       setW(el.clientWidth || 280);
+// //     });
+// //     ro.observe(el);
+// //     setW(el.clientWidth || 280);
+// //     return () => ro.disconnect();
+// //   }, []);
+
+// //   const scale = Math.max(0.15, Math.min(0.45, w / A4_W)); // ✅ width-fit, readable
+// //   const cropH = 180;
+
+// //   return (
+// //     <div
+// //       ref={wrapRef}
+// //       style={{
+// //         width: "100%",
+// //         height: cropH,
+// //         borderRadius: 12,
+// //         border: "1px solid #e5e7eb",
+// //         background: "#f8fafc",
+// //         overflow: "hidden",
+// //         position: "relative",
+// //       }}
+// //     >
+// //       <div
+// //         style={{
+// //           width: A4_W,
+// //           minHeight: A4_H,
+// //           transform: `scale(${scale})`,
+// //           transformOrigin: "top left",
+// //           pointerEvents: "none",
+// //         }}
+// //       >
+// //         <ResumePreview schema={schema || {}} template={template} />
+// //       </div>
+// //     </div>
+// //   );
+// // }
+
+// // /** ✅ Image preview that falls back if image fails */
+// // function ImageWithFallback({
+// //   src,
+// //   fallback,
+// // }: {
+// //   src: string;
+// //   fallback: React.ReactNode;
+// // }) {
+// //   const [failed, setFailed] = useState(false);
+
+// //   useEffect(() => {
+// //     setFailed(false);
+// //   }, [src]);
+
+// //   if (!src || failed) return <>{fallback}</>;
+
+// //   return (
+// //     <img
+// //       src={src}
+// //       alt=""
+// //       onError={() => setFailed(true)}
+// //       style={{
+// //         width: "100%",
+// //         height: 180,
+// //         objectFit: "cover",
+// //         borderRadius: 12,
+// //         border: "1px solid #e5e7eb",
+// //         display: "block",
+// //         background: "#f3f4f6",
+// //       }}
+// //     />
+// //   );
+// // }
+
 // // export default function AdminTemplates() {
 // //   const nav = useNavigate();
+// //   const location = useLocation();
+
+// //   const mode: "admin" | "student" = location.pathname.startsWith("/admin")
+// //     ? "admin"
+// //     : "student";
 
 // //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
 // //   const [loading, setLoading] = useState(false);
@@ -1761,14 +4395,22 @@
 // //   const [search, setSearch] = useState("");
 // //   const [openAdd, setOpenAdd] = useState(false);
 
-// //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">("market");
+// //   const [addTab, setAddTab] = useState<"market" | "scratch" | "duplicate">(
+// //     "market"
+// //   );
 // //   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
 // //   const [marketLoading, setMarketLoading] = useState(false);
 
+// //   // ✅ Preview modal
 // //   const [previewOpen, setPreviewOpen] = useState(false);
 // //   const [previewSchema, setPreviewSchema] = useState<any>(null);
+// //   const [previewTemplate, setPreviewTemplate] = useState<any>(null);
 
-// //   // scratch form
+// //   // ✅ fit scale
+// //   const previewViewportRef = useRef<HTMLDivElement | null>(null);
+// //   const previewPageRef = useRef<HTMLDivElement | null>(null);
+// //   const [previewScale, setPreviewScale] = useState(1);
+
 // //   const [scratch, setScratch] = useState({
 // //     name: "",
 // //     category: "Modern" as Category,
@@ -1776,14 +4418,26 @@
 // //     color: "#2563eb",
 // //   });
 
-// //   // duplicate form
 // //   const [dupFromId, setDupFromId] = useState<number | "">("");
 // //   const [dupName, setDupName] = useState("");
+
+// //   const [payingId, setPayingId] = useState<number | null>(null);
+
+// //   const isLocked = (t: TemplateRow) => {
+// //     if (mode !== "student") return false;
+// //     const p = t.pricing;
+// //     if (!p) return false;
+// //     if (p.status !== "active") return true;
+// //     if (p.billing_type === "free") return false;
+// //     return !t.has_access;
+// //   };
 
 // //   const fetchTemplates = async () => {
 // //     setLoading(true);
 // //     try {
-// //       const res = await axios.get("/auth/admin/templates/", { headers: authHeaders() });
+// //       const url =
+// //         mode === "admin" ? "/auth/admin/templates/" : "/auth/student/templates/";
+// //       const res = await axios.get(url, { headers: authHeaders() });
 // //       setTemplates(res.data || []);
 // //     } finally {
 // //       setLoading(false);
@@ -1793,7 +4447,9 @@
 // //   const fetchMarketplace = async () => {
 // //     setMarketLoading(true);
 // //     try {
-// //       const res = await axios.get("/auth/admin/template-marketplace/", { headers: authHeaders() });
+// //       const res = await axios.get("/auth/admin/template-marketplace/", {
+// //         headers: authHeaders(),
+// //       });
 // //       setMarket(res.data?.results || []);
 // //     } finally {
 // //       setMarketLoading(false);
@@ -1802,21 +4458,26 @@
 
 // //   useEffect(() => {
 // //     fetchTemplates();
-// //   }, []);
+// //     // eslint-disable-next-line react-hooks/exhaustive-deps
+// //   }, [mode]);
 
 // //   const filtered = useMemo(() => {
 // //     const q = search.trim().toLowerCase();
 // //     if (!q) return templates;
-// //     return templates.filter((t) => t.name.toLowerCase().includes(q));
+// //     return templates.filter((t) => (t.name || "").toLowerCase().includes(q));
 // //   }, [templates, search]);
 
 // //   const doDelete = async (id: number) => {
+// //     if (mode !== "admin") return;
 // //     if (!window.confirm("Delete this template?")) return;
-// //     await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
+// //     await axios.delete(`/auth/admin/templates/${id}/`, {
+// //       headers: authHeaders(),
+// //     });
 // //     fetchTemplates();
 // //   };
 
 // //   const toggleStatus = async (t: TemplateRow) => {
+// //     if (mode !== "admin") return;
 // //     const next = t.status === "active" ? "draft" : "active";
 // //     await axios.put(
 // //       `/auth/admin/templates/${t.id}/`,
@@ -1827,6 +4488,7 @@
 // //   };
 
 // //   const importFromMarketplace = async (tpl: MarketplaceTpl) => {
+// //     if (mode !== "admin") return;
 // //     const res = await axios.post(
 // //       "/auth/admin/templates/import/",
 // //       { marketplace_key: tpl.key },
@@ -1838,7 +4500,9 @@
 // //   };
 
 // //   const createScratch = async () => {
+// //     if (mode !== "admin") return;
 // //     if (!scratch.name.trim()) return alert("Name required");
+
 // //     const schema = {
 // //       version: 1,
 // //       layout: scratch.layout,
@@ -1851,16 +4515,22 @@
 // //         lineHeight: 1.35,
 // //       },
 // //       order: ["header", "summary", "experience", "education", "skills", "projects"],
-// //       columns: { left: ["summary", "skills", "education"], right: ["header", "experience", "projects"] },
+// //       columns: {
+// //         left: ["summary", "skills", "education", "certifications", "languages", "achievements", "courses"],
+// //         right: ["header", "experience", "projects"],
+// //       },
 // //       sections: {
 // //         header: { enabled: true },
-// //         summary: { enabled: true },
-// //         experience: { enabled: true },
-// //         education: { enabled: true },
-// //         skills: { enabled: true },
-// //         projects: { enabled: true },
-// //         certifications: { enabled: false },
-// //         languages: { enabled: false },
+// //         contacts: { enabled: true, type: "list" },
+// //         summary: { enabled: true, type: "text" },
+// //         experience: { enabled: true, type: "timeline" },
+// //         education: { enabled: true, type: "timeline" },
+// //         skills: { enabled: true, type: "skills" },
+// //         projects: { enabled: true, type: "timeline" },
+// //         certifications: { enabled: true, type: "list" },
+// //         languages: { enabled: true, type: "languages" },
+// //         achievements: { enabled: true, type: "list" },
+// //         courses: { enabled: true, type: "list" },
 // //       },
 // //     };
 
@@ -1884,7 +4554,9 @@
 // //   };
 
 // //   const duplicate = async () => {
+// //     if (mode !== "admin") return;
 // //     if (!dupFromId) return alert("Select a template");
+
 // //     const res = await axios.post(
 // //       `/auth/admin/templates/${dupFromId}/duplicate/`,
 // //       { name: dupName.trim() || undefined },
@@ -1896,137 +4568,462 @@
 // //   };
 
 // //   const openAddModal = () => {
+// //     if (mode !== "admin") return;
 // //     setOpenAdd(true);
 // //     setAddTab("market");
 // //     fetchMarketplace();
 // //   };
 
-// //   const cardImg = (t: any) => {
-// //     const src = t.preview_image || t.preview_image_url;
-// //     if (src) return <img src={src} alt="" style={{ width: "100%", height: 180, objectFit: "cover", borderRadius: 12, border: "1px solid #e5e7eb" }} />;
-// //     return (
-// //       <div style={{ width: "100%", height: 180, borderRadius: 12, border: "1px solid #e5e7eb", background: "#f3f4f6", display: "grid", placeItems: "center", color: "#6b7280", fontWeight: 900 }}>
-// //         No Preview
-// //       </div>
-// //     );
+// //   /** ✅ CARD PREVIEW ALWAYS SHOW */
+// //   const cardPreview = (t: any) => {
+// //     const fallback = <LiveTemplateThumb schema={t.schema || {}} template={t} />;
+
+// //     const src = t.preview_image || t.preview_image_url || "";
+// //     const pdfPages = resolvePdfPages(t.schema || {}, t);
+// //     const isPdf = isPdfTemplate(t.schema || {}, t);
+
+// //     if (src) return <ImageWithFallback src={src} fallback={fallback} />;
+
+// //     if (isPdf && pdfPages.length > 0) {
+// //       return <ImageWithFallback src={pdfPages[0]} fallback={fallback} />;
+// //     }
+
+// //     return fallback;
+// //   };
+
+// //   /** ✅ MODAL FIT: stable (double RAF) */
+// //   const recalcPreviewScale = () => {
+// //     const viewport = previewViewportRef.current;
+// //     const page = previewPageRef.current;
+// //     if (!viewport || !page) return;
+
+// //     // reset for measure
+// //     setPreviewScale(1);
+// //     page.style.transform = "scale(1)";
+// //     page.style.transformOrigin = "top center";
+
+// //     requestAnimationFrame(() => {
+// //       requestAnimationFrame(() => {
+// //         const vw = viewport.clientWidth;
+// //         const vh = viewport.clientHeight;
+// //         if (!vw || !vh) return;
+
+// //         const pw = page.scrollWidth || page.offsetWidth;
+// //         const ph = page.scrollHeight || page.offsetHeight;
+// //         if (!pw || !ph) return;
+
+// //         const padding = 32;
+// //         const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
+// //         const clamped = Math.max(0.2, Math.min(1, scale));
+// //         setPreviewScale(clamped);
+// //       });
+// //     });
+// //   };
+
+// //   useEffect(() => {
+// //     if (!previewOpen) return;
+
+// //     recalcPreviewScale();
+
+// //     const viewport = previewViewportRef.current;
+// //     let ro: ResizeObserver | null = null;
+// //     if (viewport) {
+// //       ro = new ResizeObserver(() => recalcPreviewScale());
+// //       ro.observe(viewport);
+// //     }
+
+// //     window.addEventListener("resize", recalcPreviewScale);
+// //     return () => {
+// //       window.removeEventListener("resize", recalcPreviewScale);
+// //       if (ro) ro.disconnect();
+// //     };
+// //     // eslint-disable-next-line react-hooks/exhaustive-deps
+// //   }, [previewOpen, previewSchema, previewTemplate]);
+
+// //   useEffect(() => {
+// //     if (previewOpen) setOpenAdd(false);
+// //   }, [previewOpen]);
+
+// //   const openPreview = (schema: any, templateObj?: any) => {
+// //     setOpenAdd(false);
+// //     setPreviewSchema(schema || {});
+// //     setPreviewTemplate(templateObj || null);
+// //     setPreviewOpen(true);
 // //   };
 
 // //   return (
 // //     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: 16 }}>
 // //       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
 // //         <div>
-// //           <div style={{ fontWeight: 900, fontSize: 22 }}>Resume Templates</div>
-// //           <div style={{ color: "#6b7280", fontSize: 12 }}>Import • Scratch • Duplicate • View/Edit/Delete</div>
+// //           <div style={{ fontWeight: 900, fontSize: 22 }}>
+// //             {mode === "admin" ? "Resume Templates" : "Choose a Template"}
+// //           </div>
+// //           <div style={{ color: "#6b7280", fontSize: 12 }}>
+// //             {mode === "admin"
+// //               ? "Import • Scratch • Duplicate • View/Edit/Delete"
+// //               : "Preview • Unlock (if paid) • Use Template"}
+// //           </div>
 // //         </div>
-// //         <button onClick={openAddModal} style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
-// //           + Add Template
-// //         </button>
+
+// //         {mode === "admin" ? (
+// //           <button
+// //             onClick={openAddModal}
+// //             style={{
+// //               padding: "10px 14px",
+// //               borderRadius: 12,
+// //               border: "1px solid #1d4ed8",
+// //               background: "#2563eb",
+// //               color: "white",
+// //               fontWeight: 900,
+// //             }}
+// //           >
+// //             + Add Template
+// //           </button>
+// //         ) : null}
 // //       </div>
 
 // //       <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-// //         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search templates..." style={{ flex: 1, padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }} />
-// //         <button onClick={() => nav("/admin/templates/pricing")} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}>
-// //           Pricing
-// //         </button>
+// //         <input
+// //           value={search}
+// //           onChange={(e) => setSearch(e.target.value)}
+// //           placeholder="Search templates..."
+// //           style={{
+// //             flex: 1,
+// //             padding: 10,
+// //             borderRadius: 12,
+// //             border: "1px solid #e5e7eb",
+// //           }}
+// //         />
+
+// //         {mode === "admin" ? (
+// //           <button
+// //             onClick={() => nav("/admin/templates/pricing")}
+// //             style={{
+// //               padding: "10px 12px",
+// //               borderRadius: 12,
+// //               border: "1px solid #e5e7eb",
+// //               background: "white",
+// //               fontWeight: 900,
+// //             }}
+// //           >
+// //             Pricing
+// //           </button>
+// //         ) : (
+// //           <button
+// //             onClick={() => fetchTemplates()}
+// //             style={{
+// //               padding: "10px 12px",
+// //               borderRadius: 12,
+// //               border: "1px solid #e5e7eb",
+// //               background: "white",
+// //               fontWeight: 900,
+// //             }}
+// //           >
+// //             Refresh
+// //           </button>
+// //         )}
 // //       </div>
 
 // //       {loading ? (
 // //         <div style={{ padding: 20 }}>Loading...</div>
 // //       ) : (
 // //         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
-// //           {filtered.map((t) => (
-// //             <div key={t.id} style={{ background: "white", border: "1px solid #eef2f7", borderRadius: 16, padding: 16, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-// //               {cardImg(t)}
-// //               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-// //                 <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
-// //                 {t.status === "active"
-// //                   ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
-// //                   : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
-// //               </div>
-// //               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-// //                 {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
-// //                 {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-// //                 {t.source ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a") : null}
-// //               </div>
+// //           {filtered.map((t) => {
+// //             const locked = isLocked(t);
 
-// //               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
-// //                 <button
-// //                   onClick={() => {
-// //                     setPreviewSchema(t.schema || {});
-// //                     setPreviewOpen(true);
-// //                   }}
-// //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
-// //                 >
-// //                   View
-// //                 </button>
-// //                 <button
-// //                   onClick={() => nav(`/admin/templates/builder/${t.id}`)}
-// //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
-// //                 >
-// //                   Edit
-// //                 </button>
-// //                 {/* <button
-// //                   onClick={() => nav(`/admin/template/test/${t.id}`)}
-// //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #10b981", background: "#10b981", color: "white", fontWeight: 900 }}
-// //                 >
-// //                   Test
-// //                 </button> */}
-// //                 <button
-// //                   onClick={() => nav(`/admin/resume/create/${t.id}`)}
-// //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #8b5cf6", background: "#8b5cf6", color: "white", fontWeight: 900 }}
-// //                 >
-// //                   Create Resume
-// //                 </button>
-// //                 <button
-// //                   onClick={() => toggleStatus(t)}
-// //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
-// //                 >
-// //                   {t.status === "active" ? "Disable" : "Enable"}
-// //                 </button>
-// //                 <button
-// //                   onClick={() => doDelete(t.id)}
-// //                   style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #fecaca", background: "white", color: "#991b1b", fontWeight: 900 }}
-// //                 >
-// //                   Delete
-// //                 </button>
+// //             return (
+// //               <div
+// //                 key={t.id}
+// //                 style={{
+// //                   background: "white",
+// //                   border: "1px solid #eef2f7",
+// //                   borderRadius: 16,
+// //                   padding: 16,
+// //                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+// //                 }}
+// //               >
+// //                 {/* ✅ ALWAYS visible preview */}
+// //                 {cardPreview(t)}
+
+// //                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+// //                   <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
+// //                   {t.status === "active"
+// //                     ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
+// //                     : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
+// //                 </div>
+
+// //                 <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+// //                   {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
+// //                   {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+// //                   {t.source ? pill(String(t.source).toUpperCase(), "#fef3c7", "#92400e", "#fde68a") : null}
+// //                 </div>
+
+// //                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+// //                   <button
+// //                     onClick={() => openPreview(t.schema || {}, t)}
+// //                     style={{
+// //                       padding: "10px 12px",
+// //                       borderRadius: 12,
+// //                       border: "1px solid #e5e7eb",
+// //                       background: "white",
+// //                       fontWeight: 900,
+// //                     }}
+// //                   >
+// //                     View
+// //                   </button>
+
+// //                   {mode === "admin" ? (
+// //                     <button
+// //                       onClick={() => nav(`/admin/templates/builder/${t.id}`)}
+// //                       style={{
+// //                         padding: "10px 12px",
+// //                         borderRadius: 12,
+// //                         border: "1px solid #1d4ed8",
+// //                         background: "#2563eb",
+// //                         color: "white",
+// //                         fontWeight: 900,
+// //                       }}
+// //                     >
+// //                       Edit
+// //                     </button>
+// //                   ) : (
+// //                     <button
+// //                       disabled={locked}
+// //                       onClick={() => nav(`/resume/create/${t.id}`)}
+// //                       style={{
+// //                         padding: "10px 12px",
+// //                         borderRadius: 12,
+// //                         border: "1px solid #16a34a",
+// //                         background: locked ? "#9ca3af" : "#16a34a",
+// //                         color: "white",
+// //                         fontWeight: 950,
+// //                       }}
+// //                     >
+// //                       {locked ? "Locked" : "Use Template"}
+// //                     </button>
+// //                   )}
+
+// //                   {mode === "admin" ? (
+// //                     <>
+// //                       <button
+// //                         onClick={() => nav(`/admin/resume/create/${t.id}`)}
+// //                         style={{
+// //                           padding: "10px 12px",
+// //                           borderRadius: 12,
+// //                           border: "1px solid #8b5cf6",
+// //                           background: "#8b5cf6",
+// //                           color: "white",
+// //                           fontWeight: 900,
+// //                         }}
+// //                       >
+// //                         Create Resume
+// //                       </button>
+
+// //                       <button
+// //                         onClick={() => toggleStatus(t)}
+// //                         style={{
+// //                           padding: "10px 12px",
+// //                           borderRadius: 12,
+// //                           border: "1px solid #e5e7eb",
+// //                           background: "white",
+// //                           fontWeight: 900,
+// //                         }}
+// //                       >
+// //                         {t.status === "active" ? "Disable" : "Enable"}
+// //                       </button>
+
+// //                       <button
+// //                         onClick={() => doDelete(t.id)}
+// //                         style={{
+// //                           padding: "10px 12px",
+// //                           borderRadius: 12,
+// //                           border: "1px solid #fecaca",
+// //                           background: "white",
+// //                           color: "#991b1b",
+// //                           fontWeight: 900,
+// //                         }}
+// //                       >
+// //                         Delete
+// //                       </button>
+// //                     </>
+// //                   ) : null}
+// //                 </div>
 // //               </div>
-// //             </div>
-// //           ))}
+// //             );
+// //           })}
 // //         </div>
 // //       )}
 
-// //       {/* Preview Modal */}
+// //       {/* ✅ Preview Modal (stable Fit) */}
 // //       {previewOpen && (
-// //         <div onClick={() => setPreviewOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20, zIndex: 1000 }}>
-// //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 20, width: "90%", maxWidth: 600, maxHeight: "80vh", overflow: "auto" }}>
-// //             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+// //         <div
+// //           onClick={() => setPreviewOpen(false)}
+// //           style={{
+// //             position: "fixed",
+// //             inset: 0,
+// //             background: "rgba(0,0,0,0.45)",
+// //             display: "grid",
+// //             placeItems: "center",
+// //             padding: 16,
+// //             zIndex: 3000,
+// //           }}
+// //         >
+// //           <div
+// //             onClick={(e) => e.stopPropagation()}
+// //             style={{
+// //               background: "white",
+// //               borderRadius: 16,
+// //               border: "1px solid #e5e7eb",
+// //               width: "min(1100px, 96vw)",
+// //               height: "min(92vh, 900px)",
+// //               display: "flex",
+// //               flexDirection: "column",
+// //               overflow: "hidden",
+// //             }}
+// //           >
+// //             <div
+// //               style={{
+// //                 padding: 14,
+// //                 borderBottom: "1px solid #e5e7eb",
+// //                 display: "flex",
+// //                 justifyContent: "space-between",
+// //                 alignItems: "center",
+// //                 gap: 10,
+// //               }}
+// //             >
 // //               <div style={{ fontWeight: 900, fontSize: 18 }}>Template Preview</div>
-// //               <button onClick={() => setPreviewOpen(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 12px", fontWeight: 900 }}>Close</button>
+// //               <div style={{ display: "flex", gap: 8 }}>
+// //                 <button
+// //                   onClick={() => recalcPreviewScale()}
+// //                   style={{
+// //                     border: "1px solid #e5e7eb",
+// //                     background: "white",
+// //                     borderRadius: 10,
+// //                     padding: "8px 12px",
+// //                     fontWeight: 900,
+// //                   }}
+// //                 >
+// //                   Fit
+// //                 </button>
+// //                 <button
+// //                   onClick={() => setPreviewOpen(false)}
+// //                   style={{
+// //                     border: "1px solid #e5e7eb",
+// //                     background: "white",
+// //                     borderRadius: 10,
+// //                     padding: "8px 12px",
+// //                     fontWeight: 900,
+// //                   }}
+// //                 >
+// //                   Close
+// //                 </button>
+// //               </div>
 // //             </div>
-// //             <div style={{ display: "grid", placeItems: "center" }}>
-// //               <ResumePreview schema={previewSchema || {}} />
+
+// //             <div
+// //               ref={previewViewportRef}
+// //               style={{
+// //                 flex: 1,
+// //                 background: "#f3f4f6",
+// //                 display: "grid",
+// //                 placeItems: "center",
+// //                 padding: 12,
+// //                 overflow: "hidden",
+// //               }}
+// //             >
+// //               <div
+// //                 ref={previewPageRef}
+// //                 style={{
+// //                   display: "inline-block",
+// //                   transform: `scale(${previewScale})`,
+// //                   transformOrigin: "top center",
+// //                 }}
+// //               >
+// //                 <ResumePreview schema={previewSchema || {}} template={previewTemplate} />
+// //               </div>
 // //             </div>
 // //           </div>
 // //         </div>
 // //       )}
 
-// //       {/* Add Template Modal */}
-// //       {openAdd && (
-// //         <div onClick={() => setOpenAdd(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "grid", placeItems: "center", padding: 20, zIndex: 1000 }}>
-// //           <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", padding: 20, width: "90%", maxWidth: 1000, maxHeight: "86vh", overflow: "auto" }}>
+// //       {/* Add Template Modal (same as tumhara) */}
+// //       {mode === "admin" && openAdd && (
+// //         <div
+// //           onClick={() => setOpenAdd(false)}
+// //           style={{
+// //             position: "fixed",
+// //             inset: 0,
+// //             background: "rgba(0,0,0,0.35)",
+// //             display: "grid",
+// //             placeItems: "center",
+// //             padding: 20,
+// //             zIndex: 1000,
+// //           }}
+// //         >
+// //           <div
+// //             onClick={(e) => e.stopPropagation()}
+// //             style={{
+// //               background: "white",
+// //               borderRadius: 16,
+// //               border: "1px solid #e5e7eb",
+// //               padding: 20,
+// //               width: "90%",
+// //               maxWidth: 1000,
+// //               maxHeight: "86vh",
+// //               overflow: "auto",
+// //             }}
+// //           >
 // //             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 16 }}>
 // //               <div style={{ fontWeight: 900, fontSize: 18 }}>Add Template</div>
-// //               <button onClick={() => setOpenAdd(false)} style={{ border: "1px solid #e5e7eb", background: "white", borderRadius: 10, padding: "8px 12px", fontWeight: 900 }}>Close</button>
+// //               <button
+// //                 onClick={() => setOpenAdd(false)}
+// //                 style={{
+// //                   border: "1px solid #e5e7eb",
+// //                   background: "white",
+// //                   borderRadius: 10,
+// //                   padding: "8px 12px",
+// //                   fontWeight: 900,
+// //                 }}
+// //               >
+// //                 Close
+// //               </button>
 // //             </div>
 
 // //             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-// //               <button onClick={() => setAddTab("market")} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "market" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// //               {/* <button
+// //                 onClick={() => setAddTab("market")}
+// //                 style={{
+// //                   padding: "10px 14px",
+// //                   borderRadius: 10,
+// //                   border: "1px solid #e5e7eb",
+// //                   background: addTab === "market" ? "#f3f4f6" : "white",
+// //                   fontWeight: 900,
+// //                 }}
+// //               >
 // //                 Marketplace
-// //               </button>
-// //               <button onClick={() => setAddTab("scratch")} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "scratch" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// //               </button> */}
+// //               <button
+// //                 onClick={() => setAddTab("scratch")}
+// //                 style={{
+// //                   padding: "10px 14px",
+// //                   borderRadius: 10,
+// //                   border: "1px solid #e5e7eb",
+// //                   background: addTab === "scratch" ? "#f3f4f6" : "white",
+// //                   fontWeight: 900,
+// //                 }}
+// //               >
 // //                 Create from Scratch
 // //               </button>
-// //               <button onClick={() => setAddTab("duplicate")} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #e5e7eb", background: addTab === "duplicate" ? "#f3f4f6" : "white", fontWeight: 900 }}>
+// //               <button
+// //                 onClick={() => setAddTab("duplicate")}
+// //                 style={{
+// //                   padding: "10px 14px",
+// //                   borderRadius: 10,
+// //                   border: "1px solid #e5e7eb",
+// //                   background: addTab === "duplicate" ? "#f3f4f6" : "white",
+// //                   fontWeight: 900,
+// //                 }}
+// //               >
 // //                 Duplicate Existing
 // //               </button>
 // //             </div>
@@ -2034,7 +5031,7 @@
 // //             {addTab === "market" && (
 // //               <>
 // //                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}>
-// //                   ✅ Choose template → Import → Saved permanently in DB + storage (no external dependency).
+// //                   ✅ Choose template → Import → Saved permanently in DB + storage
 // //                 </div>
 
 // //                 {marketLoading ? (
@@ -2043,26 +5040,54 @@
 // //                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
 // //                     {market.map((m) => (
 // //                       <div key={m.key} style={{ border: "1px solid #eef2f7", borderRadius: 14, padding: 16 }}>
-// //                         {cardImg(m)}
+// //                         <img
+// //                           src={m.preview_image_url || ""}
+// //                           alt=""
+// //                           style={{
+// //                             width: "100%",
+// //                             height: 180,
+// //                             objectFit: "cover",
+// //                             borderRadius: 12,
+// //                             border: "1px solid #e5e7eb",
+// //                             background: "#f3f4f6",
+// //                             display: "block",
+// //                           }}
+// //                         />
+
 // //                         <div style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}>{m.name}</div>
+
 // //                         <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
 // //                           {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
 // //                           {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-// //                           {m.price_type === "free" ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0") : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+// //                           {m.price_type === "free"
+// //                             ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
+// //                             : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
 // //                         </div>
+
 // //                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
 // //                           <button
-// //                             onClick={() => {
-// //                               setPreviewSchema(m.schema);
-// //                               setPreviewOpen(true);
+// //                             onClick={() => openPreview(m.schema)}
+// //                             style={{
+// //                               padding: "10px 12px",
+// //                               borderRadius: 12,
+// //                               border: "1px solid #e5e7eb",
+// //                               background: "white",
+// //                               fontWeight: 900,
 // //                             }}
-// //                             style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
 // //                           >
 // //                             Preview
 // //                           </button>
+
 // //                           <button
 // //                             onClick={() => importFromMarketplace(m)}
-// //                             style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+// //                             style={{
+// //                               padding: "10px 12px",
+// //                               borderRadius: 12,
+// //                               border: "1px solid #1d4ed8",
+// //                               background: "#2563eb",
+// //                               color: "white",
+// //                               fontWeight: 900,
+// //                             }}
 // //                           >
 // //                             Use / Import
 // //                           </button>
@@ -2079,12 +5104,25 @@
 // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
 // //                   ✅ Blank canvas create → draft → open builder
 // //                 </div>
-// //                 <input value={scratch.name} onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))} placeholder="Template name" style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }} />
-// //                 <select value={scratch.category} onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))} style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// //                 <input
+// //                   value={scratch.name}
+// //                   onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))}
+// //                   placeholder="Template name"
+// //                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
+// //                 />
+// //                 <select
+// //                   value={scratch.category}
+// //                   onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))}
+// //                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
+// //                 >
 // //                   <option>Modern</option>
 // //                   <option>Classic</option>
 // //                 </select>
-// //                 <select value={scratch.layout} onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))} style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// //                 <select
+// //                   value={scratch.layout}
+// //                   onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))}
+// //                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
+// //                 >
 // //                   <option>Single Column</option>
 // //                   <option>Two Column</option>
 // //                   <option>Sidebar Left</option>
@@ -2092,10 +5130,25 @@
 // //                 </select>
 // //                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
 // //                   <label style={{ fontWeight: 900, fontSize: 14 }}>Color</label>
-// //                   <input type="color" value={scratch.color} onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))} style={{ width: 50, height: 50, borderRadius: 10 }} />
+// //                   <input
+// //                     type="color"
+// //                     value={scratch.color}
+// //                     onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))}
+// //                     style={{ width: 50, height: 50, borderRadius: 10 }}
+// //                   />
 // //                   <span style={{ fontSize: 14 }}>{scratch.color}</span>
 // //                 </div>
-// //                 <button onClick={createScratch} style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// //                 <button
+// //                   onClick={createScratch}
+// //                   style={{
+// //                     padding: "12px 16px",
+// //                     borderRadius: 12,
+// //                     border: "1px solid #1d4ed8",
+// //                     background: "#2563eb",
+// //                     color: "white",
+// //                     fontWeight: 900,
+// //                   }}
+// //                 >
 // //                   Create & Open Builder
 // //                 </button>
 // //               </div>
@@ -2106,7 +5159,11 @@
 // //                 <div style={{ color: "#6b7280", fontSize: 12 }}>
 // //                   ✅ Existing template copy → schema cloned → open builder
 // //                 </div>
-// //                 <select value={dupFromId} onChange={(e) => setDupFromId(Number(e.target.value) || "")} style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+// //                 <select
+// //                   value={dupFromId}
+// //                   onChange={(e) => setDupFromId(Number(e.target.value) || "")}
+// //                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
+// //                 >
 // //                   <option value="">Select template</option>
 // //                   {templates.map((t) => (
 // //                     <option key={t.id} value={t.id}>
@@ -2114,8 +5171,23 @@
 // //                     </option>
 // //                   ))}
 // //                 </select>
-// //                 <input value={dupName} onChange={(e) => setDupName(e.target.value)} placeholder="New name (optional)" style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }} />
-// //                 <button onClick={duplicate} style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}>
+// //                 <input
+// //                   value={dupName}
+// //                   onChange={(e) => setDupName(e.target.value)}
+// //                   placeholder="New name (optional)"
+// //                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
+// //                 />
+// //                 <button
+// //                   onClick={duplicate}
+// //                   style={{
+// //                     padding: "12px 16px",
+// //                     borderRadius: 12,
+// //                     border: "1px solid #1d4ed8",
+// //                     background: "#2563eb",
+// //                     color: "white",
+// //                     fontWeight: 900,
+// //                   }}
+// //                 >
 // //                   Duplicate & Open Builder
 // //                 </button>
 // //               </div>
@@ -2129,12 +5201,21 @@
 
 // import { useEffect, useMemo, useRef, useState } from "react";
 // import axios from "../../api/axiosInstance";
-// import { useNavigate } from "react-router-dom";
+// import { useLocation, useNavigate } from "react-router-dom";
 // import ResumePreview from "./ResumePreview";
 
 // type TemplateStatus = "active" | "draft";
 // type Category = "Modern" | "Classic";
-// type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+// type Layout =
+//   | "Two Column"
+//   | "Single Column"
+//   | "Sidebar Left"
+//   | "Sidebar Right"
+//   | "PDF Template"
+//   | "PDF Background";
+
+// type PricingStatus = "active" | "inactive";
+// type BillingType = "free" | "one_time" | "subscription";
 
 // type TemplateRow = {
 //   id: number;
@@ -2150,6 +5231,19 @@
 //   schema?: any;
 //   preview_image?: string;
 //   updated?: string;
+
+//   pages?: any[];
+//   pdf_file?: string;
+
+//   pricing?: {
+//     billing_type: BillingType;
+//     currency: "INR" | "USD";
+//     price: number;
+//     discount_percent: number;
+//     final_price: number;
+//     status: PricingStatus;
+//   };
+//   has_access?: boolean;
 // };
 
 // type MarketplaceTpl = {
@@ -2166,7 +5260,9 @@
 
 // function authHeaders() {
 //   const token =
-//     localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+//     localStorage.getItem("admin_access") ||
+//     localStorage.getItem("access") ||
+//     "";
 //   return token ? { Authorization: `Bearer ${token}` } : {};
 // }
 
@@ -2188,8 +5284,95 @@
 //   );
 // }
 
+// const currencySymbol = (c?: "INR" | "USD") => (c === "USD" ? "$" : "₹");
+
+// /** ---------- Helpers: PDF detect + pages resolve ---------- */
+// function isPdfTemplate(schema?: any, t?: any) {
+//   const s = schema || {};
+//   if (s?.layout === "PDF Template" || s?.layout === "PDF Background") return true;
+//   if (s?.pdf?.pages?.length) return true;
+//   if (t?.pages?.length) return true;
+//   if (t?.schema?.pdf?.pages?.length) return true;
+//   if (t?.pdf_pages?.length) return true;
+//   return false;
+// }
+
+// function resolvePdfPages(schema?: any, t?: any) {
+//   const s = schema || {};
+//   const raw =
+//     s?.pdf?.pages || t?.pages || t?.schema?.pdf?.pages || t?.pdf_pages || [];
+//   const out: string[] = [];
+//   for (const p of raw) {
+//     if (!p) continue;
+//     if (typeof p === "string") out.push(p);
+//     else out.push(p.url || p.image || p.src || "");
+//   }
+//   return out.filter(Boolean);
+// }
+
+// /** ✅ Card thumbnail: width-fit and crop height */
+// function LiveTemplateThumb({
+//   schema,
+//   template,
+// }: {
+//   schema: any;
+//   template: any;
+// }) {
+//   const A4_W = 794;
+//   const A4_H = 1123;
+
+//   const wrapRef = useRef<HTMLDivElement | null>(null);
+//   const [w, setW] = useState(280);
+
+//   useEffect(() => {
+//     const el = wrapRef.current;
+//     if (!el) return;
+//     const ro = new ResizeObserver(() => {
+//       setW(el.clientWidth || 280);
+//     });
+//     ro.observe(el);
+//     setW(el.clientWidth || 280);
+//     return () => ro.disconnect();
+//   }, []);
+
+//   const scale = Math.max(0.15, Math.min(0.45, w / A4_W));
+//   const cropH = 180;
+
+//   return (
+//     <div
+//       ref={wrapRef}
+//       style={{
+//         width: "100%",
+//         height: cropH,
+//         borderRadius: 12,
+//         border: "1px solid #e5e7eb",
+//         background: "#f8fafc",
+//         overflow: "hidden",
+//         position: "relative",
+//       }}
+//     >
+//       <div
+//         style={{
+//           width: A4_W,
+//           minHeight: A4_H,
+//           transform: `scale(${scale})`,
+//           transformOrigin: "top left",
+//           pointerEvents: "none",
+//         }}
+//       >
+//         <ResumePreview schema={schema || {}} template={template} />
+//       </div>
+//     </div>
+//   );
+// }
+
 // export default function AdminTemplates() {
 //   const nav = useNavigate();
+//   const location = useLocation();
+
+//   const mode: "admin" | "student" = location.pathname.startsWith("/admin")
+//     ? "admin"
+//     : "student";
 
 //   const [templates, setTemplates] = useState<TemplateRow[]>([]);
 //   const [loading, setLoading] = useState(false);
@@ -2203,15 +5386,16 @@
 //   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
 //   const [marketLoading, setMarketLoading] = useState(false);
 
+//   // ✅ Preview modal
 //   const [previewOpen, setPreviewOpen] = useState(false);
 //   const [previewSchema, setPreviewSchema] = useState<any>(null);
+//   const [previewTemplate, setPreviewTemplate] = useState<any>(null);
 
-//   // ✅ PREVIEW SCALE (NO SCROLL)
+//   // ✅ fit scale
 //   const previewViewportRef = useRef<HTMLDivElement | null>(null);
 //   const previewPageRef = useRef<HTMLDivElement | null>(null);
 //   const [previewScale, setPreviewScale] = useState(1);
 
-//   // scratch form
 //   const [scratch, setScratch] = useState({
 //     name: "",
 //     category: "Modern" as Category,
@@ -2219,16 +5403,26 @@
 //     color: "#2563eb",
 //   });
 
-//   // duplicate form
 //   const [dupFromId, setDupFromId] = useState<number | "">("");
 //   const [dupName, setDupName] = useState("");
+
+//   const [payingId, setPayingId] = useState<number | null>(null);
+
+//   const isLocked = (t: TemplateRow) => {
+//     if (mode !== "student") return false;
+//     const p = t.pricing;
+//     if (!p) return false;
+//     if (p.status !== "active") return true;
+//     if (p.billing_type === "free") return false;
+//     return !t.has_access;
+//   };
 
 //   const fetchTemplates = async () => {
 //     setLoading(true);
 //     try {
-//       const res = await axios.get("/auth/admin/templates/", {
-//         headers: authHeaders(),
-//       });
+//       const url =
+//         mode === "admin" ? "/auth/admin/templates/" : "/auth/student/templates/";
+//       const res = await axios.get(url, { headers: authHeaders() });
 //       setTemplates(res.data || []);
 //     } finally {
 //       setLoading(false);
@@ -2249,15 +5443,17 @@
 
 //   useEffect(() => {
 //     fetchTemplates();
-//   }, []);
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, [mode]);
 
 //   const filtered = useMemo(() => {
 //     const q = search.trim().toLowerCase();
 //     if (!q) return templates;
-//     return templates.filter((t) => t.name.toLowerCase().includes(q));
+//     return templates.filter((t) => (t.name || "").toLowerCase().includes(q));
 //   }, [templates, search]);
 
 //   const doDelete = async (id: number) => {
+//     if (mode !== "admin") return;
 //     if (!window.confirm("Delete this template?")) return;
 //     await axios.delete(`/auth/admin/templates/${id}/`, {
 //       headers: authHeaders(),
@@ -2266,6 +5462,7 @@
 //   };
 
 //   const toggleStatus = async (t: TemplateRow) => {
+//     if (mode !== "admin") return;
 //     const next = t.status === "active" ? "draft" : "active";
 //     await axios.put(
 //       `/auth/admin/templates/${t.id}/`,
@@ -2276,6 +5473,7 @@
 //   };
 
 //   const importFromMarketplace = async (tpl: MarketplaceTpl) => {
+//     if (mode !== "admin") return;
 //     const res = await axios.post(
 //       "/auth/admin/templates/import/",
 //       { marketplace_key: tpl.key },
@@ -2287,7 +5485,9 @@
 //   };
 
 //   const createScratch = async () => {
+//     if (mode !== "admin") return;
 //     if (!scratch.name.trim()) return alert("Name required");
+
 //     const schema = {
 //       version: 1,
 //       layout: scratch.layout,
@@ -2308,18 +5508,29 @@
 //         "projects",
 //       ],
 //       columns: {
-//         left: ["summary", "skills", "education"],
+//         left: [
+//           "summary",
+//           "skills",
+//           "education",
+//           "certifications",
+//           "languages",
+//           "achievements",
+//           "courses",
+//         ],
 //         right: ["header", "experience", "projects"],
 //       },
 //       sections: {
 //         header: { enabled: true },
-//         summary: { enabled: true },
-//         experience: { enabled: true },
-//         education: { enabled: true },
-//         skills: { enabled: true },
-//         projects: { enabled: true },
-//         certifications: { enabled: false },
-//         languages: { enabled: false },
+//         contacts: { enabled: true, type: "list" },
+//         summary: { enabled: true, type: "text" },
+//         experience: { enabled: true, type: "timeline" },
+//         education: { enabled: true, type: "timeline" },
+//         skills: { enabled: true, type: "skills" },
+//         projects: { enabled: true, type: "timeline" },
+//         certifications: { enabled: true, type: "list" },
+//         languages: { enabled: true, type: "languages" },
+//         achievements: { enabled: true, type: "list" },
+//         courses: { enabled: true, type: "list" },
 //       },
 //     };
 
@@ -2343,7 +5554,9 @@
 //   };
 
 //   const duplicate = async () => {
+//     if (mode !== "admin") return;
 //     if (!dupFromId) return alert("Select a template");
+
 //     const res = await axios.post(
 //       `/auth/admin/templates/${dupFromId}/duplicate/`,
 //       { name: dupName.trim() || undefined },
@@ -2355,14 +5568,20 @@
 //   };
 
 //   const openAddModal = () => {
+//     if (mode !== "admin") return;
 //     setOpenAdd(true);
 //     setAddTab("market");
 //     fetchMarketplace();
 //   };
 
-//   const cardImg = (t: any) => {
-//     const src = t.preview_image || t.preview_image_url;
-//     if (src)
+//   /** ✅ CARD PREVIEW ALWAYS SHOW (DB templates) */
+//   const cardPreview = (t: any) => {
+//     const src = t.preview_image || t.preview_image_url || "";
+//     const pdfPages = resolvePdfPages(t.schema || {}, t);
+//     const isPdf = isPdfTemplate(t.schema || {}, t);
+
+//     // If backend image exists use it (for DB templates)
+//     if (src) {
 //       return (
 //         <img
 //           src={src}
@@ -2373,84 +5592,92 @@
 //             objectFit: "cover",
 //             borderRadius: 12,
 //             border: "1px solid #e5e7eb",
+//             display: "block",
+//             background: "#f3f4f6",
 //           }}
 //         />
 //       );
-//     return (
-//       <div
-//         style={{
-//           width: "100%",
-//           height: 180,
-//           borderRadius: 12,
-//           border: "1px solid #e5e7eb",
-//           background: "#f3f4f6",
-//           display: "grid",
-//           placeItems: "center",
-//           color: "#6b7280",
-//           fontWeight: 900,
-//         }}
-//       >
-//         No Preview
-//       </div>
-//     );
+//     }
+
+//     // If PDF template show first page
+//     if (isPdf && pdfPages.length > 0) {
+//       return (
+//         <img
+//           src={pdfPages[0]}
+//           alt=""
+//           style={{
+//             width: "100%",
+//             height: 180,
+//             objectFit: "cover",
+//             borderRadius: 12,
+//             border: "1px solid #e5e7eb",
+//             display: "block",
+//             background: "#f3f4f6",
+//           }}
+//         />
+//       );
+//     }
+
+//     // fallback live
+//     return <LiveTemplateThumb schema={t.schema || {}} template={t} />;
 //   };
 
-//   // ✅ scale calculation (fit preview into viewport, no scrolling)
+//   /** ✅ MODAL FIT */
 //   const recalcPreviewScale = () => {
 //     const viewport = previewViewportRef.current;
 //     const page = previewPageRef.current;
 //     if (!viewport || !page) return;
 
+//     setPreviewScale(1);
 //     page.style.transform = "scale(1)";
 //     page.style.transformOrigin = "top center";
 
-//     const vw = viewport.clientWidth;
-//     const vh = viewport.clientHeight;
+//     requestAnimationFrame(() => {
+//       requestAnimationFrame(() => {
+//         const vw = viewport.clientWidth;
+//         const vh = viewport.clientHeight;
+//         if (!vw || !vh) return;
 
-//     const pw = page.scrollWidth || page.offsetWidth;
-//     const ph = page.scrollHeight || page.offsetHeight;
+//         const pw = page.scrollWidth || page.offsetWidth;
+//         const ph = page.scrollHeight || page.offsetHeight;
+//         if (!pw || !ph) return;
 
-//     if (!pw || !ph || !vw || !vh) return;
-
-//     const padding = 24;
-//     const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
-//     const clamped = Math.max(0.2, Math.min(1, scale));
-//     setPreviewScale(clamped);
+//         const padding = 32;
+//         const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
+//         const clamped = Math.max(0.2, Math.min(1, scale));
+//         setPreviewScale(clamped);
+//       });
+//     });
 //   };
 
 //   useEffect(() => {
 //     if (!previewOpen) return;
 
-//     const t = window.setTimeout(() => recalcPreviewScale(), 0);
+//     recalcPreviewScale();
 
 //     const viewport = previewViewportRef.current;
 //     let ro: ResizeObserver | null = null;
-
 //     if (viewport) {
 //       ro = new ResizeObserver(() => recalcPreviewScale());
 //       ro.observe(viewport);
 //     }
 
 //     window.addEventListener("resize", recalcPreviewScale);
-
 //     return () => {
-//       window.clearTimeout(t);
 //       window.removeEventListener("resize", recalcPreviewScale);
 //       if (ro) ro.disconnect();
 //     };
 //     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [previewOpen, previewSchema]);
+//   }, [previewOpen, previewSchema, previewTemplate]);
 
-//   // ✅ FIX: If preview opens, close Add modal automatically
 //   useEffect(() => {
 //     if (previewOpen) setOpenAdd(false);
 //   }, [previewOpen]);
 
-//   // ✅ helper to open preview from anywhere (main cards OR marketplace cards)
-//   const openPreview = (schema: any) => {
-//     // close Add modal immediately so preview shows DIRECT (no waiting for close)
+//   const openPreview = (schema: any, templateObj?: any) => {
 //     setOpenAdd(false);
 //     setPreviewSchema(schema || {});
+//     setPreviewTemplate(templateObj || null);
 //     setPreviewOpen(true);
 //   };
 
@@ -2465,24 +5692,31 @@
 //         }}
 //       >
 //         <div>
-//           <div style={{ fontWeight: 900, fontSize: 22 }}>Resume Templates</div>
+//           <div style={{ fontWeight: 900, fontSize: 22 }}>
+//             {mode === "admin" ? "Resume Templates" : "Choose a Template"}
+//           </div>
 //           <div style={{ color: "#6b7280", fontSize: 12 }}>
-//             Import • Scratch • Duplicate • View/Edit/Delete
+//             {mode === "admin"
+//               ? "Import • Scratch • Duplicate • View/Edit/Delete"
+//               : "Preview • Unlock (if paid) • Use Template"}
 //           </div>
 //         </div>
-//         <button
-//           onClick={openAddModal}
-//           style={{
-//             padding: "10px 14px",
-//             borderRadius: 12,
-//             border: "1px solid #1d4ed8",
-//             background: "#2563eb",
-//             color: "white",
-//             fontWeight: 900,
-//           }}
-//         >
-//           + Add Template
-//         </button>
+
+//         {mode === "admin" ? (
+//           <button
+//             onClick={openAddModal}
+//             style={{
+//               padding: "10px 14px",
+//               borderRadius: 12,
+//               border: "1px solid #1d4ed8",
+//               background: "#2563eb",
+//               color: "white",
+//               fontWeight: 900,
+//             }}
+//           >
+//             + Add Template
+//           </button>
+//         ) : null}
 //       </div>
 
 //       <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
@@ -2497,18 +5731,34 @@
 //             border: "1px solid #e5e7eb",
 //           }}
 //         />
-//         <button
-//           onClick={() => nav("/admin/templates/pricing")}
-//           style={{
-//             padding: "10px 12px",
-//             borderRadius: 12,
-//             border: "1px solid #e5e7eb",
-//             background: "white",
-//             fontWeight: 900,
-//           }}
-//         >
-//           Pricing
-//         </button>
+
+//         {mode === "admin" ? (
+//           <button
+//             onClick={() => nav("/admin/templates/pricing")}
+//             style={{
+//               padding: "10px 12px",
+//               borderRadius: 12,
+//               border: "1px solid #e5e7eb",
+//               background: "white",
+//               fontWeight: 900,
+//             }}
+//           >
+//             Pricing
+//           </button>
+//         ) : (
+//           <button
+//             onClick={() => fetchTemplates()}
+//             style={{
+//               padding: "10px 12px",
+//               borderRadius: 12,
+//               border: "1px solid #e5e7eb",
+//               background: "white",
+//               fontWeight: 900,
+//             }}
+//           >
+//             Refresh
+//           </button>
+//         )}
 //       </div>
 
 //       {loading ? (
@@ -2521,129 +5771,150 @@
 //             gap: 16,
 //           }}
 //         >
-//           {filtered.map((t) => (
-//             <div
-//               key={t.id}
-//               style={{
-//                 background: "white",
-//                 border: "1px solid #eef2f7",
-//                 borderRadius: 16,
-//                 padding: 16,
-//                 boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-//               }}
-//             >
-//               {cardImg(t)}
+//           {filtered.map((t) => {
+//             const locked = isLocked(t);
+
+//             return (
 //               <div
+//                 key={t.id}
 //                 style={{
-//                   display: "flex",
-//                   justifyContent: "space-between",
-//                   alignItems: "center",
-//                   marginTop: 12,
+//                   background: "white",
+//                   border: "1px solid #eef2f7",
+//                   borderRadius: 16,
+//                   padding: 16,
+//                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
 //                 }}
 //               >
-//                 <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
-//                 {t.status === "active"
-//                   ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
-//                   : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
+//                 {cardPreview(t)}
+
+//                 <div
+//                   style={{
+//                     display: "flex",
+//                     justifyContent: "space-between",
+//                     alignItems: "center",
+//                     marginTop: 12,
+//                   }}
+//                 >
+//                   <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
+//                   {t.status === "active"
+//                     ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
+//                     : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
+//                 </div>
+
+//                 <div
+//                   style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}
+//                 >
+//                   {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
+//                   {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+//                   {t.source
+//                     ? pill(String(t.source).toUpperCase(), "#fef3c7", "#92400e", "#fde68a")
+//                     : null}
+//                 </div>
+
+//                 <div
+//                   style={{
+//                     display: "grid",
+//                     gridTemplateColumns: "1fr 1fr",
+//                     gap: 10,
+//                     marginTop: 16,
+//                   }}
+//                 >
+//                   <button
+//                     onClick={() => openPreview(t.schema || {}, t)}
+//                     style={{
+//                       padding: "10px 12px",
+//                       borderRadius: 12,
+//                       border: "1px solid #e5e7eb",
+//                       background: "white",
+//                       fontWeight: 900,
+//                     }}
+//                   >
+//                     View
+//                   </button>
+
+//                   {mode === "admin" ? (
+//                     <button
+//                       onClick={() => nav(`/admin/templates/builder/${t.id}`)}
+//                       style={{
+//                         padding: "10px 12px",
+//                         borderRadius: 12,
+//                         border: "1px solid #1d4ed8",
+//                         background: "#2563eb",
+//                         color: "white",
+//                         fontWeight: 900,
+//                       }}
+//                     >
+//                       Edit
+//                     </button>
+//                   ) : (
+//                     <button
+//                       disabled={locked}
+//                       onClick={() => nav(`/resume/create/${t.id}`)}
+//                       style={{
+//                         padding: "10px 12px",
+//                         borderRadius: 12,
+//                         border: "1px solid #16a34a",
+//                         background: locked ? "#9ca3af" : "#16a34a",
+//                         color: "white",
+//                         fontWeight: 950,
+//                       }}
+//                     >
+//                       {locked ? "Locked" : "Use Template"}
+//                     </button>
+//                   )}
+
+//                   {mode === "admin" ? (
+//                     <>
+//                       <button
+//                         onClick={() => nav(`/admin/resume/create/${t.id}`)}
+//                         style={{
+//                           padding: "10px 12px",
+//                           borderRadius: 12,
+//                           border: "1px solid #8b5cf6",
+//                           background: "#8b5cf6",
+//                           color: "white",
+//                           fontWeight: 900,
+//                         }}
+//                       >
+//                         Create Resume
+//                       </button>
+
+//                       <button
+//                         onClick={() => toggleStatus(t)}
+//                         style={{
+//                           padding: "10px 12px",
+//                           borderRadius: 12,
+//                           border: "1px solid #e5e7eb",
+//                           background: "white",
+//                           fontWeight: 900,
+//                         }}
+//                       >
+//                         {t.status === "active" ? "Disable" : "Enable"}
+//                       </button>
+
+//                       <button
+//                         onClick={() => doDelete(t.id)}
+//                         style={{
+//                           padding: "10px 12px",
+//                           borderRadius: 12,
+//                           border: "1px solid #fecaca",
+//                           background: "white",
+//                           color: "#991b1b",
+//                           fontWeight: 900,
+//                         }}
+//                       >
+//                         Delete
+//                       </button>
+//                     </>
+//                   ) : null}
+//                 </div>
 //               </div>
-
-//               <div
-//                 style={{
-//                   display: "flex",
-//                   gap: 8,
-//                   marginTop: 8,
-//                   flexWrap: "wrap",
-//                 }}
-//               >
-//                 {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
-//                 {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-//                 {t.source
-//                   ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a")
-//                   : null}
-//               </div>
-
-//               <div
-//                 style={{
-//                   display: "grid",
-//                   gridTemplateColumns: "1fr 1fr",
-//                   gap: 10,
-//                   marginTop: 16,
-//                 }}
-//               >
-//                 <button
-//                   onClick={() => openPreview(t.schema || {})}
-//                   style={{
-//                     padding: "10px 12px",
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                     background: "white",
-//                     fontWeight: 900,
-//                   }}
-//                 >
-//                   View
-//                 </button>
-
-//                 <button
-//                   onClick={() => nav(`/admin/templates/builder/${t.id}`)}
-//                   style={{
-//                     padding: "10px 12px",
-//                     borderRadius: 12,
-//                     border: "1px solid #1d4ed8",
-//                     background: "#2563eb",
-//                     color: "white",
-//                     fontWeight: 900,
-//                   }}
-//                 >
-//                   Edit
-//                 </button>
-
-//                 <button
-//                   onClick={() => nav(`/admin/resume/create/${t.id}`)}
-//                   style={{
-//                     padding: "10px 12px",
-//                     borderRadius: 12,
-//                     border: "1px solid #8b5cf6",
-//                     background: "#8b5cf6",
-//                     color: "white",
-//                     fontWeight: 900,
-//                   }}
-//                 >
-//                   Create Resume
-//                 </button>
-
-//                 <button
-//                   onClick={() => toggleStatus(t)}
-//                   style={{
-//                     padding: "10px 12px",
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                     background: "white",
-//                     fontWeight: 900,
-//                   }}
-//                 >
-//                   {t.status === "active" ? "Disable" : "Enable"}
-//                 </button>
-
-//                 <button
-//                   onClick={() => doDelete(t.id)}
-//                   style={{
-//                     padding: "10px 12px",
-//                     borderRadius: 12,
-//                     border: "1px solid #fecaca",
-//                     background: "white",
-//                     color: "#991b1b",
-//                     fontWeight: 900,
-//                   }}
-//                 >
-//                   Delete
-//                 </button>
-//               </div>
-//             </div>
-//           ))}
+//             );
+//           })}
 //         </div>
 //       )}
 
-//       {/* ✅ Preview Modal (always on top) */}
+//       {/* ✅ Preview Modal */}
 //       {previewOpen && (
 //         <div
 //           onClick={() => setPreviewOpen(false)}
@@ -2654,7 +5925,7 @@
 //             display: "grid",
 //             placeItems: "center",
 //             padding: 16,
-//             zIndex: 3000, // ✅ higher than Add modal
+//             zIndex: 3000,
 //           }}
 //         >
 //           <div
@@ -2725,19 +5996,23 @@
 //               <div
 //                 ref={previewPageRef}
 //                 style={{
+//                   display: "inline-block",
 //                   transform: `scale(${previewScale})`,
 //                   transformOrigin: "top center",
 //                 }}
 //               >
-//                 <ResumePreview schema={previewSchema || {}} />
+//                 <ResumePreview
+//                   schema={previewSchema || {}}
+//                   template={previewTemplate}
+//                 />
 //               </div>
 //             </div>
 //           </div>
 //         </div>
 //       )}
 
-//       {/* Add Template Modal */}
-//       {openAdd && (
+//       {/* ✅ Add Template Modal */}
+//       {mode === "admin" && openAdd && (
 //         <div
 //           onClick={() => setOpenAdd(false)}
 //           style={{
@@ -2800,6 +6075,7 @@
 //               >
 //                 Marketplace
 //               </button>
+
 //               <button
 //                 onClick={() => setAddTab("scratch")}
 //                 style={{
@@ -2826,13 +6102,11 @@
 //               </button>
 //             </div>
 
+//             {/* ✅ Marketplace TAB: backend images removed, LIVE preview shown */}
 //             {addTab === "market" && (
 //               <>
-//                 <div
-//                   style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}
-//                 >
+//                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}>
 //                   ✅ Choose template → Import → Saved permanently in DB + storage
-//                   (no external dependency).
 //                 </div>
 
 //                 {marketLoading ? (
@@ -2841,79 +6115,100 @@
 //                   <div
 //                     style={{
 //                       display: "grid",
-//                       gridTemplateColumns:
-//                         "repeat(auto-fill, minmax(280px, 1fr))",
+//                       gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
 //                       gap: 16,
 //                     }}
 //                   >
-//                     {market.map((m) => (
-//                       <div
-//                         key={m.key}
-//                         style={{
-//                           border: "1px solid #eef2f7",
-//                           borderRadius: 14,
-//                           padding: 16,
-//                         }}
-//                       >
-//                         {cardImg(m)}
-//                         <div
-//                           style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}
-//                         >
-//                           {m.name}
-//                         </div>
+//                     {market.map((m) => {
+//                       const isPdf = isPdfTemplate(m.schema || {}, m);
+//                       const pages = resolvePdfPages(m.schema || {}, m);
+
+//                       // ✅ IMPORTANT: Marketplace card preview is always LIVE
+//                       // - If PDF pages exist -> show page-1 in live style
+//                       // - Else -> ResumePreview live
+//                       const livePreview = isPdf && pages.length > 0 ? (
 //                         <div
 //                           style={{
-//                             display: "flex",
-//                             gap: 8,
-//                             marginTop: 8,
-//                             flexWrap: "wrap",
+//                             width: "100%",
+//                             height: 180,
+//                             borderRadius: 12,
+//                             border: "1px solid #e5e7eb",
+//                             overflow: "hidden",
+//                             background: "#fff",
 //                           }}
 //                         >
-//                           {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
-//                           {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-//                           {m.price_type === "free"
-//                             ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
-//                             : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+//                           <img
+//                             src={pages[0]}
+//                             alt=""
+//                             style={{
+//                               width: "100%",
+//                               height: "100%",
+//                               objectFit: "contain",
+//                               display: "block",
+//                               background: "#fff",
+//                             }}
+//                           />
 //                         </div>
+//                       ) : (
+//                         <LiveTemplateThumb schema={m.schema || {}} template={m} />
+//                       );
 
+//                       return (
 //                         <div
+//                           key={m.key}
 //                           style={{
-//                             display: "grid",
-//                             gridTemplateColumns: "1fr 1fr",
-//                             gap: 10,
-//                             marginTop: 16,
+//                             border: "1px solid #eef2f7",
+//                             borderRadius: 14,
+//                             padding: 16,
+//                             background: "white",
 //                           }}
 //                         >
-//                           {/* ✅ FIXED: direct preview open (close add + open preview) */}
-//                           <button
-//                             onClick={() => openPreview(m.schema)}
-//                             style={{
-//                               padding: "10px 12px",
-//                               borderRadius: 12,
-//                               border: "1px solid #e5e7eb",
-//                               background: "white",
-//                               fontWeight: 900,
-//                             }}
-//                           >
-//                             Preview
-//                           </button>
+//                           {/* ✅ REMOVED backend preview_image_url */}
+//                           {livePreview}
 
-//                           <button
-//                             onClick={() => importFromMarketplace(m)}
-//                             style={{
-//                               padding: "10px 12px",
-//                               borderRadius: 12,
-//                               border: "1px solid #1d4ed8",
-//                               background: "#2563eb",
-//                               color: "white",
-//                               fontWeight: 900,
-//                             }}
-//                           >
-//                             Use / Import
-//                           </button>
+//                           <div style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}>
+//                             {m.name}
+//                           </div>
+
+//                           <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+//                             {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
+//                             {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+//                             {m.price_type === "free"
+//                               ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
+//                               : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+//                           </div>
+
+//                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+//                             <button
+//                               onClick={() => openPreview(m.schema)}
+//                               style={{
+//                                 padding: "10px 12px",
+//                                 borderRadius: 12,
+//                                 border: "1px solid #e5e7eb",
+//                                 background: "white",
+//                                 fontWeight: 900,
+//                               }}
+//                             >
+//                               Preview
+//                             </button>
+
+//                             <button
+//                               onClick={() => importFromMarketplace(m)}
+//                               style={{
+//                                 padding: "10px 12px",
+//                                 borderRadius: 12,
+//                                 border: "1px solid #1d4ed8",
+//                                 background: "#2563eb",
+//                                 color: "white",
+//                                 fontWeight: 900,
+//                               }}
+//                             >
+//                               Use / Import
+//                             </button>
+//                           </div>
 //                         </div>
-//                       </div>
-//                     ))}
+//                       );
+//                     })}
 //                   </div>
 //                 )}
 //               </>
@@ -2926,46 +6221,22 @@
 //                 </div>
 //                 <input
 //                   value={scratch.name}
-//                   onChange={(e) =>
-//                     setScratch((p) => ({ ...p, name: e.target.value }))
-//                   }
+//                   onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))}
 //                   placeholder="Template name"
-//                   style={{
-//                     padding: 12,
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                   }}
+//                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
 //                 />
 //                 <select
 //                   value={scratch.category}
-//                   onChange={(e) =>
-//                     setScratch((p) => ({
-//                       ...p,
-//                       category: e.target.value as Category,
-//                     }))
-//                   }
-//                   style={{
-//                     padding: 12,
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                   }}
+//                   onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))}
+//                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
 //                 >
 //                   <option>Modern</option>
 //                   <option>Classic</option>
 //                 </select>
 //                 <select
 //                   value={scratch.layout}
-//                   onChange={(e) =>
-//                     setScratch((p) => ({
-//                       ...p,
-//                       layout: e.target.value as Layout,
-//                     }))
-//                   }
-//                   style={{
-//                     padding: 12,
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                   }}
+//                   onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))}
+//                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
 //                 >
 //                   <option>Single Column</option>
 //                   <option>Two Column</option>
@@ -2977,9 +6248,7 @@
 //                   <input
 //                     type="color"
 //                     value={scratch.color}
-//                     onChange={(e) =>
-//                       setScratch((p) => ({ ...p, color: e.target.value }))
-//                     }
+//                     onChange={(e) => setScratch((p) => ({ ...p, color: e.target.value }))}
 //                     style={{ width: 50, height: 50, borderRadius: 10 }}
 //                   />
 //                   <span style={{ fontSize: 14 }}>{scratch.color}</span>
@@ -3008,11 +6277,7 @@
 //                 <select
 //                   value={dupFromId}
 //                   onChange={(e) => setDupFromId(Number(e.target.value) || "")}
-//                   style={{
-//                     padding: 12,
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                   }}
+//                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
 //                 >
 //                   <option value="">Select template</option>
 //                   {templates.map((t) => (
@@ -3025,11 +6290,7 @@
 //                   value={dupName}
 //                   onChange={(e) => setDupName(e.target.value)}
 //                   placeholder="New name (optional)"
-//                   style={{
-//                     padding: 12,
-//                     borderRadius: 12,
-//                     border: "1px solid #e5e7eb",
-//                   }}
+//                   style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
 //                 />
 //                 <button
 //                   onClick={duplicate}
@@ -3060,7 +6321,13 @@ import ResumePreview from "./ResumePreview";
 
 type TemplateStatus = "active" | "draft";
 type Category = "Modern" | "Classic";
-type Layout = "Two Column" | "Single Column" | "Sidebar Left" | "Sidebar Right";
+type Layout =
+  | "Two Column"
+  | "Single Column"
+  | "Sidebar Left"
+  | "Sidebar Right"
+  | "PDF Template"
+  | "PDF Background";
 
 type PricingStatus = "active" | "inactive";
 type BillingType = "free" | "one_time" | "subscription";
@@ -3077,10 +6344,12 @@ type TemplateRow = {
   source?: "custom" | "imported" | "duplicated";
   description?: string;
   schema?: any;
-  preview_image?: string;
+  preview_image?: string; // ❌ will NOT be used for UI now
   updated?: string;
 
-  // ✅ for student store
+  pages?: any[];
+  pdf_file?: string;
+
   pricing?: {
     billing_type: BillingType;
     currency: "INR" | "USD";
@@ -3100,13 +6369,15 @@ type MarketplaceTpl = {
   color: string;
   price_type: "free" | "paid";
   price: number;
-  preview_image_url: string;
+  preview_image_url: string; // ❌ will NOT be used for UI now
   schema: any;
 };
 
 function authHeaders() {
   const token =
-    localStorage.getItem("admin_access") || localStorage.getItem("access") || "";
+    localStorage.getItem("admin_access") ||
+    localStorage.getItem("access") ||
+    "";
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -3128,7 +6399,110 @@ function pill(text: string, bg: string, fg: string, border: string) {
   );
 }
 
-const currencySymbol = (c?: "INR" | "USD") => (c === "USD" ? "$" : "₹");
+function isPdfTemplate(schema?: any, t?: any) {
+  const s = schema || {};
+  if (s?.layout === "PDF Template" || s?.layout === "PDF Background") return true;
+  if (s?.pdf?.pages?.length) return true;
+  if (t?.pages?.length) return true;
+  if (t?.schema?.pdf?.pages?.length) return true;
+  if (t?.pdf_pages?.length) return true;
+  return false;
+}
+
+function resolvePdfPages(schema?: any, t?: any) {
+  const s = schema || {};
+  const raw =
+    s?.pdf?.pages || t?.pages || t?.schema?.pdf?.pages || t?.pdf_pages || [];
+  const out: string[] = [];
+  for (const p of raw) {
+    if (!p) continue;
+    if (typeof p === "string") out.push(p);
+    else out.push(p.url || p.image || p.src || "");
+  }
+  return out.filter(Boolean);
+}
+
+/** ✅ Live preview card thumb (same everywhere) */
+function LiveTemplateThumb({
+  schema,
+  template,
+}: {
+  schema: any;
+  template: any;
+}) {
+  const A4_W = 794;
+  const A4_H = 1123;
+
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [w, setW] = useState(280);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setW(el.clientWidth || 280));
+    ro.observe(el);
+    setW(el.clientWidth || 280);
+    return () => ro.disconnect();
+  }, []);
+
+  const scale = Math.max(0.15, Math.min(0.45, w / A4_W));
+  const cropH = 180;
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{
+        width: "100%",
+        height: cropH,
+        borderRadius: 12,
+        border: "1px solid #e5e7eb",
+        background: "#f8fafc",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          width: A4_W,
+          minHeight: A4_H,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          pointerEvents: "none",
+        }}
+      >
+        <ResumePreview schema={schema || {}} template={template} />
+      </div>
+    </div>
+  );
+}
+
+/** ✅ PDF first page thumb (no cut) */
+function PdfFirstPageThumb({ url }: { url: string }) {
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: 180,
+        borderRadius: 12,
+        border: "1px solid #e5e7eb",
+        overflow: "hidden",
+        background: "#fff",
+      }}
+    >
+      <img
+        src={url}
+        alt=""
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          display: "block",
+          background: "#fff",
+        }}
+      />
+    </div>
+  );
+}
 
 export default function AdminTemplates() {
   const nav = useNavigate();
@@ -3150,15 +6524,16 @@ export default function AdminTemplates() {
   const [market, setMarket] = useState<MarketplaceTpl[]>([]);
   const [marketLoading, setMarketLoading] = useState(false);
 
+  // ✅ Preview modal
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSchema, setPreviewSchema] = useState<any>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<any>(null);
 
-  // ✅ PREVIEW SCALE (NO SCROLL)
+  // ✅ fit scale
   const previewViewportRef = useRef<HTMLDivElement | null>(null);
   const previewPageRef = useRef<HTMLDivElement | null>(null);
   const [previewScale, setPreviewScale] = useState(1);
 
-  // scratch form
   const [scratch, setScratch] = useState({
     name: "",
     category: "Modern" as Category,
@@ -3166,108 +6541,16 @@ export default function AdminTemplates() {
     color: "#2563eb",
   });
 
-  // duplicate form
   const [dupFromId, setDupFromId] = useState<number | "">("");
   const [dupName, setDupName] = useState("");
-
-  // payment state
-  const [payingId, setPayingId] = useState<number | null>(null);
 
   const isLocked = (t: TemplateRow) => {
     if (mode !== "student") return false;
     const p = t.pricing;
-    if (!p) return false; // pricing missing => free treat
+    if (!p) return false;
     if (p.status !== "active") return true;
     if (p.billing_type === "free") return false;
     return !t.has_access;
-  };
-
-  const loadRazorpay = () =>
-    new Promise<boolean>((resolve) => {
-      if ((window as any).Razorpay) return resolve(true);
-      const id = "razorpay-checkout-js";
-      if (document.getElementById(id)) return resolve(true);
-
-      const s = document.createElement("script");
-      s.id = id;
-      s.src = "https://checkout.razorpay.com/v1/checkout.js";
-      s.onload = () => resolve(true);
-      s.onerror = () => resolve(false);
-      document.body.appendChild(s);
-    });
-
-  const handleBuy = async (t: TemplateRow) => {
-    if (mode !== "student") return;
-    setPayingId(t.id);
-
-    try {
-      const ok = await loadRazorpay();
-      if (!ok) {
-        alert("Razorpay script load failed");
-        return;
-      }
-
-      // Subscription case -> backend returns 402; we show msg.
-      let orderRes: any;
-      try {
-        orderRes = await axios.post(
-          "/auth/student/payments/template/order/",
-          { template_id: t.id },
-          { headers: authHeaders() }
-        );
-      } catch (e: any) {
-        if (e?.response?.status === 402) {
-          alert("Subscription required for this template.");
-          return;
-        }
-        alert(e?.response?.data?.detail || "Order create failed");
-        return;
-      }
-
-      if (orderRes?.data?.has_access) {
-        await fetchTemplates();
-        nav(`/resume/create/${t.id}`);
-        return;
-      }
-
-      const { key, order_id, amount, currency } = orderRes.data || {};
-      if (!key || !order_id) {
-        alert("Invalid order response from backend");
-        return;
-      }
-
-      const rz = new (window as any).Razorpay({
-        key,
-        order_id,
-        amount,
-        currency,
-        name: "Resume Templates",
-        description: `Unlock template: ${t.name}`,
-        handler: async (resp: any) => {
-          try {
-            await axios.post(
-              "/auth/student/payments/template/verify/",
-              {
-                razorpay_order_id: resp.razorpay_order_id,
-                razorpay_payment_id: resp.razorpay_payment_id,
-                razorpay_signature: resp.razorpay_signature,
-              },
-              { headers: authHeaders() }
-            );
-
-            alert("Payment successful ✅ Template unlocked!");
-            await fetchTemplates();
-            nav(`/resume/create/${t.id}`);
-          } catch (e: any) {
-            alert(e?.response?.data?.detail || "Verify failed");
-          }
-        },
-      });
-
-      rz.open();
-    } finally {
-      setPayingId(null);
-    }
   };
 
   const fetchTemplates = async () => {
@@ -3305,13 +6588,10 @@ export default function AdminTemplates() {
     return templates.filter((t) => (t.name || "").toLowerCase().includes(q));
   }, [templates, search]);
 
-  // --------- ADMIN ONLY ACTIONS ----------
   const doDelete = async (id: number) => {
     if (mode !== "admin") return;
     if (!window.confirm("Delete this template?")) return;
-    await axios.delete(`/auth/admin/templates/${id}/`, {
-      headers: authHeaders(),
-    });
+    await axios.delete(`/auth/admin/templates/${id}/`, { headers: authHeaders() });
     fetchTemplates();
   };
 
@@ -3355,18 +6635,21 @@ export default function AdminTemplates() {
       },
       order: ["header", "summary", "experience", "education", "skills", "projects"],
       columns: {
-        left: ["summary", "skills", "education"],
+        left: ["summary", "skills", "education", "certifications", "languages", "achievements", "courses"],
         right: ["header", "experience", "projects"],
       },
       sections: {
         header: { enabled: true },
-        summary: { enabled: true },
-        experience: { enabled: true },
-        education: { enabled: true },
-        skills: { enabled: true },
-        projects: { enabled: true },
-        certifications: { enabled: false },
-        languages: { enabled: false },
+        contacts: { enabled: true, type: "list" },
+        summary: { enabled: true, type: "text" },
+        experience: { enabled: true, type: "timeline" },
+        education: { enabled: true, type: "timeline" },
+        skills: { enabled: true, type: "skills" },
+        projects: { enabled: true, type: "timeline" },
+        certifications: { enabled: true, type: "list" },
+        languages: { enabled: true, type: "languages" },
+        achievements: { enabled: true, type: "list" },
+        courses: { enabled: true, type: "list" },
       },
     };
 
@@ -3392,7 +6675,6 @@ export default function AdminTemplates() {
   const duplicate = async () => {
     if (mode !== "admin") return;
     if (!dupFromId) return alert("Select a template");
-
     const res = await axios.post(
       `/auth/admin/templates/${dupFromId}/duplicate/`,
       { name: dupName.trim() || undefined },
@@ -3410,109 +6692,82 @@ export default function AdminTemplates() {
     fetchMarketplace();
   };
 
-  const cardImg = (t: any) => {
-    const src = t.preview_image || t.preview_image_url;
-    if (src)
-      return (
-        <img
-          src={src}
-          alt=""
-          style={{
-            width: "100%",
-            height: 180,
-            objectFit: "cover",
-            borderRadius: 12,
-            border: "1px solid #e5e7eb",
-          }}
-        />
-      );
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: 180,
-          borderRadius: 12,
-          border: "1px solid #e5e7eb",
-          background: "#f3f4f6",
-          display: "grid",
-          placeItems: "center",
-          color: "#6b7280",
-          fontWeight: 900,
-        }}
-      >
-        No Preview
-      </div>
-    );
+  /** ✅ IMPORTANT FIX:
+   * Dashboard cards will NOT use backend images anymore.
+   * Always show same live preview like marketplace.
+   */
+  const cardPreview = (t: any) => {
+    const isPdf = isPdfTemplate(t.schema || {}, t);
+    const pages = resolvePdfPages(t.schema || {}, t);
+
+    if (isPdf && pages.length > 0) {
+      return <PdfFirstPageThumb url={pages[0]} />;
+    }
+
+    return <LiveTemplateThumb schema={t.schema || {}} template={t} />;
   };
 
-  // ✅ scale calculation (fit preview into viewport, no scrolling)
   const recalcPreviewScale = () => {
     const viewport = previewViewportRef.current;
     const page = previewPageRef.current;
     if (!viewport || !page) return;
 
+    setPreviewScale(1);
     page.style.transform = "scale(1)";
     page.style.transformOrigin = "top center";
 
-    const vw = viewport.clientWidth;
-    const vh = viewport.clientHeight;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const vw = viewport.clientWidth;
+        const vh = viewport.clientHeight;
+        if (!vw || !vh) return;
 
-    const pw = page.scrollWidth || page.offsetWidth;
-    const ph = page.scrollHeight || page.offsetHeight;
+        const pw = page.scrollWidth || page.offsetWidth;
+        const ph = page.scrollHeight || page.offsetHeight;
+        if (!pw || !ph) return;
 
-    if (!pw || !ph || !vw || !vh) return;
-
-    const padding = 24;
-    const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
-    const clamped = Math.max(0.2, Math.min(1, scale));
-    setPreviewScale(clamped);
+        const padding = 32;
+        const scale = Math.min((vw - padding) / pw, (vh - padding) / ph);
+        const clamped = Math.max(0.2, Math.min(1, scale));
+        setPreviewScale(clamped);
+      });
+    });
   };
 
   useEffect(() => {
     if (!previewOpen) return;
 
-    const t = window.setTimeout(() => recalcPreviewScale(), 0);
+    recalcPreviewScale();
 
     const viewport = previewViewportRef.current;
     let ro: ResizeObserver | null = null;
-
     if (viewport) {
       ro = new ResizeObserver(() => recalcPreviewScale());
       ro.observe(viewport);
     }
 
     window.addEventListener("resize", recalcPreviewScale);
-
     return () => {
-      window.clearTimeout(t);
       window.removeEventListener("resize", recalcPreviewScale);
       if (ro) ro.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previewOpen, previewSchema]);
+  }, [previewOpen, previewSchema, previewTemplate]);
 
-  // ✅ FIX: If preview opens, close Add modal automatically
   useEffect(() => {
     if (previewOpen) setOpenAdd(false);
   }, [previewOpen]);
 
-  // ✅ helper to open preview from anywhere (main cards OR marketplace cards)
-  const openPreview = (schema: any) => {
+  const openPreview = (schema: any, templateObj?: any) => {
     setOpenAdd(false);
     setPreviewSchema(schema || {});
+    setPreviewTemplate(templateObj || null);
     setPreviewOpen(true);
   };
 
   return (
     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: 16 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 14,
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
         <div>
           <div style={{ fontWeight: 900, fontSize: 22 }}>
             {mode === "admin" ? "Resume Templates" : "Choose a Template"}
@@ -3554,7 +6809,7 @@ export default function AdminTemplates() {
           }}
         />
 
-        {mode === "admin" ? (
+        {/* {mode === "admin" ? (
           <button
             onClick={() => nav("/admin/templates/pricing")}
             style={{
@@ -3580,22 +6835,15 @@ export default function AdminTemplates() {
           >
             Refresh
           </button>
-        )}
+        )} */}
       </div>
 
       {loading ? (
         <div style={{ padding: 20 }}>Loading...</div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
           {filtered.map((t) => {
             const locked = isLocked(t);
-            const p = t.pricing;
 
             return (
               <div
@@ -3608,67 +6856,25 @@ export default function AdminTemplates() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                 }}
               >
-                {cardImg(t)}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: 12,
-                  }}
-                >
+                {/* ✅ FIXED: always live preview, no backend images */}
+                {cardPreview(t)}
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
                   <div style={{ fontWeight: 900, fontSize: 16 }}>{t.name}</div>
                   {t.status === "active"
                     ? pill("ACTIVE", "#dcfce7", "#166534", "#bbf7d0")
                     : pill("DRAFT", "#f3f4f6", "#374151", "#e5e7eb")}
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    marginTop: 8,
-                    flexWrap: "wrap",
-                  }}
-                >
+                <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
                   {pill(t.category, "#e0f2fe", "#075985", "#bae6fd")}
                   {pill(t.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-                  {t.source
-                    ? pill(t.source.toUpperCase(), "#fef3c7", "#92400e", "#fde68a")
-                    : null}
+                  {t.source ? pill(String(t.source).toUpperCase(), "#fef3c7", "#92400e", "#fde68a") : null}
                 </div>
 
-                {mode === "student" && p?.status === "active" ? (
-                  <div style={{ marginTop: 10, fontSize: 13, color: "#374151" }}>
-                    {p.billing_type === "free" ? (
-                      <b>Free</b>
-                    ) : p.billing_type === "subscription" ? (
-                      <b>Subscription</b>
-                    ) : (
-                      <b>
-                        {currencySymbol(p.currency)}
-                        {Number(p.final_price || 0)}
-                      </b>
-                    )}
-                    {" • "}
-                    {locked ? (
-                      <span style={{ color: "#991b1b", fontWeight: 900 }}>Locked</span>
-                    ) : (
-                      <span style={{ color: "#166534", fontWeight: 900 }}>Unlocked</span>
-                    )}
-                  </div>
-                ) : null}
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 10,
-                    marginTop: 16,
-                  }}
-                >
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
                   <button
-                    onClick={() => openPreview(t.schema || {})}
+                    onClick={() => openPreview(t.schema || {}, t)}
                     style={{
                       padding: "10px 12px",
                       borderRadius: 12,
@@ -3694,45 +6900,20 @@ export default function AdminTemplates() {
                     >
                       Edit
                     </button>
-                  ) : locked ? (
-                    <button
-                      onClick={() => handleBuy(t)}
-                      disabled={payingId === t.id || p?.billing_type === "subscription"}
-                      style={{
-                        padding: "10px 12px",
-                        borderRadius: 12,
-                        border: "1px solid #7c2d12",
-                        background: p?.billing_type === "subscription" ? "#9ca3af" : "#ea580c",
-                        color: "white",
-                        fontWeight: 950,
-                        opacity: payingId === t.id ? 0.7 : 1,
-                        cursor:
-                          payingId === t.id || p?.billing_type === "subscription"
-                            ? "not-allowed"
-                            : "pointer",
-                      }}
-                    >
-                      {payingId === t.id
-                        ? "Processing..."
-                        : p?.billing_type === "subscription"
-                        ? "Subscription Required"
-                        : `Buy & Unlock ${currencySymbol(p?.currency)}${Number(
-                            p?.final_price || 0
-                          )}`}
-                    </button>
                   ) : (
                     <button
+                      disabled={locked}
                       onClick={() => nav(`/resume/create/${t.id}`)}
                       style={{
                         padding: "10px 12px",
                         borderRadius: 12,
                         border: "1px solid #16a34a",
-                        background: "#16a34a",
+                        background: locked ? "#9ca3af" : "#16a34a",
                         color: "white",
                         fontWeight: 950,
                       }}
                     >
-                      Use Template
+                      {locked ? "Locked" : "Use Template"}
                     </button>
                   )}
 
@@ -3787,7 +6968,7 @@ export default function AdminTemplates() {
         </div>
       )}
 
-      {/* ✅ Preview Modal (always on top) */}
+      {/* ✅ Preview Modal */}
       {previewOpen && (
         <div
           onClick={() => setPreviewOpen(false)}
@@ -3824,9 +7005,7 @@ export default function AdminTemplates() {
                 gap: 10,
               }}
             >
-              <div style={{ fontWeight: 900, fontSize: 18 }}>
-                Template Preview
-              </div>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>Template Preview</div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button
                   onClick={() => recalcPreviewScale()}
@@ -3869,18 +7048,19 @@ export default function AdminTemplates() {
               <div
                 ref={previewPageRef}
                 style={{
+                  display: "inline-block",
                   transform: `scale(${previewScale})`,
                   transformOrigin: "top center",
                 }}
               >
-                <ResumePreview schema={previewSchema || {}} />
+                <ResumePreview schema={previewSchema || {}} template={previewTemplate} />
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Add Template Modal (ADMIN ONLY) */}
+      {/* ✅ Add Template Modal (marketplace also live) */}
       {mode === "admin" && openAdd && (
         <div
           onClick={() => setOpenAdd(false)}
@@ -3907,15 +7087,7 @@ export default function AdminTemplates() {
               overflow: "auto",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 10,
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 16 }}>
               <div style={{ fontWeight: 900, fontSize: 18 }}>Add Template</div>
               <button
                 onClick={() => setOpenAdd(false)}
@@ -3944,6 +7116,7 @@ export default function AdminTemplates() {
               >
                 Marketplace
               </button>
+
               <button
                 onClick={() => setAddTab("scratch")}
                 style={{
@@ -3956,6 +7129,7 @@ export default function AdminTemplates() {
               >
                 Create from Scratch
               </button>
+
               <button
                 onClick={() => setAddTab("duplicate")}
                 style={{
@@ -3974,84 +7148,53 @@ export default function AdminTemplates() {
               <>
                 <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 16 }}>
                   ✅ Choose template → Import → Saved permanently in DB + storage
-                  (no external dependency).
                 </div>
 
                 {marketLoading ? (
                   <div style={{ padding: 20 }}>Loading marketplace...</div>
                 ) : (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                      gap: 16,
-                    }}
-                  >
-                    {market.map((m) => (
-                      <div
-                        key={m.key}
-                        style={{
-                          border: "1px solid #eef2f7",
-                          borderRadius: 14,
-                          padding: 16,
-                        }}
-                      >
-                        {cardImg(m)}
-                        <div style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}>
-                          {m.name}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: 8,
-                            marginTop: 8,
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
-                          {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
-                          {m.price_type === "free"
-                            ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
-                            : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
-                        </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                    {market.map((m) => {
+                      const isPdf = isPdfTemplate(m.schema || {}, m);
+                      const pages = resolvePdfPages(m.schema || {}, m);
 
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: 10,
-                            marginTop: 16,
-                          }}
-                        >
-                          <button
-                            onClick={() => openPreview(m.schema)}
-                            style={{
-                              padding: "10px 12px",
-                              borderRadius: 12,
-                              border: "1px solid #e5e7eb",
-                              background: "white",
-                              fontWeight: 900,
-                            }}
-                          >
-                            Preview
-                          </button>
+                      return (
+                        <div key={m.key} style={{ border: "1px solid #eef2f7", borderRadius: 14, padding: 16 }}>
+                          {/* ✅ LIVE PREVIEW ONLY */}
+                          {isPdf && pages.length > 0 ? (
+                            <PdfFirstPageThumb url={pages[0]} />
+                          ) : (
+                            <LiveTemplateThumb schema={m.schema || {}} template={m} />
+                          )}
 
-                          <button
-                            onClick={() => importFromMarketplace(m)}
-                            style={{
-                              padding: "10px 12px",
-                              borderRadius: 12,
-                              border: "1px solid #1d4ed8",
-                              background: "#2563eb",
-                              color: "white",
-                              fontWeight: 900,
-                            }}
-                          >
-                            Use / Import
-                          </button>
+                          <div style={{ fontWeight: 900, marginTop: 12, fontSize: 15 }}>{m.name}</div>
+
+                          <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                            {pill(m.category, "#e0f2fe", "#075985", "#bae6fd")}
+                            {pill(m.layout, "#ede9fe", "#5b21b6", "#ddd6fe")}
+                            {m.price_type === "free"
+                              ? pill("FREE", "#dcfce7", "#166534", "#bbf7d0")
+                              : pill(`₹${m.price}`, "#fef3c7", "#92400e", "#fde68a")}
+                          </div>
+
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+                            <button
+                              onClick={() => openPreview(m.schema)}
+                              style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+                            >
+                              Preview
+                            </button>
+
+                            <button
+                              onClick={() => importFromMarketplace(m)}
+                              style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
+                            >
+                              Use / Import
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </>
@@ -4066,42 +7209,20 @@ export default function AdminTemplates() {
                   value={scratch.name}
                   onChange={(e) => setScratch((p) => ({ ...p, name: e.target.value }))}
                   placeholder="Template name"
-                  style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                  }}
+                  style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
                 />
                 <select
                   value={scratch.category}
-                  onChange={(e) =>
-                    setScratch((p) => ({
-                      ...p,
-                      category: e.target.value as Category,
-                    }))
-                  }
-                  style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                  }}
+                  onChange={(e) => setScratch((p) => ({ ...p, category: e.target.value as Category }))}
+                  style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
                 >
                   <option>Modern</option>
                   <option>Classic</option>
                 </select>
                 <select
                   value={scratch.layout}
-                  onChange={(e) =>
-                    setScratch((p) => ({
-                      ...p,
-                      layout: e.target.value as Layout,
-                    }))
-                  }
-                  style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                  }}
+                  onChange={(e) => setScratch((p) => ({ ...p, layout: e.target.value as Layout }))}
+                  style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
                 >
                   <option>Single Column</option>
                   <option>Two Column</option>
@@ -4120,14 +7241,7 @@ export default function AdminTemplates() {
                 </div>
                 <button
                   onClick={createScratch}
-                  style={{
-                    padding: "12px 16px",
-                    borderRadius: 12,
-                    border: "1px solid #1d4ed8",
-                    background: "#2563eb",
-                    color: "white",
-                    fontWeight: 900,
-                  }}
+                  style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
                 >
                   Create & Open Builder
                 </button>
@@ -4142,11 +7256,7 @@ export default function AdminTemplates() {
                 <select
                   value={dupFromId}
                   onChange={(e) => setDupFromId(Number(e.target.value) || "")}
-                  style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                  }}
+                  style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
                 >
                   <option value="">Select template</option>
                   {templates.map((t) => (
@@ -4159,22 +7269,11 @@ export default function AdminTemplates() {
                   value={dupName}
                   onChange={(e) => setDupName(e.target.value)}
                   placeholder="New name (optional)"
-                  style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                  }}
+                  style={{ padding: 12, borderRadius: 12, border: "1px solid #e5e7eb" }}
                 />
                 <button
                   onClick={duplicate}
-                  style={{
-                    padding: "12px 16px",
-                    borderRadius: 12,
-                    border: "1px solid #1d4ed8",
-                    background: "#2563eb",
-                    color: "white",
-                    fontWeight: 900,
-                  }}
+                  style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid #1d4ed8", background: "#2563eb", color: "white", fontWeight: 900 }}
                 >
                   Duplicate & Open Builder
                 </button>
