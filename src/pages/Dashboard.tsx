@@ -11340,26 +11340,34 @@ const Dashboard = () => {
           >
             Profile
           </button>
-
           <button
-            onClick={openTemplatesModal}
-            style={{
-              backgroundColor: "#10b981",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 500,
-              cursor: "pointer",
-              marginLeft: "auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Plus size={16} /> Browse Templates
-          </button>
+  onClick={openTemplatesModal}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "#10b981", // green
+    color: "#ffffff",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "12px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    boxShadow: "0 4px 10px rgba(16, 185, 129, 0.25)",
+    transition: "all 0.2s ease",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.backgroundColor = "#059669";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.backgroundColor = "#10b981";
+  }}
+>
+  <span style={{ fontSize: "18px", fontWeight: "700" }}>+</span>
+  Browse Templates
+</button>
+   
         </div>
 
         {/* ✅ HOME TAB */}
