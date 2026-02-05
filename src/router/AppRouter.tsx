@@ -779,6 +779,7 @@ import AdminForgotPassword from "../pages/dashboard/AdminForgotPassword";
 import AdminResetPassword from "../pages/dashboard/AdminResetPassword";
 import AIResumeGenerator from "../pages/dashboard/AIResumeGenerator";
 import AIUses from "../pages/dashboard/AIUses";
+import AdminTemplateJsonStudio from "../pages/dashboard/AdminTemplateJsonStudio";
 
 // ✅ Auth helpers
 function isUserAuthed() {
@@ -883,6 +884,8 @@ export default function AppRouter() {
             </RequireAdmin>
           }
         />
+        <Route path="/admin/templates/:id/json-studio" element={<AdminTemplateJsonStudio />} />
+
         <Route
           path="/admin/templates/pricing"
           element={

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {useParams } from "react-router-dom";
 import axios from "../../api/axiosInstance";
 import ResumePreview from "./ResumePreview";
-
+import { useNavigate } from "react-router-dom";
 type Layout = "Single Column" | "Two Column" | "Sidebar Left" | "Sidebar Right";
 
 function authHeaders() {
@@ -143,7 +143,7 @@ export default function AdminTemplateBuilder() {
   const { id } = useParams();
   const templateId = Number(id);
   //const nav = useNavigate();
-
+  const nav = useNavigate();
   const [tpl, setTpl] = useState<any>(null);
   const [schema, setSchema] = useState<any>(null);
   const [tab, setTab] = useState<"sections" | "design" | "json">("sections");
@@ -262,6 +262,12 @@ export default function AdminTemplateBuilder() {
           >
             {saving ? "Saving..." : "Save"}
           </button>
+          <button
+  onClick={() => nav(`/admin/templates/${tpl.id}/json-studio`)}
+  style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #e5e7eb", background: "white", fontWeight: 900 }}
+>
+  Create your JSON
+</button>
         </div>
       </div>
 
